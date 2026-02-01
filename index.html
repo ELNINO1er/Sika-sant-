@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sika-Santé — Carnet de Santé Numérique Universel</title>
+    <meta
+      name="description"
+      content="Plateforme ivoirienne pour un carnet de santé numérique universel, sécurisé et accessible en temps réel."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-mark">✦</span>
+        <div>
+          <p class="brand-title">Sika-Santé</p>
+          <p class="brand-sub">Carnet de Santé Numérique Universel</p>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="#accueil">Accueil</a>
+        <a href="#comment">Comment ça marche</a>
+        <a href="#securite">Sécurité</a>
+        <a href="#partenaires">Partenaires</a>
+        <a href="#profils">Profils</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <a class="cta" href="#profils">Se connecter</a>
+    </header>
+
+    <main>
+      <section id="accueil" class="hero">
+        <div class="hero-content">
+          <p class="eyebrow">CSNU • Côte d'Ivoire</p>
+          <h1>
+            Votre santé, accessible partout,
+            <span>en toute sécurité</span>
+          </h1>
+          <p class="lead">
+            Le carnet de santé numérique universel de la Côte d'Ivoire. Une seule
+            plateforme, trois expériences adaptées : patient, soignant et État.
+          </p>
+          <div class="hero-actions">
+            <a class="cta" href="#patient">Je suis un patient</a>
+            <a class="ghost" href="#pro">Je suis un professionnel</a>
+            <a class="ghost" href="#etat">Je suis une institution</a>
+          </div>
+          <div class="trust">
+            <span>HL7 FHIR Ready</span>
+            <span>Chiffrement AES-256</span>
+            <span>Mode Offline</span>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="card-top">
+            <p class="card-title">Fiche d'urgence</p>
+            <span class="card-chip">QR • NFC</span>
+          </div>
+          <div class="card-row">
+            <div>
+              <p class="label">Groupe sanguin</p>
+              <p class="value">O+</p>
+            </div>
+            <div>
+              <p class="label">Allergies</p>
+              <p class="value">Pénicilline</p>
+            </div>
+          </div>
+          <div class="card-alert danger">
+            <span>⚠️</span>
+            <p>Contre-indication majeure détectée.</p>
+          </div>
+          <button class="cta full">Appeler le contact d'urgence (ICE)</button>
+        </div>
+      </section>
+
+      <section id="comment" class="solutions">
+        <div class="section-head">
+          <h2>Comment ça marche</h2>
+          <p>Un parcours clair pour chaque profil utilisateur, sans friction.</p>
+        </div>
+        <div class="grid">
+          <article class="panel">
+            <h3>Le patient</h3>
+            <ul>
+              <li>Carte, QR Code ou téléphone pour accéder aux infos vitales.</li>
+              <li>Historique des consultations et rappels de soins.</li>
+              <li>Accès sécurisé via CMU.</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <h3>Le soignant</h3>
+            <ul>
+              <li>Lecture immédiate des informations critiques.</li>
+              <li>Nouvelle consultation en moins de 2 minutes.</li>
+              <li>Ordonnances numériques traçables.</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <h3>L'État</h3>
+            <ul>
+              <li>Données anonymisées pour la surveillance sanitaire.</li>
+              <li>Tableaux de bord épidémiologiques.</li>
+              <li>Alertes rapides pour interventions ciblées.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="sitemap">
+        <div class="section-head">
+          <h2>Sitemap visuel</h2>
+          <p>Un seul portail public, puis trois expériences dédiées après connexion.</p>
+        </div>
+        <div class="sitemap-flow">
+          <div class="sitemap-card">
+            <p class="sitemap-title">Accueil public</p>
+            <p class="sitemap-sub">Présentation • Sécurité • Contact</p>
+          </div>
+          <span class="sitemap-arrow">↓</span>
+          <div class="sitemap-card accent">
+            <p class="sitemap-title">Choix du profil</p>
+            <p class="sitemap-sub">Patient • Soignant • Institution</p>
+          </div>
+        </div>
+        <div class="sitemap-branches">
+          <div class="sitemap-card">
+            <p class="sitemap-title">Patient</p>
+            <ul>
+              <li>Tableau de bord</li>
+              <li>Carnet médical</li>
+              <li>Ma famille</li>
+              <li>Profil & QR</li>
+            </ul>
+          </div>
+          <div class="sitemap-card">
+            <p class="sitemap-title">Professionnel</p>
+            <ul>
+              <li>Scanner patient</li>
+              <li>Infos vitales</li>
+              <li>Consultation</li>
+              <li>Ordonnances</li>
+            </ul>
+          </div>
+          <div class="sitemap-card">
+            <p class="sitemap-title">Institution</p>
+            <ul>
+              <li>Tableau de bord</li>
+              <li>Cartes épidémiologiques</li>
+              <li>Rapports</li>
+              <li>Alertes</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="securite" class="security">
+        <div class="section-head">
+          <h2>Sécurité & confidentialité</h2>
+          <p>La confiance est la base. Chaque accès est contrôlé et enregistré.</p>
+        </div>
+        <div class="security-grid">
+          <div class="security-card">
+            <h3>Données chiffrées</h3>
+            <p>Chiffrement AES-256, stockage sécurisé et journalisation complète.</p>
+          </div>
+          <div class="security-card">
+            <h3>Consentement patient</h3>
+            <p>OTP SMS et traçabilité des accès au dossier médical.</p>
+          </div>
+          <div class="security-card">
+            <h3>Conformité ARTCI</h3>
+            <p>Respect des exigences nationales pour les données sensibles.</p>
+          </div>
+          <div class="security-card">
+            <h3>Hébergement certifié</h3>
+            <p>Infrastructure résiliente avec réplication locale.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="accessibility">
+        <div class="section-head">
+          <h2>Accessibilité nationale</h2>
+          <p>Parce que la santé doit rester accessible partout, pour tous.</p>
+        </div>
+        <div class="accessibility-grid">
+          <div>
+            <h3>Fonctionne sans internet</h3>
+            <p>Accès aux données vitales même en zone blanche.</p>
+          </div>
+          <div>
+            <h3>USSD & téléphones classiques</h3>
+            <p>Consultation et rappels essentiels sans smartphone.</p>
+          </div>
+          <div>
+            <h3>Langues locales</h3>
+            <p>Assistance audio en Dioula et Baoulé pour une adoption rapide.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="partenaires" class="partners">
+        <div class="section-head">
+          <h2>Partenaires stratégiques</h2>
+          <p>CHU, cliniques, assurances et institutions publiques engagées.</p>
+        </div>
+        <div class="partner-logos">
+          <span>CHU Angré</span>
+          <span>CHU Treichville</span>
+          <span>CNAM</span>
+          <span>ARTCI</span>
+          <span>Assureurs</span>
+        </div>
+      </section>
+
+      <section id="profils" class="auth">
+        <div class="section-head">
+          <h2>Choisir son profil</h2>
+          <p>Une plateforme unique, trois expériences distinctes.</p>
+        </div>
+        <div class="auth-grid">
+          <a class="auth-card" href="#patient">
+            <h3>Patient</h3>
+            <p>Consultez vos données, vos rendez-vous et vos autorisations.</p>
+          </a>
+          <a class="auth-card" href="#pro">
+            <h3>Professionnel de santé</h3>
+            <p>Scanner un patient, saisir une consultation et émettre une ordonnance.</p>
+          </a>
+          <a class="auth-card" href="#etat">
+            <h3>Institution / État</h3>
+            <p>Accédez aux tableaux de bord anonymisés et aux alertes sanitaires.</p>
+          </a>
+        </div>
+      </section>
+
+      <section id="patient" class="profile-section">
+        <div class="section-head">
+          <h2>Interface patient</h2>
+          <p>Simple, lisible, peu de texte. Priorité à l'urgence et aux rappels.</p>
+        </div>
+        <div class="dashboard-grid">
+          <div class="panel highlight">
+            <h3>Bouton urgence</h3>
+            <p>Afficher les informations vitales immédiatement.</p>
+            <button class="cta full">Afficher ma fiche d'urgence</button>
+          </div>
+          <div class="panel">
+            <h3>Prochain rendez-vous</h3>
+            <p>CHU Angré • 12 février 2026 • 09:30</p>
+            <button class="ghost full">Voir mes consultations</button>
+          </div>
+          <div class="panel">
+            <h3>Rappels</h3>
+            <p>Vaccin PEV à venir dans 3 jours.</p>
+            <button class="ghost full">Ouvrir les notifications</button>
+          </div>
+        </div>
+        <div class="grid page-section">
+          <article class="panel">
+            <h3>Mon profil santé</h3>
+            <p>Groupe sanguin, allergies et pathologies chroniques.</p>
+          </article>
+          <article class="panel">
+            <h3>Mes consultations</h3>
+            <p>Historique complet et documents médicaux.</p>
+          </article>
+          <article class="panel">
+            <h3>Mes médicaments</h3>
+            <p>Ordonnances actives et rappel de prises.</p>
+          </article>
+          <article class="panel">
+            <h3>Autorisations d'accès</h3>
+            <p>Gérez qui peut consulter votre dossier.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="pro" class="profile-section alt">
+        <div class="section-head">
+          <h2>Interface professionnel de santé</h2>
+          <p>Rapide, fonctionnelle et adaptée aux contraintes du terrain.</p>
+        </div>
+        <div class="dashboard-grid">
+          <div class="panel highlight">
+            <h3>Scanner un patient</h3>
+            <p>QR Code ou NFC pour accéder à la fiche d'urgence.</p>
+            <button class="cta full">Ouvrir le scanner</button>
+          </div>
+          <div class="panel">
+            <h3>Nouvelle consultation</h3>
+            <p>Saisie rapide des constantes et du diagnostic.</p>
+            <button class="ghost full">Créer une consultation</button>
+          </div>
+          <div class="panel">
+            <h3>Ordonnances</h3>
+            <p>Générez des prescriptions sécurisées avec QR code.</p>
+            <button class="ghost full">Créer une ordonnance</button>
+          </div>
+        </div>
+        <div class="grid page-section">
+          <article class="panel">
+            <h3>Infos vitales</h3>
+            <p>Allergies graves, groupe sanguin, pathologies chroniques.</p>
+          </article>
+          <article class="panel">
+            <h3>Historique patient</h3>
+            <p>Consultations précédentes et résultats d'examens.</p>
+          </article>
+          <article class="panel">
+            <h3>Saisie rapide</h3>
+            <p>Constantes en moins de 2 minutes.</p>
+          </article>
+          <article class="panel">
+            <h3>Mode offline</h3>
+            <p>Continuité de service en zones à faible connectivité.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="etat" class="profile-section">
+        <div class="section-head">
+          <h2>Interface institution / État</h2>
+          <p>Décisionnelle, anonymisée et orientée action.</p>
+        </div>
+        <div class="dashboard-grid">
+          <div class="panel highlight">
+            <h3>Carte épidémiologique</h3>
+            <p>Suivi des foyers en temps réel (anonymisé).</p>
+            <button class="cta full">Ouvrir la carte</button>
+          </div>
+          <div class="panel">
+            <h3>Rapports</h3>
+            <p>Export des indicateurs clés par région.</p>
+            <button class="ghost full">Voir les rapports</button>
+          </div>
+          <div class="panel">
+            <h3>Alertes sanitaires</h3>
+            <p>Notifications ciblées pour interventions rapides.</p>
+            <button class="ghost full">Gérer les alertes</button>
+          </div>
+        </div>
+        <div class="grid page-section">
+          <article class="panel">
+            <h3>Tableau de bord</h3>
+            <p>Indicateurs santé en continu.</p>
+          </article>
+          <article class="panel">
+            <h3>Cartographie</h3>
+            <p>Zones à risque et tendances épidémiologiques.</p>
+          </article>
+          <article class="panel">
+            <h3>Rapports</h3>
+            <p>Exports PDF et partages sécurisés.</p>
+          </article>
+          <article class="panel">
+            <h3>Alertes</h3>
+            <p>Diffusion vers les structures sanitaires.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="contact" class="contact">
+        <div>
+          <h2>Contact & démonstration</h2>
+          <p>
+            Vous représentez un CHU, une clinique ou une institution ?
+            Recevez le dossier complet et planifiez un pilote.
+          </p>
+        </div>
+        <form class="contact-form">
+          <label>
+            Nom complet
+            <input type="text" placeholder="Votre nom" />
+          </label>
+          <label>
+            Structure
+            <input type="text" placeholder="CHU, clinique, ministère" />
+          </label>
+          <label>
+            Email
+            <input type="email" placeholder="contact@exemple.ci" />
+          </label>
+          <button class="cta" type="button">Recevoir le dossier</button>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Mentions légales • Politique de confidentialité • ARTCI • Ministère de la Santé</p>
+      <p>© 2026 Sika-Santé — Santé précieuse, données protégées.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
