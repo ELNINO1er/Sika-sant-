@@ -47,42 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   window.addEventListener("scroll", updateActiveLink);
-
-  const portfolioGrid = document.querySelector('#portfolio-grid');
-  if (portfolioGrid) {
-    var iso = new Isotope("#portfolio-grid", {
-      itemSelector: ".portfolio-item",
-      layoutMode: "masonry",
-    });
-
-    if (iso) {
-      iso.on("layoutComplete", updateActiveLink);
-
-      imagesLoaded("#portfolio-grid", function () {
-        iso.layout();
-        updateActiveLink();
-      });
-    }
-
-    var filterButtons = document.querySelectorAll(".filter-button");
-    if (filterButtons) {
-      filterButtons.forEach(function (button) {
-        button.addEventListener("click", function (e) {
-          e.preventDefault();
-          var filterValue = button.getAttribute("data-filter");
-          iso.arrange({ filter: filterValue });
-
-          filterButtons.forEach(function (btn) {
-            btn.classList.remove("active");
-          });
-          button.classList.add("active");
-          updateActiveLink();
-        });
-      });
-    }
-
-    updateActiveLink();
-  }
+  updateActiveLink();
 });
 
 const navbarScrollInit = () => {
@@ -108,7 +73,6 @@ const navbarInit = () => {
 
 // ======= Marquee =======
 const logoMarqueeInit = () => {
-  const wrapper = document.querySelector(".logo-wrapper");
   const boxes = gsap.utils.toArray(".logo-item");
   
   if (boxes.length > 0) {
@@ -383,6 +347,46 @@ const inlineSvgInit = () => {
 };
 
 document.addEventListener("DOMContentLoaded", inlineSvgInit);
+
+// ======= Contact Form (demo local) =======
+const contactFormInit = () => {
+  const form = document.getElementById("contactForm");
+  if (!form) {
+    return;
+  }
+
+  const successMessage = document.getElementById("successMessage");
+  const errorMessage = document.getElementById("errorMessage");
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (!form.checkValidity()) {
+      form.classList.add("was-validated");
+      return;
+    }
+
+    try {
+      form.reset();
+      form.classList.remove("was-validated");
+
+      if (errorMessage) {
+        errorMessage.classList.add("d-none");
+      }
+      if (successMessage) {
+        successMessage.classList.remove("d-none");
+      }
+    } catch (error) {
+      if (successMessage) {
+        successMessage.classList.add("d-none");
+      }
+      if (errorMessage) {
+        errorMessage.classList.remove("d-none");
+      }
+    }
+  });
+};
+document.addEventListener("DOMContentLoaded", contactFormInit);
 
 // ======= AOS =======
 const aosInit = () => {
