@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Connexion Institution — Sika-Santé</title>
+    <meta name="description" content="Accès institutionnel aux données de santé publique">
+
+    <!-- ======= Google Font =======-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- End Google Font-->
+
+    <!-- ======= Styles =======-->
+    <link href="assets/vendors/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="assets/vendors/aos/aos.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <!-- End Styles-->
+
+    <!-- ======= Apply theme =======-->
+    <script>
+      (function() {
+        const storedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', storedTheme);
+      })();
+    </script>
+
+    <style>
+      .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(0, 82, 204, 0.05) 0%, rgba(46, 204, 113, 0.05) 100%);
+      }
+      .auth-card {
+        background: var(--bs-body-bg);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(var(--bs-black-rgb), 0.1);
+      }
+      .auth-icon {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+        color: white;
+        margin: 0 auto 20px;
+      }
+      .otp-inputs {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 30px 0;
+      }
+      .otp-input {
+        width: 50px;
+        height: 60px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid rgba(var(--inverse-color-rgb), 0.2);
+        border-radius: 10px;
+      }
+      .otp-input:focus {
+        border-color: var(--bs-primary);
+        outline: none;
+      }
+      .back-link {
+        color: var(--bs-primary);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .back-link:hover {
+        color: var(--bs-primary-hover);
+      }
+      #mfaSection {
+        display: none;
+      }
+      .password-toggle {
+        cursor: pointer;
+      }
+      .security-badge {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(255, 193, 7, 0.1));
+        border: 1px solid rgba(220, 53, 69, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ======= Auth Page =======-->
+    <div class="auth-page">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-5 col-md-8">
+
+            <!-- Back link -->
+            <a href="connexion.html" class="back-link">
+              <i class="bi bi-arrow-left"></i>
+              <span>Changer de profil</span>
+            </a>
+
+            <!-- Auth Card -->
+            <div class="auth-card" data-aos="fade-up">
+
+              <!-- Header -->
+              <div class="text-center mb-4">
+                <div class="auth-icon">
+                  <i class="bi bi-building fs-1"></i>
+                </div>
+                <h2 class="mb-2">Accès Institutionnel</h2>
+                <p class="text-muted">Tableau de bord épidémiologique et statistiques</p>
+              </div>
+
+              <!-- Security Warning -->
+              <div class="alert security-badge mb-4">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-shield-exclamation fs-3 text-danger me-3"></i>
+                  <div>
+                    <strong>Accès restreint et sécurisé</strong><br>
+                    <small>Toutes les connexions sont enregistrées et auditées. Les données sont anonymisées.</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 1: Login -->
+              <div id="loginSection">
+                <form id="loginForm">
+
+                  <!-- Institution Select -->
+                  <div class="mb-3">
+                    <label for="institution" class="form-label">Institution</label>
+                    <select class="form-select form-select-lg" id="institution" required>
+                      <option value="">Sélectionnez votre institution</option>
+                      <option value="ministere-sante">Ministère de la Santé</option>
+                      <option value="artci">ARTCI</option>
+                      <option value="cnam">CNAM-CI</option>
+                      <option value="inp">Institut National de Santé Publique</option>
+                      <option value="dge">Direction Générale des Épidémies</option>
+                    </select>
+                  </div>
+
+                  <!-- Institution ID Input -->
+                  <div class="mb-3">
+                    <label for="institutionId" class="form-label">Identifiant institutionnel</label>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg"
+                      id="institutionId"
+                      placeholder="GOV-XXXX-XXXX"
+                      required
+                    >
+                    <small class="text-muted">Format: GOV-[institution]-[numéro]</small>
+                  </div>
+
+                  <!-- Password Input -->
+                  <div class="mb-3">
+                    <label for="govPassword" class="form-label">Mot de passe sécurisé</label>
+                    <div class="input-group">
+                      <input
+                        type="password"
+                        class="form-control form-control-lg"
+                        id="govPassword"
+                        placeholder="••••••••••••"
+                        required
+                        minlength="12"
+                      >
+                      <button class="btn btn-outline-secondary password-toggle" type="button" id="togglePassword">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                      </button>
+                    </div>
+                    <small class="text-muted">Minimum 12 caractères requis</small>
+                  </div>
+
+                  <!-- Submit Button -->
+                  <button type="submit" class="btn btn-primary w-100 py-3 mb-3" id="loginBtn">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Continuer
+                  </button>
+
+                  <!-- Contact Support -->
+                  <div class="text-center">
+                    <small class="text-muted">
+                      Problème de connexion ?
+                      <a href="mailto:support-gov@sika-sante.ci" class="text-decoration-none">
+                        Contacter le support
+                      </a>
+                    </small>
+                  </div>
+
+                </form>
+              </div>
+
+              <!-- Step 2: MFA -->
+              <div id="mfaSection">
+
+                <!-- MFA Info -->
+                <div class="alert alert-warning mb-4">
+                  <i class="bi bi-shield-lock me-2"></i>
+                  <strong>Validation de sécurité renforcée</strong><br>
+                  <small>Code envoyé à <span id="mfaContact"></span></small>
+                </div>
+
+                <form id="verifyMfaForm">
+
+                  <!-- OTP Inputs -->
+                  <label class="form-label text-center d-block mb-3">Code d'authentification à 2 facteurs</label>
+                  <div class="otp-inputs">
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="0" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="1" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="2" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="3" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="4" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="5" />
+                  </div>
+
+                  <!-- Institution Info Display -->
+                  <div class="alert alert-light mb-3" id="institutionDisplay" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <small class="text-muted">Institution :</small><br>
+                        <strong id="institutionText"></strong>
+                      </div>
+                      <div>
+                        <small class="text-muted">Niveau d'accès :</small><br>
+                        <span class="badge bg-warning">Élevé</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Verify Button -->
+                  <button type="submit" class="btn btn-primary w-100 py-3 mb-3" id="verifyMfaBtn">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Vérifier et accéder au tableau de bord
+                  </button>
+
+                  <!-- Resend -->
+                  <div class="text-center">
+                    <small class="text-muted">Code non reçu ? </small>
+                    <button type="button" class="btn btn-link btn-sm p-0" id="resendMfaBtn" disabled>
+                      Renvoyer <span class="resend-timer" id="resendTimer">(90s)</span>
+                    </button>
+                  </div>
+
+                  <!-- Back to Login -->
+                  <div class="text-center mt-3">
+                    <button type="button" class="btn btn-link btn-sm" id="backToLoginBtn">
+                      <i class="bi bi-arrow-left me-1"></i>
+                      Retour à la connexion
+                    </button>
+                  </div>
+
+                </form>
+
+              </div>
+
+              <!-- Error Message -->
+              <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span id="errorText"></span>
+              </div>
+
+              <!-- Success Message -->
+              <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
+                <i class="bi bi-check-circle me-2"></i>
+                <span id="successText"></span>
+              </div>
+
+            </div>
+
+            <!-- Security Notice -->
+            <div class="alert alert-dark text-center mt-4 mb-0">
+              <i class="bi bi-eye me-2"></i>
+              <small>
+                <strong>Audit de sécurité :</strong> Votre connexion sera enregistrée avec votre IP, date, heure et actions effectuées.
+              </small>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Auth Page-->
+
+    <!-- ======= Javascripts =======-->
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendors/aos/aos.js"></script>
+    <script src="assets/js/auth-institution.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        AOS.init({
+          duration: 800,
+          easing: 'slide',
+          once: true
+        });
+      });
+    </script>
+    <!-- End JavaScripts-->
+  </body>
+</html>

@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tableau de Bord Institutionnel — Sika-Santé</title>
+    <meta name="description" content="Surveillance épidémiologique et pilotage stratégique">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
+    <link href="assets/vendors/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <style>
+      :root {
+        --sidebar-width: 280px;
+        --header-height: 75px;
+        --footer-height: 40px;
+      }
+
+      body {
+        overflow-x: hidden;
+        background: #ecf0f1;
+        font-size: 14px;
+      }
+
+      /* Header Institutionnel */
+      .gov-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-height);
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 25px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.3);
+      }
+
+      .gov-header .logos {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .gov-header .ministry-badge {
+        background: rgba(255,255,255,0.1);
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .gov-header .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .gov-header .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .period-selector {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+      }
+
+      .period-selector:focus {
+        background: rgba(255,255,255,0.25);
+        outline: none;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: var(--sidebar-width);
+        height: calc(100vh - var(--header-height) - var(--footer-height));
+        background: #2c3e50;
+        color: white;
+        overflow-y: auto;
+        z-index: 999;
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 20px 0;
+        margin: 0;
+      }
+
+      .sidebar-menu li a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: all 0.2s;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .sidebar-menu li a:hover,
+      .sidebar-menu li a.active {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border-left: 3px solid #3498db;
+      }
+
+      .sidebar-menu li a i {
+        font-size: 20px;
+        width: 24px;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: var(--header-height);
+        padding: 30px;
+        min-height: calc(100vh - var(--header-height) - var(--footer-height));
+      }
+
+      @media (max-width: 991px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+      }
+
+      /* Footer Info Bar */
+      .info-bar {
+        position: fixed;
+        bottom: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: var(--footer-height);
+        background: #34495e;
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 25px;
+        font-size: 12px;
+        z-index: 998;
+      }
+
+      @media (max-width: 991px) {
+        .info-bar {
+          left: 0;
+        }
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .status-normal { background: #2ecc71; }
+      .status-warning { background: #f39c12; }
+      .status-alert { background: #e74c3c; }
+
+      /* KPI Cards */
+      .kpi-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        border-left: 4px solid #3498db;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+      }
+
+      .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      }
+
+      .kpi-card .number {
+        font-size: 42px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 8px;
+      }
+
+      .kpi-card .label {
+        color: #7f8c8d;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .kpi-card .trend {
+        font-size: 12px;
+        margin-top: 8px;
+      }
+
+      .trend.up {
+        color: #e74c3c;
+      }
+
+      .trend.down {
+        color: #2ecc71;
+      }
+
+      .kpi-card.warning {
+        border-left-color: #f39c12;
+      }
+
+      .kpi-card.danger {
+        border-left-color: #e74c3c;
+      }
+
+      .kpi-card.success {
+        border-left-color: #2ecc71;
+      }
+
+      /* Section Card */
+      .section-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      }
+
+      .section-card h4 {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #2c3e50;
+        font-weight: 600;
+      }
+
+      .section-card h4 i {
+        color: #3498db;
+        margin-right: 10px;
+      }
+
+      /* Chart Placeholder */
+      .chart-placeholder {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        padding: 40px;
+        color: white;
+        text-align: center;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .chart-placeholder i {
+        font-size: 64px;
+        margin-bottom: 15px;
+        opacity: 0.8;
+      }
+
+      /* Map Placeholder */
+      .map-placeholder {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border-radius: 8px;
+        padding: 40px;
+        color: white;
+        text-align: center;
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .map-placeholder i {
+        font-size: 100px;
+        margin-bottom: 15px;
+        opacity: 0.9;
+      }
+
+      /* Alert Card */
+      .alert-gov {
+        background: white;
+        border-left: 4px solid #e74c3c;
+        border-radius: 8px;
+        padding: 18px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      }
+
+      .alert-gov.warning {
+        border-left-color: #f39c12;
+      }
+
+      .alert-gov i {
+        font-size: 28px;
+        color: #e74c3c;
+      }
+
+      .alert-gov.warning i {
+        color: #f39c12;
+      }
+
+      /* Table Styling */
+      .table-gov {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .table-gov thead {
+        background: #34495e;
+        color: white;
+      }
+
+      .table-gov th {
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .table-gov tbody tr:hover {
+        background: #ecf0f1;
+      }
+
+      /* Filters */
+      .filter-bar {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      }
+
+      .filter-bar .row {
+        align-items: end;
+      }
+
+      /* Page Sections */
+      .page-section {
+        display: none;
+      }
+
+      .page-section.active {
+        display: block;
+      }
+
+      /* Export Buttons */
+      .export-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .export-btn:hover {
+        background: #229954;
+      }
+
+      /* Anonymous Data Warning */
+      .anonymous-warning {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .anonymous-warning i {
+        font-size: 24px;
+      }
+    </style>
+
+    <script>
+      let currentUser = {};
+
+      // Vérification authentification
+      document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('sika_access_token');
+        const institution = localStorage.getItem('sika_institution');
+        const userData = JSON.parse(localStorage.getItem('sika_user_data') || '{}');
+
+        if (!token || !institution) {
+          window.location.href = 'connexion-institution.html';
+          return;
+        }
+
+        currentUser = userData;
+
+        // Afficher infos
+        document.getElementById('userName').textContent = userData.institutionName || 'Institution';
+        document.getElementById('userRole').textContent = 'Analyste'; // Rôle fictif
+        document.getElementById('userInitials').textContent = getInitials(userData.institutionName);
+
+        // Mettre à jour l'heure et statut
+        updateClock();
+        setInterval(updateClock, 1000);
+      });
+
+      function getInitials(name) {
+        if (!name) return 'MS';
+        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      }
+
+      function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('fr-FR');
+        const date = now.toLocaleDateString('fr-FR');
+        document.getElementById('currentTime').textContent = `${date} ${time}`;
+      }
+
+      // Navigation
+      function showSection(sectionId) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+
+        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+        event.target.closest('a').classList.add('active');
+
+        if (window.innerWidth < 992) {
+          document.querySelector('.sidebar').classList.remove('show');
+        }
+      }
+
+      function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('show');
+      }
+
+      function logout() {
+        if (confirm('Déconnexion sécurisée ?')) {
+          localStorage.clear();
+          window.location.href = 'index.html';
+        }
+      }
+
+      function exportPDF() {
+        alert('📄 Export PDF en cours...\n\nRapport mensuel de surveillance épidémiologique');
+      }
+
+      function exportExcel() {
+        alert('📊 Export Excel en cours...\n\nDonnées agrégées pour analyse');
+      }
+
+      function triggerAlert() {
+        if (confirm('🚨 Déclencher une alerte sanitaire régionale ?\n\nCette action notifiera toutes les directions concernées.')) {
+          alert('✅ Alerte déclenchée avec succès\n\nNotifications envoyées aux acteurs régionaux');
+        }
+      }
+    </script>
+  </head>
+  <body>
+
+    <!-- ======= Header Gouvernemental =======-->
+    <header class="gov-header">
+      <button class="btn btn-link text-white d-lg-none me-2" onclick="toggleSidebar()">
+        <i class="bi bi-list fs-3"></i>
+      </button>
+
+      <div class="logos">
+        <div class="ministry-badge">
+          <i class="bi bi-building me-2"></i>
+          Ministère de la Santé
+        </div>
+      </div>
+
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <select class="period-selector">
+          <option>Aujourd'hui</option>
+          <option>Cette semaine</option>
+          <option selected>Ce mois</option>
+          <option>Ce trimestre</option>
+          <option>Cette année</option>
+        </select>
+
+        <button class="btn btn-link text-white position-relative">
+          <i class="bi bi-bell fs-5"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            3
+          </span>
+        </button>
+
+        <div class="user-info">
+          <div class="user-avatar" id="userInitials">MS</div>
+          <div class="d-none d-xl-block">
+            <strong id="userName">Ministère de la Santé</strong><br>
+            <small style="opacity: 0.9;" id="userRole">Analyste</small>
+          </div>
+        </div>
+
+        <button class="btn btn-link text-white" onclick="logout()">
+          <i class="bi bi-box-arrow-right fs-5"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- ======= Sidebar =======-->
+    <aside class="sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="#" onclick="showSection('section-dashboard')" class="active">
+          <i class="bi bi-speedometer2"></i>
+          <span>Tableau de Bord National</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-surveillance')">
+          <i class="bi bi-activity"></i>
+          <span>Surveillance Épidémiologique</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-carte')">
+          <i class="bi bi-map"></i>
+          <span>Cartographie Sanitaire</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-statistiques')">
+          <i class="bi bi-bar-chart"></i>
+          <span>Statistiques & Rapports</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-ressources')">
+          <i class="bi bi-hospital"></i>
+          <span>Ressources & Capacités</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-alertes')">
+          <i class="bi bi-exclamation-triangle"></i>
+          <span>Alertes & Crises</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-audits')">
+          <i class="bi bi-shield-check"></i>
+          <span>Audits & Conformité</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-acces')">
+          <i class="bi bi-key"></i>
+          <span>Gestion des Accès</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-parametres')">
+          <i class="bi bi-gear"></i>
+          <span>Paramètres Institutionnels</span>
+        </a></li>
+      </ul>
+    </aside>
+
+    <!-- ======= Main Content =======-->
+    <main class="main-content">
+
+      <!-- ====== SECTION: DASHBOARD NATIONAL ====== -->
+      <div id="section-dashboard" class="page-section active">
+
+        <div class="anonymous-warning">
+          <i class="bi bi-shield-lock"></i>
+          <div>
+            <strong>Données Anonymisées</strong><br>
+            <small>Toutes les données sont agrégées et anonymisées. Aucune information patient individuelle n'est accessible.</small>
+          </div>
+        </div>
+
+        <h3 class="mb-4">Tableau de Bord National - Février 2025</h3>
+
+        <!-- KPIs -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="kpi-card">
+              <div class="number">45,287</div>
+              <div class="label">Consultations (Mois)</div>
+              <div class="trend up">
+                <i class="bi bi-arrow-up"></i> +12% vs mois dernier
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="kpi-card success">
+              <div class="number">87%</div>
+              <div class="label">Couverture Vaccinale (PEV)</div>
+              <div class="trend down">
+                <i class="bi bi-arrow-down"></i> -2% (action requise)
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="kpi-card danger">
+              <div class="number">3</div>
+              <div class="label">Alertes Sanitaires Actives</div>
+              <div class="trend up">
+                <i class="bi bi-exclamation-triangle"></i> Vigilance
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="kpi-card warning">
+              <div class="number">73%</div>
+              <div class="label">Taux d'Utilisation CHU</div>
+              <div class="trend up">
+                <i class="bi bi-arrow-up"></i> +8% (saturation)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pathologies Fréquentes -->
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="section-card">
+              <h4>
+                <span><i class="bi bi-virus"></i>Top 5 Pathologies</span>
+                <small class="text-muted" style="font-size: 12px; font-weight: normal;">Ce mois</small>
+              </h4>
+              <div class="chart-placeholder">
+                <i class="bi bi-bar-chart"></i>
+                <h5>Graphique - Top Pathologies</h5>
+                <p class="mb-0">1. Paludisme (34%)<br>2. Grippe (18%)<br>3. Diarrhée (12%)<br>4. HTA (10%)<br>5. Diabète (8%)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="section-card">
+              <h4>
+                <span><i class="bi bi-pie-chart"></i>Répartition Public / Privé</span>
+              </h4>
+              <div class="chart-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <i class="bi bi-pie-chart"></i>
+                <h5>Répartition des Consultations</h5>
+                <p class="mb-0">Public: 68%<br>Privé: 32%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zones à Risque -->
+        <div class="section-card mt-3">
+          <h4><i class="bi bi-geo-alt"></i>Zones à Risque Élevé</h4>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="alert-gov">
+                <i class="bi bi-geo-alt-fill"></i>
+                <div>
+                  <strong>Région des Lagunes</strong><br>
+                  <small>Pic de paludisme (+45%)</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert-gov warning">
+                <i class="bi bi-geo-alt-fill"></i>
+                <div>
+                  <strong>District d'Abidjan Nord</strong><br>
+                  <small>Saturation CHU (85%)</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert-gov">
+                <i class="bi bi-geo-alt-fill"></i>
+                <div>
+                  <strong>Région du Denguélé</strong><br>
+                  <small>Vaccination < 75%</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: SURVEILLANCE ÉPIDÉMIOLOGIQUE ====== -->
+      <div id="section-surveillance" class="page-section">
+        <h3 class="mb-4">Surveillance Épidémiologique</h3>
+
+        <!-- Filtres -->
+        <div class="filter-bar">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Maladie</label>
+              <select class="form-select">
+                <option selected>Toutes</option>
+                <option>Paludisme</option>
+                <option>Choléra</option>
+                <option>Fièvre Jaune</option>
+                <option>COVID-19</option>
+                <option>Grippe</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Région</label>
+              <select class="form-select">
+                <option selected>Toutes</option>
+                <option>Lagunes</option>
+                <option>Comoé</option>
+                <option>Denguélé</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Période</label>
+              <select class="form-select">
+                <option>7 derniers jours</option>
+                <option selected>30 derniers jours</option>
+                <option>3 derniers mois</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">&nbsp;</label>
+              <button class="btn btn-primary w-100">Appliquer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Courbes d'évolution -->
+        <div class="section-card">
+          <h4><i class="bi bi-graph-up"></i>Évolution du Paludisme (30 derniers jours)</h4>
+          <div class="chart-placeholder" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <i class="bi bi-graph-up-arrow"></i>
+            <h5>Courbe d'Évolution</h5>
+            <p class="mb-0">+45% de cas détectés<br>Pic détecté en Semaine 5</p>
+          </div>
+        </div>
+
+        <!-- Comparaison inter-régions -->
+        <div class="section-card">
+          <h4><i class="bi bi-bar-chart-line"></i>Comparaison Inter-Régions</h4>
+          <div class="table-responsive">
+            <table class="table table-gov">
+              <thead>
+                <tr>
+                  <th>Région</th>
+                  <th>Cas Paludisme</th>
+                  <th>Évolution</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Lagunes</td>
+                  <td>4,523</td>
+                  <td class="text-danger">+45%</td>
+                  <td><span class="badge bg-danger">Alerte</span></td>
+                </tr>
+                <tr>
+                  <td>Comoé</td>
+                  <td>1,234</td>
+                  <td class="text-warning">+12%</td>
+                  <td><span class="badge bg-warning">Surveillance</span></td>
+                </tr>
+                <tr>
+                  <td>Denguélé</td>
+                  <td>876</td>
+                  <td class="text-success">-8%</td>
+                  <td><span class="badge bg-success">Normal</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: CARTOGRAPHIE ====== -->
+      <div id="section-carte" class="page-section">
+        <h3 class="mb-4">Cartographie Sanitaire</h3>
+
+        <div class="section-card">
+          <h4>
+            <span><i class="bi bi-geo"></i>Carte Interactive de la Côte d'Ivoire</span>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-primary">Incidence</button>
+              <button class="btn btn-outline-primary active">Vaccination</button>
+              <button class="btn btn-outline-primary">Capacités</button>
+            </div>
+          </h4>
+
+          <div class="map-placeholder">
+            <i class="bi bi-map"></i>
+            <h4>Carte Sanitaire - Côte d'Ivoire</h4>
+            <p class="mb-0">
+              Heatmap : Couverture Vaccinale par Région<br>
+              🟢 > 85% | 🟡 75-85% | 🔴 < 75%
+            </p>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-4">
+            <div class="kpi-card">
+              <div class="number">234</div>
+              <div class="label">Centres de Santé Actifs</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kpi-card warning">
+              <div class="number">18</div>
+              <div class="label">Zones Sous-Couvertes</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kpi-card success">
+              <div class="number">92%</div>
+              <div class="label">Structures Connectées</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: STATISTIQUES & RAPPORTS ====== -->
+      <div id="section-statistiques" class="page-section">
+        <h3 class="mb-4">Statistiques & Rapports</h3>
+
+        <div class="section-card">
+          <h4>
+            <span><i class="bi bi-file-earmark-bar-graph"></i>Exports Disponibles</span>
+            <div class="btn-group">
+              <button class="export-btn" onclick="exportPDF()">
+                <i class="bi bi-file-pdf me-2"></i>PDF
+              </button>
+              <button class="export-btn ms-2" onclick="exportExcel()">
+                <i class="bi bi-file-excel me-2"></i>Excel
+              </button>
+            </div>
+          </h4>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                  Rapport Mensuel Février 2025
+                  <span class="badge bg-primary">Nouveau</span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                  Surveillance Paludisme - Trimestre 1
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                  Couverture Vaccinale Annuelle 2024
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                  Analyse Capacité Hospitalière
+                </a>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <h5>Rapports Programmés</h5>
+              <ul class="list-unstyled">
+                <li class="mb-2">
+                  <i class="bi bi-calendar-week text-primary me-2"></i>
+                  <strong>Hebdomadaire</strong> - Lundi 09:00
+                </li>
+                <li class="mb-2">
+                  <i class="bi bi-calendar-month text-primary me-2"></i>
+                  <strong>Mensuel</strong> - 1er de chaque mois
+                </li>
+                <li class="mb-2">
+                  <i class="bi bi-calendar-range text-primary me-2"></i>
+                  <strong>Trimestriel</strong> - Fin de trimestre
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: RESSOURCES & CAPACITÉS ====== -->
+      <div id="section-ressources" class="page-section">
+        <h3 class="mb-4">Ressources & Capacités Sanitaires</h3>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="kpi-card">
+              <div class="number">12,450</div>
+              <div class="label">Lits Disponibles</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kpi-card warning">
+              <div class="number">73%</div>
+              <div class="label">Taux d'Occupation</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kpi-card success">
+              <div class="number">8,234</div>
+              <div class="label">Personnel Actif</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kpi-card">
+              <div class="number">456</div>
+              <div class="label">Urgentistes</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-hospital"></i>Charge par Structure</h4>
+          <div class="table-responsive">
+            <table class="table table-gov">
+              <thead>
+                <tr>
+                  <th>Structure</th>
+                  <th>Lits</th>
+                  <th>Occupation</th>
+                  <th>Personnel</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>CHU de Cocody</td>
+                  <td>450</td>
+                  <td>85%</td>
+                  <td>234</td>
+                  <td><span class="badge bg-warning">Surveillance</span></td>
+                </tr>
+                <tr>
+                  <td>CHU de Treichville</td>
+                  <td>380</td>
+                  <td>78%</td>
+                  <td>198</td>
+                  <td><span class="badge bg-success">Normal</span></td>
+                </tr>
+                <tr>
+                  <td>CHU d'Angré</td>
+                  <td>320</td>
+                  <td>92%</td>
+                  <td>176</td>
+                  <td><span class="badge bg-danger">Saturation</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: ALERTES & CRISES ====== -->
+      <div id="section-alertes" class="page-section">
+        <h3 class="mb-4">Alertes & Gestion de Crise</h3>
+
+        <div class="section-card">
+          <h4>
+            <span><i class="bi bi-exclamation-triangle"></i>Alertes Actives</span>
+            <button class="btn btn-danger btn-sm" onclick="triggerAlert()">
+              <i class="bi bi-megaphone me-1"></i>
+              Déclencher Alerte
+            </button>
+          </h4>
+
+          <div class="alert-gov">
+            <i class="bi bi-virus"></i>
+            <div class="flex-grow-1">
+              <strong>Seuil Épidémique Dépassé - Paludisme</strong><br>
+              <small>Région des Lagunes - Détecté il y a 2 heures</small>
+            </div>
+            <button class="btn btn-sm btn-danger">Voir Détails</button>
+          </div>
+
+          <div class="alert-gov warning">
+            <i class="bi bi-hospital"></i>
+            <div class="flex-grow-1">
+              <strong>Saturation CHU d'Angré</strong><br>
+              <small>Taux d'occupation 92% - Vigilance requise</small>
+            </div>
+            <button class="btn btn-sm btn-warning">Voir Détails</button>
+          </div>
+
+          <div class="alert-gov">
+            <i class="bi bi-shield-x"></i>
+            <div class="flex-grow-1">
+              <strong>Chute Couverture Vaccinale - Denguélé</strong><br>
+              <small>-12% en 3 mois - Action corrective nécessaire</small>
+            </div>
+            <button class="btn btn-sm btn-danger">Voir Détails</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: AUDITS ====== -->
+      <div id="section-audits" class="page-section">
+        <h3 class="mb-4">Audits, Traçabilité & Conformité</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-shield-check"></i>Journal d'Audit (7 derniers jours)</h4>
+          <div class="table-responsive">
+            <table class="table table-gov table-sm">
+              <thead>
+                <tr>
+                  <th>Date/Heure</th>
+                  <th>Utilisateur</th>
+                  <th>Action</th>
+                  <th>Détails</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>04 Fév 2025 14:32</td>
+                  <td>Dr. KONÉ Amadou</td>
+                  <td>Export Rapport</td>
+                  <td>Rapport mensuel PDF</td>
+                </tr>
+                <tr>
+                  <td>04 Fév 2025 11:15</td>
+                  <td>Analyste TRAORÉ</td>
+                  <td>Consultation Dashboard</td>
+                  <td>Vue surveillance épidémio</td>
+                </tr>
+                <tr>
+                  <td>03 Fév 2025 09:45</td>
+                  <td>Admin SYSTÈME</td>
+                  <td>Modification Paramètre</td>
+                  <td>Seuil alerte paludisme: 100→150</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-muted mb-0 mt-3">
+            <i class="bi bi-info-circle me-1"></i>
+            <small>Tous les accès sont enregistrés conformément aux exigences ARTCI. Conservation: 5 ans.</small>
+          </p>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-file-earmark-lock"></i>Conformité</h4>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="text-center p-3">
+                <i class="bi bi-check-circle text-success" style="font-size: 48px;"></i>
+                <p class="mt-2 mb-0"><strong>Conformité ARTCI</strong><br><small>100%</small></p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center p-3">
+                <i class="bi bi-check-circle text-success" style="font-size: 48px;"></i>
+                <p class="mt-2 mb-0"><strong>Anonymisation</strong><br><small>Conforme</small></p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center p-3">
+                <i class="bi bi-check-circle text-success" style="font-size: 48px;"></i>
+                <p class="mt-2 mb-0"><strong>Rétention Données</strong><br><small>5 ans</small></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: GESTION ACCÈS ====== -->
+      <div id="section-acces" class="page-section">
+        <h3 class="mb-4">Gestion des Accès</h3>
+
+        <div class="section-card">
+          <h4>
+            <span><i class="bi bi-people"></i>Utilisateurs Actifs</span>
+            <button class="btn btn-primary btn-sm">
+              <i class="bi bi-plus-circle me-1"></i>
+              Nouvel Utilisateur
+            </button>
+          </h4>
+
+          <div class="table-responsive">
+            <table class="table table-gov">
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Rôle</th>
+                  <th>Email</th>
+                  <th>Dernière Connexion</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Dr. KONÉ Amadou</td>
+                  <td><span class="badge bg-primary">Directeur</span></td>
+                  <td>a.kone@msante.gouv.ci</td>
+                  <td>04 Fév 2025 14:32</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-x-circle"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>TRAORÉ Ibrahim</td>
+                  <td><span class="badge bg-info">Analyste</span></td>
+                  <td>i.traore@msante.gouv.ci</td>
+                  <td>04 Fév 2025 11:15</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-x-circle"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="alert alert-warning">
+          <i class="bi bi-shield-exclamation me-2"></i>
+          <strong>Sécurité Renforcée :</strong> Tous les comptes nécessitent une double authentification (MFA) et sont liés à des adresses IP autorisées.
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: PARAMÈTRES ====== -->
+      <div id="section-parametres" class="page-section">
+        <h3 class="mb-4">Paramètres Institutionnels</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-sliders"></i>Seuils d'Alerte</h4>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Paludisme (cas/semaine)</label>
+              <input type="number" class="form-control" value="150">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Couverture Vaccinale Minimale (%)</label>
+              <input type="number" class="form-control" value="75">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Taux Occupation CHU (%)</label>
+              <input type="number" class="form-control" value="85">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Période Reporting (jours)</label>
+              <input type="number" class="form-control" value="30">
+            </div>
+          </div>
+          <button class="btn btn-primary mt-3">Enregistrer</button>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-bell"></i>Notifications Automatiques</h4>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="notifEmail" checked>
+            <label class="form-check-label" for="notifEmail">
+              Email pour alertes critiques
+            </label>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="notifSMS" checked>
+            <label class="form-check-label" for="notifSMS">
+              SMS pour situations d'urgence
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="notifWeekly" checked>
+            <label class="form-check-label" for="notifWeekly">
+              Rapport hebdomadaire automatique
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- ======= Info Bar =======-->
+    <div class="info-bar">
+      <div class="d-flex align-items-center me-4">
+        <span class="status-dot status-normal"></span>
+        <span>Système: Normal</span>
+      </div>
+      <div class="me-4">
+        <i class="bi bi-database me-1"></i>
+        Données à jour | Complétude: 94%
+      </div>
+      <div class="ms-auto">
+        <i class="bi bi-clock me-1"></i>
+        <span id="currentTime">--/--/---- --:--:--</span>
+      </div>
+    </div>
+
+    <!-- ======= Javascripts =======-->
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

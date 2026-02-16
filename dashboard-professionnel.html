@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Espace Professionnel — Sika-Santé</title>
+    <meta name="description" content="Interface médicale professionnelle">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
+    <link href="assets/vendors/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <style>
+      :root {
+        --sidebar-width: 280px;
+        --header-height: 70px;
+      }
+
+      body {
+        overflow-x: hidden;
+        background: #f8f9fa;
+      }
+
+      /* Header */
+      .pro-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-height);
+        background: white;
+        border-bottom: 2px solid var(--bs-primary);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      }
+
+      .pro-header .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .pro-header .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .role-badge {
+        background: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--bs-primary);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .scan-btn {
+        background: var(--bs-primary);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .scan-btn:hover {
+        background: var(--bs-primary-hover);
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: var(--sidebar-width);
+        height: calc(100vh - var(--header-height));
+        background: white;
+        border-right: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+        overflow-y: auto;
+        z-index: 999;
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 20px 0;
+        margin: 0;
+      }
+
+      .sidebar-menu li a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        color: var(--bs-body-color);
+        text-decoration: none;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+
+      .sidebar-menu li a:hover,
+      .sidebar-menu li a.active {
+        background: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--bs-primary);
+        border-left: 3px solid var(--bs-primary);
+      }
+
+      .sidebar-menu li a i {
+        font-size: 22px;
+        width: 28px;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: var(--header-height);
+        padding: 30px;
+        min-height: calc(100vh - var(--header-height));
+      }
+
+      @media (max-width: 991px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+      }
+
+      /* Status Bar */
+      .status-bar {
+        position: fixed;
+        bottom: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: 35px;
+        background: #2c3e50;
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 12px;
+        z-index: 998;
+      }
+
+      @media (max-width: 991px) {
+        .status-bar {
+          left: 0;
+        }
+      }
+
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .status-indicator.online {
+        background: #2ecc71;
+      }
+
+      .status-indicator.offline {
+        background: #e74c3c;
+      }
+
+      /* Cards */
+      .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        border-left: 4px solid var(--bs-primary);
+        transition: all 0.3s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(var(--bs-black-rgb), 0.1);
+      }
+
+      .stat-card .number {
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--bs-primary);
+        margin-bottom: 5px;
+      }
+
+      .stat-card .label {
+        color: var(--bs-body-color);
+        font-size: 14px;
+      }
+
+      .quick-action-pro {
+        background: white;
+        border: 2px solid var(--bs-primary);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        height: 100%;
+      }
+
+      .quick-action-pro:hover {
+        background: var(--bs-primary);
+        color: white;
+        transform: scale(1.05);
+      }
+
+      .quick-action-pro i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: var(--bs-primary);
+      }
+
+      .quick-action-pro:hover i {
+        color: white;
+      }
+
+      .alert-critical {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .alert-critical.danger {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+      }
+
+      .section-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+      }
+
+      .section-card h4 {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--bs-primary);
+      }
+
+      .patient-card {
+        background: white;
+        border: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .patient-card:hover {
+        box-shadow: 0 5px 20px rgba(var(--bs-black-rgb), 0.1);
+        border-color: var(--bs-primary);
+      }
+
+      .vital-info-emergency {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 20px;
+      }
+
+      .vital-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .vital-item {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 15px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+      }
+
+      .vital-item label {
+        font-size: 12px;
+        opacity: 0.9;
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .vital-item strong {
+        font-size: 20px;
+        display: block;
+      }
+
+      .tab-nav {
+        display: flex;
+        gap: 10px;
+        border-bottom: 2px solid rgba(var(--inverse-color-rgb), 0.1);
+        margin-bottom: 20px;
+      }
+
+      .tab-nav button {
+        padding: 12px 24px;
+        background: none;
+        border: none;
+        color: var(--bs-body-color);
+        font-weight: 500;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+      }
+
+      .tab-nav button:hover,
+      .tab-nav button.active {
+        color: var(--bs-primary);
+        border-bottom-color: var(--bs-primary);
+      }
+
+      .page-section {
+        display: none;
+      }
+
+      .page-section.active {
+        display: block;
+      }
+
+      .permission-disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .qr-scanner-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.9);
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .qr-scanner-modal.show {
+        display: flex;
+      }
+
+      .qr-scanner-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+      }
+    </style>
+
+    <script>
+      let currentUser = {};
+      let currentPatient = null;
+
+      // Vérification authentification
+      document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('sika_access_token');
+        const userRole = localStorage.getItem('sika_user_role');
+        const userData = JSON.parse(localStorage.getItem('sika_user_data') || '{}');
+        const permissions = JSON.parse(localStorage.getItem('sika_user_permissions') || '[]');
+
+        if (!token || !['DOCTOR', 'NURSE', 'PHARMACIST', 'ER'].includes(userRole)) {
+          window.location.href = 'connexion-professionnel.html';
+          return;
+        }
+
+        currentUser = userData;
+
+        // Afficher infos utilisateur
+        document.getElementById('userName').textContent = userData.name || 'Professionnel';
+        document.getElementById('userRole').textContent = getRoleDisplayName(userData.role);
+        document.getElementById('userInitials').textContent = getInitials(userData.name);
+
+        // Afficher dans sidebar
+        document.getElementById('userNameSidebar').textContent = userData.name || 'Professionnel';
+        document.getElementById('userRoleSidebar').textContent = getRoleDisplayName(userData.role);
+
+        // Gestion permissions (RBAC)
+        applyRolePermissions(userData.role, permissions);
+
+        // Détection offline
+        updateConnectionStatus();
+        window.addEventListener('offline', updateConnectionStatus);
+        window.addEventListener('online', updateConnectionStatus);
+
+        // Mettre à jour l'heure
+        updateClock();
+        setInterval(updateClock, 1000);
+      });
+
+      function getRoleDisplayName(role) {
+        const roles = {
+          'DOCTOR': 'Médecin',
+          'NURSE': 'Infirmier(ère)',
+          'PHARMACIST': 'Pharmacien(ne)',
+          'ER': 'Urgentiste'
+        };
+        return roles[role] || role;
+      }
+
+      function getInitials(name) {
+        if (!name) return 'PR';
+        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      }
+
+      function applyRolePermissions(role, permissions) {
+        // Exemple: cacher certaines sections selon le rôle
+        if (role === 'PHARMACIST') {
+          // Pharmacien : accès uniquement aux ordonnances
+          document.querySelectorAll('[data-permission="prescribe"]').forEach(el => {
+            el.classList.add('permission-disabled');
+          });
+        }
+
+        if (role === 'NURSE') {
+          // Infirmier : pas de prescription
+          document.querySelectorAll('[data-permission="prescribe"]').forEach(el => {
+            el.classList.add('permission-disabled');
+          });
+        }
+      }
+
+      function updateConnectionStatus() {
+        const isOnline = navigator.onLine;
+        const indicator = document.getElementById('statusIndicator');
+        const text = document.getElementById('statusText');
+
+        if (isOnline) {
+          indicator.className = 'status-indicator online';
+          text.textContent = 'En ligne';
+        } else {
+          indicator.className = 'status-indicator offline';
+          text.textContent = 'Hors ligne - Mode Offline Actif';
+        }
+      }
+
+      function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('fr-FR');
+        document.getElementById('currentTime').textContent = time;
+      }
+
+      // Navigation
+      function showSection(sectionId) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+
+        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+        event.target.closest('a').classList.add('active');
+
+        if (window.innerWidth < 992) {
+          document.querySelector('.sidebar').classList.remove('show');
+        }
+      }
+
+      function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('show');
+      }
+
+      function logout() {
+        if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+          localStorage.clear();
+          window.location.href = 'index.html';
+        }
+      }
+
+      // Scanner Patient
+      function openScanner() {
+        document.getElementById('scannerModal').classList.add('show');
+      }
+
+      function closeScanner() {
+        document.getElementById('scannerModal').classList.remove('show');
+      }
+
+      function simulateScan() {
+        // Simulation scan QR
+        const patientCMU = prompt('Entrez le numéro CMU du patient (simulation):', '1234567890');
+        if (patientCMU) {
+          loadPatient(patientCMU);
+          closeScanner();
+        }
+      }
+
+      function searchPatient() {
+        const cmuInput = document.getElementById('searchCMU').value;
+        if (cmuInput) {
+          loadPatient(cmuInput);
+        }
+      }
+
+      function loadPatient(cmu) {
+        // Simulation chargement patient
+        currentPatient = {
+          cmu: cmu,
+          name: 'KOUASSI Jean',
+          age: 40,
+          bloodType: 'O+',
+          allergies: 'Pénicilline',
+          chronicDiseases: 'Aucune',
+          emergencyContact: '+225 07 01 23 45 68'
+        };
+
+        // Demander consentement (sauf urgence)
+        const isEmergency = confirm('Est-ce une situation d\'URGENCE ?\n\nOui = Mode urgence (pas de consentement)\nNon = Consultation normale (consentement requis)');
+
+        if (isEmergency) {
+          showEmergencyMode();
+        } else {
+          requestConsent();
+        }
+      }
+
+      function showEmergencyMode() {
+        alert('🚨 MODE URGENCE ACTIVÉ\n\nAccès immédiat aux informations vitales.\nCet accès est automatiquement journalisé.');
+        showSection('section-emergency-view');
+
+        // Remplir les données
+        document.getElementById('emergencyPatientName').textContent = currentPatient.name;
+        document.getElementById('emergencyPatientCMU').textContent = currentPatient.cmu;
+      }
+
+      function requestConsent() {
+        const otp = prompt('Demandez au patient son code de consentement OTP :');
+        if (otp) {
+          // Simulation validation OTP
+          alert('✅ Consentement validé. Accès autorisé au dossier.');
+          showSection('section-patient-file');
+          loadPatientFile();
+        }
+      }
+
+      function loadPatientFile() {
+        document.getElementById('patientFileName').textContent = currentPatient.name;
+        document.getElementById('patientFileCMU').textContent = currentPatient.cmu;
+      }
+
+      // Nouvelle consultation
+      function saveConsultation() {
+        const symptoms = document.getElementById('symptoms').value;
+        const diagnosis = document.getElementById('diagnosis').value;
+
+        if (!symptoms || !diagnosis) {
+          alert('Veuillez remplir tous les champs obligatoires');
+          return;
+        }
+
+        if (!navigator.onLine) {
+          alert('⚠️ Hors ligne : La consultation sera synchronisée dès le retour de connexion.');
+        }
+
+        alert('✅ Consultation enregistrée avec succès');
+        showSection('section-dashboard');
+      }
+
+      function generatePrescription() {
+        if (!currentUser.role || currentUser.role === 'NURSE') {
+          alert('❌ Vous n\'avez pas la permission de prescrire');
+          return;
+        }
+
+        alert('📄 Génération de l\'ordonnance électronique...');
+        showSection('section-ordonnances');
+      }
+    </script>
+  </head>
+  <body>
+
+    <!-- ======= Header =======-->
+    <header class="pro-header">
+      <button class="btn btn-link d-lg-none me-2" onclick="toggleSidebar()">
+        <i class="bi bi-list fs-3"></i>
+      </button>
+
+      <img src="assets/images/logo-dark.svg" alt="Sika-Santé" height="40" class="me-3">
+
+      <div class="user-info">
+        <div class="user-avatar" id="userInitials">DK</div>
+        <div class="d-none d-md-block">
+          <strong id="userName">Dr. Jean KOUASSI</strong><br>
+          <span class="role-badge" id="userRole">Médecin</span>
+        </div>
+      </div>
+
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <button class="btn btn-link position-relative">
+          <i class="bi bi-bell fs-5"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            5
+          </span>
+        </button>
+
+        <button class="scan-btn" onclick="openScanner()">
+          <i class="bi bi-qr-code-scan"></i>
+          Scanner Patient
+        </button>
+
+        <button class="btn btn-link" onclick="logout()">
+          <i class="bi bi-box-arrow-right fs-5"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- ======= Sidebar =======-->
+    <aside class="sidebar">
+      <div class="p-3 border-bottom">
+        <strong id="userNameSidebar">Dr. Jean KOUASSI</strong>
+        <br><span class="role-badge" id="userRoleSidebar">Médecin</span>
+        <br><small class="text-muted">CHU de Cocody</small>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li><a href="#" onclick="showSection('section-dashboard')" class="active">
+          <i class="bi bi-grid"></i>
+          <span>Tableau de Bord</span>
+        </a></li>
+
+        <li><a href="#" onclick="openScanner()">
+          <i class="bi bi-qr-code-scan"></i>
+          <span>Scanner un Patient</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-patients')">
+          <i class="bi bi-people"></i>
+          <span>Dossiers Patients</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-consultation')" data-permission="consult">
+          <i class="bi bi-clipboard-plus"></i>
+          <span>Nouvelle Consultation</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-ordonnances')" data-permission="prescribe">
+          <i class="bi bi-prescription2"></i>
+          <span>Ordonnances</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-examens')">
+          <i class="bi bi-file-earmark-medical"></i>
+          <span>Examens & Résultats</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-historique')">
+          <i class="bi bi-clock-history"></i>
+          <span>Historique & Traçabilité</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-alertes')">
+          <i class="bi bi-exclamation-triangle"></i>
+          <span>Messages / Alertes</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-parametres')">
+          <i class="bi bi-gear"></i>
+          <span>Paramètres</span>
+        </a></li>
+      </ul>
+    </aside>
+
+    <!-- ======= Main Content =======-->
+    <main class="main-content">
+
+      <!-- ====== SECTION: TABLEAU DE BORD ====== -->
+      <div id="section-dashboard" class="page-section active">
+        <h3 class="mb-4">Tableau de Bord</h3>
+
+        <!-- Statistiques -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="stat-card">
+              <div class="number">12</div>
+              <div class="label">Patients vus aujourd'hui</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #f39c12;">
+              <div class="number" style="color: #f39c12;">5</div>
+              <div class="label">Patients en attente</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #e74c3c;">
+              <div class="number" style="color: #e74c3c;">2</div>
+              <div class="label">Alertes critiques</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #2ecc71;">
+              <div class="number" style="color: #2ecc71;">8</div>
+              <div class="label">Ordonnances créées</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions Rapides -->
+        <h4 class="mb-3">Actions Rapides</h4>
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6">
+            <div class="quick-action-pro" onclick="openScanner()">
+              <i class="bi bi-qr-code-scan"></i>
+              <h5>Scanner Patient</h5>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="quick-action-pro" onclick="showSection('section-consultation')">
+              <i class="bi bi-clipboard-plus"></i>
+              <h5>Nouvelle Consultation</h5>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="quick-action-pro" onclick="showSection('section-ordonnances')">
+              <i class="bi bi-prescription2"></i>
+              <h5>Ordonnances</h5>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="quick-action-pro" onclick="showSection('section-emergency-view')" style="border-color: #e74c3c;">
+              <i class="bi bi-heart-pulse" style="color: #e74c3c;"></i>
+              <h5>Mode Urgence</h5>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alertes Critiques -->
+        <h4 class="mb-3">Alertes Critiques</h4>
+        <div class="alert-critical danger">
+          <i class="bi bi-exclamation-triangle fs-3 text-danger"></i>
+          <div class="flex-grow-1">
+            <strong>Allergie Pénicilline - Patient KONÉ Marie (CMU: 0987654321)</strong><br>
+            <small>Détectée lors de la prescription - Il y a 15 minutes</small>
+          </div>
+          <button class="btn btn-sm btn-danger">Voir</button>
+        </div>
+
+        <div class="alert-critical">
+          <i class="bi bi="bi bi-capsule fs-3 text-warning"></i>
+          <div class="flex-grow-1">
+            <strong>Interaction médicamenteuse possible - Patient TRAORÉ Ibrahim</strong><br>
+            <small>Warfarine + Aspirine - À vérifier</small>
+          </div>
+          <button class="btn btn-sm btn-warning">Voir</button>
+        </div>
+
+        <!-- Dernières Consultations -->
+        <h4 class="mb-3 mt-4">Dernières Consultations</h4>
+        <div class="section-card">
+          <div class="list-group">
+            <div class="patient-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>KOUASSI Jean</strong> <span class="text-muted">(CMU: 1234567890)</span><br>
+                  <small class="text-muted">40 ans - Contrôle cardiologie - 14:30</small>
+                </div>
+                <button class="btn btn-sm btn-outline-primary">Voir dossier</button>
+              </div>
+            </div>
+
+            <div class="patient-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>KONÉ Marie</strong> <span class="text-muted">(CMU: 0987654321)</span><br>
+                  <small class="text-muted">35 ans - Consultation générale - 13:45</small>
+                </div>
+                <button class="btn btn-sm btn-outline-primary">Voir dossier</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: MODE URGENCE ====== -->
+      <div id="section-emergency-view" class="page-section">
+        <div class="alert alert-danger">
+          <h4><i class="bi bi-exclamation-triangle me-2"></i>MODE URGENCE ACTIVÉ</h4>
+          <p class="mb-0">Accès immédiat sans consentement. Consultation journalisée automatiquement.</p>
+        </div>
+
+        <div class="vital-info-emergency">
+          <h3>🚨 Informations Vitales - <span id="emergencyPatientName">Patient</span></h3>
+          <p class="mb-0">CMU: <strong id="emergencyPatientCMU">-</strong></p>
+
+          <div class="vital-grid">
+            <div class="vital-item">
+              <label>🩸 Groupe Sanguin</label>
+              <strong style="font-size: 32px;">O+</strong>
+            </div>
+            <div class="vital-item">
+              <label>⚠️ ALLERGIES CRITIQUES</label>
+              <strong style="color: #ffeb3b;">Pénicilline</strong>
+            </div>
+            <div class="vital-item">
+              <label>💊 Traitements en Cours</label>
+              <strong>Aucun</strong>
+            </div>
+            <div class="vital-item">
+              <label>🏥 Maladies Graves</label>
+              <strong>Aucune</strong>
+            </div>
+            <div class="vital-item">
+              <label>📞 Contact Urgence</label>
+              <strong>Marie KOUASSI<br>+225 07 01 23 45 68</strong>
+            </div>
+            <div class="vital-item">
+              <label>🕐 Dernière Consultation</label>
+              <strong>25 Jan 2025</strong>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-danger btn-lg">
+          <i class="bi bi-clipboard-plus me-2"></i>
+          Saisir Intervention d'Urgence
+        </button>
+      </div>
+
+      <!-- ====== SECTION: DOSSIER PATIENT ====== -->
+      <div id="section-patient-file" class="page-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h3 class="mb-1" id="patientFileName">KOUASSI Jean</h3>
+            <p class="text-muted mb-0">CMU: <span id="patientFileCMU">1234567890</span> - 40 ans - Homme</p>
+          </div>
+          <button class="btn btn-outline-primary">
+            <i class="bi bi-printer me-2"></i>
+            Imprimer
+          </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-nav">
+          <button class="active">Infos Vitales</button>
+          <button>Antécédents</button>
+          <button>Consultations</button>
+          <button>Examens</button>
+          <button>Ordonnances</button>
+          <button>Vaccins</button>
+        </div>
+
+        <!-- Contenu onglets (simplifié) -->
+        <div class="section-card">
+          <h4>Informations Vitales</h4>
+          <div class="row">
+            <div class="col-md-3">
+              <label class="text-muted small">Groupe Sanguin</label>
+              <p><strong>O+</strong></p>
+            </div>
+            <div class="col-md-3">
+              <label class="text-muted small">Allergies</label>
+              <p><strong class="text-danger">Pénicilline</strong></p>
+            </div>
+            <div class="col-md-6">
+              <label class="text-muted small">Maladies Chroniques</label>
+              <p><strong>Aucune</strong></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: NOUVELLE CONSULTATION ====== -->
+      <div id="section-consultation" class="page-section">
+        <h3 class="mb-4">Nouvelle Consultation</h3>
+
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Patient : <strong>KOUASSI Jean</strong> (CMU: 1234567890)
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-heart-pulse"></i> Constantes</h4>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Tension (mmHg)</label>
+              <input type="text" class="form-control" placeholder="120/80">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Température (°C)</label>
+              <input type="number" class="form-control" placeholder="37.0" step="0.1">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Poids (kg)</label>
+              <input type="number" class="form-control" placeholder="70">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Fréquence Cardiaque</label>
+              <input type="number" class="form-control" placeholder="75">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-clipboard"></i> Symptômes</h4>
+          <textarea class="form-control" id="symptoms" rows="4" placeholder="Décrire les symptômes..."></textarea>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-clipboard-check"></i> Diagnostic</h4>
+          <textarea class="form-control" id="diagnosis" rows="4" placeholder="Diagnostic..."></textarea>
+        </div>
+
+        <div class="section-card" data-permission="prescribe">
+          <h4><i class="bi bi-prescription2"></i> Prescription</h4>
+          <button class="btn btn-outline-primary" onclick="generatePrescription()">
+            <i class="bi bi-plus-circle me-2"></i>
+            Générer une Ordonnance
+          </button>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary btn-lg" onclick="saveConsultation()">
+            <i class="bi bi-save me-2"></i>
+            Enregistrer
+          </button>
+          <button class="btn btn-outline-secondary btn-lg" onclick="showSection('section-dashboard')">
+            Annuler
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: ORDONNANCES ====== -->
+      <div id="section-ordonnances" class="page-section">
+        <h3 class="mb-4">E-Ordonnances</h3>
+
+        <button class="btn btn-primary mb-4" data-permission="prescribe">
+          <i class="bi bi-plus-circle me-2"></i>
+          Créer une Ordonnance
+        </button>
+
+        <div class="section-card">
+          <h4>Ordonnances Récentes</h4>
+          <div class="list-group">
+            <div class="patient-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>ORD-2025-001</strong> - KOUASSI Jean<br>
+                  <small class="text-muted">25 Jan 2025 - Paracétamol 500mg, Vitamine C</small>
+                </div>
+                <div class="text-end">
+                  <span class="badge bg-success">Délivrée</span><br>
+                  <button class="btn btn-sm btn-outline-primary mt-2">
+                    <i class="bi bi-qr-code"></i> QR Code
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: EXAMENS ====== -->
+      <div id="section-examens" class="page-section">
+        <h3 class="mb-4">Examens & Résultats</h3>
+
+        <button class="btn btn-primary mb-4">
+          <i class="bi bi-plus-circle me-2"></i>
+          Prescrire un Examen
+        </button>
+
+        <div class="section-card">
+          <h4>Examens en Attente de Résultats</h4>
+          <p class="text-muted">Aucun examen en attente</p>
+        </div>
+
+        <div class="section-card">
+          <h4>Résultats Récents</h4>
+          <div class="list-group">
+            <div class="patient-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>Bilan Sanguin Complet</strong> - KOUASSI Jean<br>
+                  <small class="text-muted">20 Jan 2025 - Laboratoire BIOLAB</small>
+                </div>
+                <div>
+                  <span class="badge bg-success">Normal</span>
+                  <button class="btn btn-sm btn-outline-primary ms-2">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: HISTORIQUE ====== -->
+      <div id="section-historique" class="page-section">
+        <h3 class="mb-4">Historique & Traçabilité</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-clock-history"></i> Journal des Accès</h4>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Date/Heure</th>
+                  <th>Patient</th>
+                  <th>Soignant</th>
+                  <th>Centre</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>04 Fév 2025 14:30</td>
+                  <td>KOUASSI Jean</td>
+                  <td>Dr. KOUASSI Jean</td>
+                  <td>CHU Cocody</td>
+                  <td>Consultation complète</td>
+                </tr>
+                <tr>
+                  <td>03 Fév 2025 09:15</td>
+                  <td>KONÉ Marie</td>
+                  <td>Dr. KOUASSI Jean</td>
+                  <td>CHU Cocody</td>
+                  <td>Vue infos vitales</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-muted mb-0">
+            <small><i class="bi bi-info-circle me-1"></i>Tous les accès sont enregistrés conformément aux exigences ARTCI</small>
+          </p>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: ALERTES ====== -->
+      <div id="section-alertes" class="page-section">
+        <h3 class="mb-4">Messages & Alertes</h3>
+
+        <div class="alert-critical danger">
+          <i class="bi bi-exclamation-triangle fs-3 text-danger"></i>
+          <div class="flex-grow-1">
+            <strong>Allergie Critique Détectée</strong><br>
+            <small>Patient KONÉ Marie - Pénicilline - Il y a 15 min</small>
+          </div>
+        </div>
+
+        <div class="alert-critical">
+          <i class="bi bi-capsule fs-3 text-warning"></i>
+          <div class="flex-grow-1">
+            <strong>Interaction Médicamenteuse Possible</strong><br>
+            <small>Patient TRAORÉ Ibrahim - Warfarine + Aspirine</small>
+          </div>
+        </div>
+
+        <div class="alert-critical" style="background: #d1ecf1; border-left-color: #17a2b8;">
+          <i class="bi bi-file-earmark-medical fs-3 text-info"></i>
+          <div class="flex-grow-1">
+            <strong>Résultat d'Examen Disponible</strong><br>
+            <small>Patient KOUASSI Jean - Bilan sanguin</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: DOSSIERS PATIENTS ====== -->
+      <div id="section-patients" class="page-section">
+        <h3 class="mb-4">Dossiers Patients</h3>
+
+        <div class="section-card">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" id="searchCMU" placeholder="Rechercher par CMU, nom...">
+            <button class="btn btn-primary" onclick="searchPatient()">
+              <i class="bi bi-search"></i> Rechercher
+            </button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4>Patients Récents</h4>
+          <div class="patient-card" onclick="loadPatient('1234567890')">
+            <strong>KOUASSI Jean</strong> <span class="text-muted">(CMU: 1234567890)</span><br>
+            <small class="text-muted">40 ans - Dernière consultation: 25 Jan 2025</small>
+          </div>
+          <div class="patient-card" onclick="loadPatient('0987654321')">
+            <strong>KONÉ Marie</strong> <span class="text-muted">(CMU: 0987654321)</span><br>
+            <small class="text-muted">35 ans - Dernière consultation: 10 Déc 2024</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: PARAMÈTRES ====== -->
+      <div id="section-parametres" class="page-section">
+        <h3 class="mb-4">Paramètres</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-building"></i> Centre de Santé</h4>
+          <p><strong>CHU de Cocody</strong></p>
+          <p class="text-muted mb-0">Service de Cardiologie</p>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-globe"></i> Langue</h4>
+          <select class="form-select">
+            <option selected>Français</option>
+            <option>English</option>
+          </select>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-wifi-off"></i> Mode Offline</h4>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="switchOffline" checked>
+            <label class="form-check-label" for="switchOffline">
+              Activer le mode hors ligne (enregistrement local des consultations)
+            </label>
+          </div>
+          <p class="text-muted mt-2 mb-0">
+            <small>Dernière synchronisation : Aujourd'hui à 14:30</small>
+          </p>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-shield-lock"></i> Sécurité</h4>
+          <button class="btn btn-outline-danger">
+            Déconnecter tous les appareils
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ======= Status Bar =======-->
+    <div class="status-bar">
+      <div class="d-flex align-items-center me-4">
+        <span id="statusIndicator" class="status-indicator online"></span>
+        <span id="statusText">En ligne</span>
+      </div>
+      <div class="me-4">
+        <i class="bi bi-geo-alt me-1"></i>
+        CHU de Cocody
+      </div>
+      <div class="ms-auto">
+        <i class="bi bi-clock me-1"></i>
+        <span id="currentTime">--:--:--</span>
+      </div>
+    </div>
+
+    <!-- ======= Scanner Modal =======-->
+    <div id="scannerModal" class="qr-scanner-modal">
+      <div class="qr-scanner-content">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Scanner un Patient</h4>
+          <button class="btn btn-link" onclick="closeScanner()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="text-center mb-4">
+          <i class="bi bi-qr-code-scan" style="font-size: 100px; color: var(--bs-primary);"></i>
+          <p class="mt-3">Placez le QR Code ou la carte NFC du patient</p>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary" onclick="simulateScan()">
+            <i class="bi bi-qr-code me-2"></i>
+            Simuler un Scan (Test)
+          </button>
+          <button class="btn btn-outline-primary">
+            <i class="bi bi-credit-card me-2"></i>
+            Activer NFC
+          </button>
+          <button class="btn btn-outline-secondary" onclick="closeScanner()">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= Javascripts =======-->
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

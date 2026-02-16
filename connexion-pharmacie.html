@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Connexion Pharmacie — Sika-Santé</title>
+    <meta name="description" content="Accès pharmacie pour validation et délivrance d'ordonnances">
+
+    <!-- ======= Google Font =======-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- End Google Font-->
+
+    <!-- ======= Styles =======-->
+    <link href="assets/vendors/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="assets/vendors/aos/aos.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <!-- End Styles-->
+
+    <!-- ======= Apply theme =======-->
+    <script>
+      (function() {
+        const storedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', storedTheme);
+      })();
+    </script>
+
+    <style>
+      .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(13, 202, 240, 0.05) 0%, rgba(111, 66, 193, 0.05) 100%);
+      }
+      .auth-card {
+        background: var(--bs-body-bg);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(var(--bs-black-rgb), 0.1);
+      }
+      .auth-icon {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0dcaf0, #6f42c1);
+        color: white;
+        margin: 0 auto 20px;
+      }
+      .otp-inputs {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 30px 0;
+      }
+      .otp-input {
+        width: 50px;
+        height: 60px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid rgba(var(--inverse-color-rgb), 0.2);
+        border-radius: 10px;
+      }
+      .otp-input:focus {
+        border-color: #0dcaf0;
+        outline: none;
+      }
+      .back-link {
+        color: #0dcaf0;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .back-link:hover {
+        color: #6f42c1;
+      }
+      #mfaSection {
+        display: none;
+      }
+      .password-toggle {
+        cursor: pointer;
+      }
+      .security-badge {
+        background: linear-gradient(135deg, rgba(13, 202, 240, 0.1), rgba(111, 66, 193, 0.1));
+        border: 1px solid rgba(13, 202, 240, 0.3);
+      }
+      .pharmacy-info {
+        background: rgba(13, 202, 240, 0.05);
+        border-left: 4px solid #0dcaf0;
+        padding: 15px;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ======= Auth Page =======-->
+    <div class="auth-page">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-5 col-md-8">
+
+            <!-- Back link -->
+            <a href="connexion.html" class="back-link">
+              <i class="bi bi-arrow-left"></i>
+              <span>Changer de profil</span>
+            </a>
+
+            <!-- Auth Card -->
+            <div class="auth-card" data-aos="fade-up">
+
+              <!-- Header -->
+              <div class="text-center mb-4">
+                <div class="auth-icon">
+                  <i class="bi bi-capsule fs-1"></i>
+                </div>
+                <h2 class="mb-2">Espace Pharmacie</h2>
+                <p class="text-muted">Validation et délivrance d'e-ordonnances</p>
+              </div>
+
+              <!-- Security Warning -->
+              <div class="alert security-badge mb-4">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-shield-check fs-3 text-info me-3"></i>
+                  <div>
+                    <strong>Connexion sécurisée pharmacie</strong><br>
+                    <small>Accès restreint aux ordonnances validées. Toutes les délivrances sont tracées.</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 1: Login -->
+              <div id="loginSection">
+                <form id="loginForm">
+
+                  <!-- Pharmacy Name -->
+                  <div class="mb-3">
+                    <label for="pharmacyName" class="form-label">Nom de la pharmacie</label>
+                    <select class="form-select form-select-lg" id="pharmacyName" required>
+                      <option value="">Sélectionnez votre pharmacie</option>
+                      <option value="pharmacie-moderne">Pharmacie Moderne d'Abidjan</option>
+                      <option value="pharmacie-plateau">Pharmacie du Plateau</option>
+                      <option value="pharmacie-cocody">Pharmacie de Cocody</option>
+                      <option value="pharmacie-yopougon">Pharmacie de Yopougon</option>
+                      <option value="pharmacie-chu">Pharmacie Hospitalière CHU Cocody</option>
+                      <option value="pharmacie-autre">Autre pharmacie agréée</option>
+                    </select>
+                  </div>
+
+                  <!-- Pharmacy License Number -->
+                  <div class="mb-3">
+                    <label for="pharmacyLicense" class="form-label">N° Licence Ordre des Pharmaciens</label>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg"
+                      id="pharmacyLicense"
+                      placeholder="PH-CI-XXXX"
+                      required
+                    >
+                    <small class="text-muted">Format: PH-CI-[numéro]</small>
+                  </div>
+
+                  <!-- Pharmacist Email -->
+                  <div class="mb-3">
+                    <label for="pharmacistEmail" class="form-label">Email professionnel</label>
+                    <input
+                      type="email"
+                      class="form-control form-control-lg"
+                      id="pharmacistEmail"
+                      placeholder="pharmacien@exemple.ci"
+                      required
+                    >
+                  </div>
+
+                  <!-- Password Input -->
+                  <div class="mb-3">
+                    <label for="pharmacyPassword" class="form-label">Mot de passe</label>
+                    <div class="input-group">
+                      <input
+                        type="password"
+                        class="form-control form-control-lg"
+                        id="pharmacyPassword"
+                        placeholder="••••••••••••"
+                        required
+                      >
+                      <button class="btn btn-outline-secondary password-toggle" type="button" id="togglePassword">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Submit Button -->
+                  <button type="submit" class="btn btn-info w-100 py-3 mb-3 text-white" id="loginBtn">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Continuer
+                  </button>
+
+                  <!-- Help Links -->
+                  <div class="text-center">
+                    <small class="text-muted">
+                      <a href="#" class="text-decoration-none me-3">Mot de passe oublié ?</a>
+                      <a href="mailto:support-pharmacie@sika-sante.ci" class="text-decoration-none">
+                        Support pharmacie
+                      </a>
+                    </small>
+                  </div>
+
+                </form>
+              </div>
+
+              <!-- Step 2: MFA -->
+              <div id="mfaSection">
+
+                <!-- MFA Info -->
+                <div class="alert alert-info mb-4">
+                  <i class="bi bi-shield-lock me-2"></i>
+                  <strong>Validation à 2 facteurs</strong><br>
+                  <small>Code envoyé à <span id="mfaContact"></span></small>
+                </div>
+
+                <form id="verifyMfaForm">
+
+                  <!-- OTP Inputs -->
+                  <label class="form-label text-center d-block mb-3">Code de vérification</label>
+                  <div class="otp-inputs">
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="0" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="1" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="2" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="3" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="4" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="5" />
+                  </div>
+
+                  <!-- Pharmacy Info Display -->
+                  <div class="pharmacy-info mb-3" id="pharmacyDisplay" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div>
+                        <small class="text-muted">Pharmacie :</small><br>
+                        <strong id="pharmacyText"></strong>
+                      </div>
+                      <div>
+                        <small class="text-muted">Rôle :</small><br>
+                        <span class="badge bg-info" id="roleText">PHARMACIEN</span>
+                      </div>
+                    </div>
+                    <div>
+                      <small class="text-muted">Licence :</small>
+                      <strong id="licenseText"></strong>
+                    </div>
+                  </div>
+
+                  <!-- Verify Button -->
+                  <button type="submit" class="btn btn-info w-100 py-3 mb-3 text-white" id="verifyMfaBtn">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Vérifier et accéder
+                  </button>
+
+                  <!-- Resend -->
+                  <div class="text-center">
+                    <small class="text-muted">Code non reçu ? </small>
+                    <button type="button" class="btn btn-link btn-sm p-0" id="resendMfaBtn" disabled>
+                      Renvoyer <span class="resend-timer" id="resendTimer">(60s)</span>
+                    </button>
+                  </div>
+
+                  <!-- Back to Login -->
+                  <div class="text-center mt-3">
+                    <button type="button" class="btn btn-link btn-sm" id="backToLoginBtn">
+                      <i class="bi bi-arrow-left me-1"></i>
+                      Retour à la connexion
+                    </button>
+                  </div>
+
+                </form>
+
+              </div>
+
+              <!-- Error Message -->
+              <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span id="errorText"></span>
+              </div>
+
+              <!-- Success Message -->
+              <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
+                <i class="bi bi-check-circle me-2"></i>
+                <span id="successText"></span>
+              </div>
+
+            </div>
+
+            <!-- Pharmacy Notice -->
+            <div class="alert alert-light text-center mt-4 mb-0">
+              <i class="bi bi-info-circle me-2"></i>
+              <small>
+                <strong>Important :</strong> Vous ne pouvez délivrer que les ordonnances validées et non expirées. Toutes les délivrances sont enregistrées.
+              </small>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Auth Page-->
+
+    <!-- ======= Javascripts =======-->
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendors/aos/aos.js"></script>
+    <script src="assets/js/auth-pharmacie.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        AOS.init({
+          duration: 800,
+          easing: 'slide',
+          once: true
+        });
+      });
+    </script>
+    <!-- End JavaScripts-->
+  </body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Connexion Professionnel — Sika-Santé</title>
+    <meta name="description" content="Connectez-vous à votre espace professionnel de santé">
+
+    <!-- ======= Google Font =======-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- End Google Font-->
+
+    <!-- ======= Styles =======-->
+    <link href="assets/vendors/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="assets/vendors/aos/aos.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <!-- End Styles-->
+
+    <!-- ======= Apply theme =======-->
+    <script>
+      (function() {
+        const storedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', storedTheme);
+      })();
+    </script>
+
+    <style>
+      .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(0, 82, 204, 0.05) 0%, rgba(46, 204, 113, 0.05) 100%);
+      }
+      .auth-card {
+        background: var(--bs-body-bg);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(var(--bs-black-rgb), 0.1);
+      }
+      .auth-icon {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+        color: white;
+        margin: 0 auto 20px;
+      }
+      .otp-inputs {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 30px 0;
+      }
+      .otp-input {
+        width: 50px;
+        height: 60px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid rgba(var(--inverse-color-rgb), 0.2);
+        border-radius: 10px;
+      }
+      .otp-input:focus {
+        border-color: var(--bs-primary);
+        outline: none;
+      }
+      .back-link {
+        color: var(--bs-primary);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .back-link:hover {
+        color: var(--bs-primary-hover);
+      }
+      #mfaSection {
+        display: none;
+      }
+      .password-toggle {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ======= Auth Page =======-->
+    <div class="auth-page">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-5 col-md-8">
+
+            <!-- Back link -->
+            <a href="connexion.html" class="back-link">
+              <i class="bi bi-arrow-left"></i>
+              <span>Changer de profil</span>
+            </a>
+
+            <!-- Auth Card -->
+            <div class="auth-card" data-aos="fade-up">
+
+              <!-- Header -->
+              <div class="text-center mb-4">
+                <div class="auth-icon">
+                  <i class="bi bi-hospital fs-1"></i>
+                </div>
+                <h2 class="mb-2">Professionnel de Santé</h2>
+                <p class="text-muted">Accès sécurisé avec authentification à 2 facteurs</p>
+              </div>
+
+              <!-- Step 1: Login -->
+              <div id="loginSection">
+                <form id="loginForm">
+
+                  <!-- Email Input -->
+                  <div class="mb-3">
+                    <label for="proEmail" class="form-label">Identifiant professionnel</label>
+                    <input
+                      type="email"
+                      class="form-control form-control-lg"
+                      id="proEmail"
+                      placeholder="votre.email@chu-abidjan.ci"
+                      required
+                    >
+                  </div>
+
+                  <!-- Password Input -->
+                  <div class="mb-3">
+                    <label for="proPassword" class="form-label">Mot de passe</label>
+                    <div class="input-group">
+                      <input
+                        type="password"
+                        class="form-control form-control-lg"
+                        id="proPassword"
+                        placeholder="••••••••"
+                        required
+                      >
+                      <button class="btn btn-outline-secondary password-toggle" type="button" id="togglePassword">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Remember Me -->
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">
+                      Se souvenir de moi
+                    </label>
+                  </div>
+
+                  <!-- Submit Button -->
+                  <button type="submit" class="btn btn-primary w-100 py-3 mb-3" id="loginBtn">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Continuer
+                  </button>
+
+                  <!-- Forgot Password -->
+                  <div class="text-center">
+                    <a href="#" class="text-decoration-none">
+                      <small>Mot de passe oublié ?</small>
+                    </a>
+                  </div>
+
+                </form>
+              </div>
+
+              <!-- Step 2: MFA -->
+              <div id="mfaSection">
+
+                <!-- MFA Info -->
+                <div class="alert alert-info mb-4">
+                  <i class="bi bi-shield-check me-2"></i>
+                  Un code de vérification a été envoyé à <strong id="mfaContact"></strong>
+                </div>
+
+                <form id="verifyMfaForm">
+
+                  <!-- OTP Inputs -->
+                  <label class="form-label text-center d-block mb-3">Code d'authentification à 2 facteurs</label>
+                  <div class="otp-inputs">
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="0" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="1" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="2" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="3" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="4" />
+                    <input type="text" class="form-control otp-input" maxlength="1" data-index="5" />
+                  </div>
+
+                  <!-- Role Display -->
+                  <div class="alert alert-light mb-3" id="roleDisplay" style="display: none;">
+                    <small class="text-muted">Connexion en tant que :</small><br>
+                    <strong id="roleText"></strong>
+                  </div>
+
+                  <!-- Verify Button -->
+                  <button type="submit" class="btn btn-primary w-100 py-3 mb-3" id="verifyMfaBtn">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Vérifier et se connecter
+                  </button>
+
+                  <!-- Resend -->
+                  <div class="text-center">
+                    <small class="text-muted">Code non reçu ? </small>
+                    <button type="button" class="btn btn-link btn-sm p-0" id="resendMfaBtn" disabled>
+                      Renvoyer <span class="resend-timer" id="resendTimer">(60s)</span>
+                    </button>
+                  </div>
+
+                  <!-- Back to Login -->
+                  <div class="text-center mt-3">
+                    <button type="button" class="btn btn-link btn-sm" id="backToLoginBtn">
+                      <i class="bi bi-arrow-left me-1"></i>
+                      Retour à la connexion
+                    </button>
+                  </div>
+
+                </form>
+
+              </div>
+
+              <!-- Error Message -->
+              <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span id="errorText"></span>
+              </div>
+
+              <!-- Success Message -->
+              <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
+                <i class="bi bi-check-circle me-2"></i>
+                <span id="successText"></span>
+              </div>
+
+            </div>
+
+            <!-- Security Notice -->
+            <div class="text-center mt-4">
+              <small class="text-muted">
+                <i class="bi bi-shield-lock me-1"></i>
+                Tous les accès sont tracés et conformes aux normes ARTCI
+              </small>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Auth Page-->
+
+    <!-- ======= Javascripts =======-->
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendors/aos/aos.js"></script>
+    <script src="assets/js/auth-professionnel.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        AOS.init({
+          duration: 800,
+          easing: 'slide',
+          once: true
+        });
+      });
+    </script>
+    <!-- End JavaScripts-->
+  </body>
+</html>

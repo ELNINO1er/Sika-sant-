@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Espace Pharmacie — Sika-Santé</title>
+    <meta name="description" content="Validation et délivrance d'e-ordonnances">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
+    <link href="assets/vendors/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <style>
+      :root {
+        --sidebar-width: 280px;
+        --header-height: 70px;
+        --pharma-primary: #0dcaf0;
+        --pharma-secondary: #6f42c1;
+      }
+
+      body {
+        overflow-x: hidden;
+        background: #f8f9fa;
+      }
+
+      /* Header */
+      .pharma-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-height);
+        background: white;
+        border-bottom: 3px solid var(--pharma-primary);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      }
+
+      .pharma-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        font-size: 20px;
+        color: var(--pharma-primary);
+      }
+
+      .pharma-logo i {
+        font-size: 32px;
+      }
+
+      .scan-btn-header {
+        background: var(--pharma-primary);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .scan-btn-header:hover {
+        background: var(--pharma-secondary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 202, 240, 0.3);
+      }
+
+      .scan-btn-header i {
+        font-size: 20px;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--pharma-primary), var(--pharma-secondary));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .role-badge {
+        background: rgba(13, 202, 240, 0.1);
+        color: var(--pharma-primary);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: var(--sidebar-width);
+        height: calc(100vh - var(--header-height) - 35px);
+        background: white;
+        border-right: 1px solid rgba(0,0,0,0.1);
+        overflow-y: auto;
+        z-index: 999;
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 20px 0;
+        margin: 0;
+      }
+
+      .sidebar-menu li a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        color: #2c3e50;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+
+      .sidebar-menu li a:hover,
+      .sidebar-menu li a.active {
+        background: rgba(13, 202, 240, 0.1);
+        color: var(--pharma-primary);
+        border-left: 3px solid var(--pharma-primary);
+      }
+
+      .sidebar-menu li a i {
+        font-size: 22px;
+        width: 28px;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: var(--header-height);
+        padding: 30px;
+        min-height: calc(100vh - var(--header-height) - 35px);
+      }
+
+      @media (max-width: 991px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+      }
+
+      /* Status Bar */
+      .status-bar {
+        position: fixed;
+        bottom: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: 35px;
+        background: #2c3e50;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        font-size: 12px;
+        z-index: 998;
+      }
+
+      @media (max-width: 991px) {
+        .status-bar {
+          left: 0;
+        }
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #2ecc71;
+      }
+
+      .status-dot.offline {
+        background: #e74c3c;
+      }
+
+      /* Scanner Modal */
+      .scanner-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .scanner-modal.show {
+        display: flex;
+      }
+
+      .scanner-content {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 600px;
+        width: 90%;
+        position: relative;
+      }
+
+      .scanner-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        color: #999;
+        cursor: pointer;
+      }
+
+      .scanner-area {
+        border: 3px dashed var(--pharma-primary);
+        border-radius: 12px;
+        padding: 60px;
+        text-align: center;
+        margin: 20px 0;
+        background: rgba(13, 202, 240, 0.05);
+      }
+
+      .scanner-icon {
+        font-size: 80px;
+        color: var(--pharma-primary);
+        margin-bottom: 20px;
+      }
+
+      /* Cards */
+      .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        border-left: 4px solid var(--pharma-primary);
+        transition: all 0.3s;
+      }
+
+      .stat-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+      }
+
+      .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--pharma-primary);
+      }
+
+      .stat-label {
+        color: #6c757d;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      /* Prescription Card */
+      .prescription-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(0,0,0,0.1);
+        transition: all 0.3s;
+      }
+
+      .prescription-card:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      }
+
+      .prescription-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+      }
+
+      .prescription-id {
+        font-family: monospace;
+        font-weight: 700;
+        color: var(--pharma-primary);
+        font-size: 16px;
+      }
+
+      .prescription-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .prescription-status.valid {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+      }
+
+      .prescription-status.delivered {
+        background: rgba(149, 165, 166, 0.1);
+        color: #95a5a6;
+      }
+
+      .prescription-status.expired {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      .medication-item {
+        background: rgba(13, 202, 240, 0.05);
+        padding: 12px;
+        border-radius: 8px;
+        margin: 8px 0;
+        border-left: 3px solid var(--pharma-primary);
+      }
+
+      .medication-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 4px;
+      }
+
+      .medication-details {
+        font-size: 13px;
+        color: #6c757d;
+      }
+
+      .alert-box {
+        background: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .alert-box.danger {
+        background: rgba(231, 76, 60, 0.1);
+        border-left-color: #e74c3c;
+      }
+
+      .alert-box i {
+        color: #ffc107;
+        margin-right: 10px;
+      }
+
+      .alert-box.danger i {
+        color: #e74c3c;
+      }
+
+      .btn-deliver {
+        background: var(--pharma-primary);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-deliver:hover {
+        background: var(--pharma-secondary);
+        transform: translateY(-2px);
+      }
+
+      .btn-deliver:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .page-section {
+        display: none;
+      }
+
+      .page-section.active {
+        display: block;
+      }
+
+      .table-hover tbody tr:hover {
+        background-color: rgba(13, 202, 240, 0.05);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+      }
+
+      .empty-state i {
+        font-size: 80px;
+        color: #dee2e6;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ======= Header =======-->
+    <header class="pharma-header">
+      <div class="pharma-logo">
+        <i class="bi bi-capsule-pill"></i>
+        <span>Sika-Santé Pharmacie</span>
+      </div>
+
+      <button class="scan-btn-header" id="openScannerBtn">
+        <i class="bi bi-qr-code-scan"></i>
+        <span>Scanner Ordonnance</span>
+      </button>
+
+      <div class="user-info">
+        <div>
+          <div class="fw-bold" id="pharmacyNameDisplay">Pharmacie Moderne d'Abidjan</div>
+          <div class="small text-muted" id="licenseDisplay">PH-CI-2025</div>
+        </div>
+        <div class="user-avatar">PM</div>
+      </div>
+    </header>
+    <!-- End Header -->
+
+    <!-- ======= Sidebar =======-->
+    <aside class="sidebar" id="sidebar">
+      <ul class="sidebar-menu">
+        <li>
+          <a href="#" class="active" data-page="dashboard">
+            <i class="bi bi-speedometer2"></i>
+            <span>Tableau de bord</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="prescriptions">
+            <i class="bi bi-file-earmark-medical"></i>
+            <span>E-Ordonnances</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="deliveries">
+            <i class="bi bi-check2-circle"></i>
+            <span>Délivrances</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="history">
+            <i class="bi bi-clock-history"></i>
+            <span>Historique</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="stock">
+            <i class="bi bi-box-seam"></i>
+            <span>Stock (Beta)</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="statistics">
+            <i class="bi bi-bar-chart"></i>
+            <span>Statistiques</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="alerts">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span>Alertes & Interactions</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="settings">
+            <i class="bi bi-gear"></i>
+            <span>Paramètres</span>
+          </a>
+        </li>
+        <li>
+          <a href="index.html" class="text-danger">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Déconnexion</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+    <!-- End Sidebar -->
+
+    <!-- ======= Main Content =======-->
+    <main class="main-content">
+
+      <!-- Dashboard Section -->
+      <div class="page-section active" id="dashboard">
+        <h2 class="mb-4">Tableau de bord Pharmacie</h2>
+
+        <!-- Stats -->
+        <div class="row mb-4">
+          <div class="col-md-3 mb-3">
+            <div class="stat-card">
+              <div class="stat-number">12</div>
+              <div class="stat-label">Ordonnances en attente</div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="stat-card">
+              <div class="stat-number">45</div>
+              <div class="stat-label">Délivrances aujourd'hui</div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="stat-card">
+              <div class="stat-number">3</div>
+              <div class="stat-label">Alertes actives</div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="stat-card">
+              <div class="stat-number">98%</div>
+              <div class="stat-label">Taux de validation</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Prescriptions -->
+        <div class="card">
+          <div class="card-header bg-white">
+            <h5 class="mb-0">Dernières e-ordonnances scannées</h5>
+          </div>
+          <div class="card-body">
+            <!-- Prescription 1 -->
+            <div class="prescription-card">
+              <div class="prescription-header">
+                <div>
+                  <div class="prescription-id">ORD-2026-00145</div>
+                  <small class="text-muted">Dr. KOUASSI Jean • CHU Cocody • 04/02/2026</small>
+                </div>
+                <span class="prescription-status valid">✓ Valide</span>
+              </div>
+
+              <div class="mb-3">
+                <strong class="text-muted">Patient :</strong> KOUAMÉ Marie (CMU: ***7890)
+              </div>
+
+              <div class="alert-box">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>Allergie connue :</strong> Pénicilline
+              </div>
+
+              <div class="mb-3">
+                <div class="medication-item">
+                  <div class="medication-name">Paracétamol 500mg</div>
+                  <div class="medication-details">1 comprimé 3x/jour pendant 5 jours • Quantité : 15 comprimés</div>
+                </div>
+                <div class="medication-item">
+                  <div class="medication-name">Ibuprofène 400mg</div>
+                  <div class="medication-details">1 comprimé 2x/jour si douleur • Quantité : 10 comprimés</div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">Valide jusqu'au : 11/02/2026</small>
+                <button class="btn-deliver" onclick="deliverPrescription('ORD-2026-00145')">
+                  <i class="bi bi-check-circle me-2"></i>Délivrer
+                </button>
+              </div>
+            </div>
+
+            <!-- Prescription 2 -->
+            <div class="prescription-card">
+              <div class="prescription-header">
+                <div>
+                  <div class="prescription-id">ORD-2026-00144</div>
+                  <small class="text-muted">Dr. N'GUESSAN Paul • Clinique Indénié • 03/02/2026</small>
+                </div>
+                <span class="prescription-status delivered">Délivrée</span>
+              </div>
+
+              <div class="mb-3">
+                <strong class="text-muted">Patient :</strong> YAO Kouadio (CMU: ***4532)
+              </div>
+
+              <div class="mb-3">
+                <div class="medication-item">
+                  <div class="medication-name">Amoxicilline 1g</div>
+                  <div class="medication-details">1 comprimé 3x/jour pendant 7 jours • Quantité : 21 comprimés</div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-success">✓ Délivrée le 03/02/2026 à 14:30</small>
+                <button class="btn-deliver" disabled>
+                  Déjà délivrée
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prescriptions Section -->
+      <div class="page-section" id="prescriptions">
+        <h2 class="mb-4">E-Ordonnances en attente</h2>
+
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Mode de fonctionnement :</strong> Scannez le QR code de l'ordonnance ou entrez son identifiant pour la valider et la délivrer.
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="empty-state">
+              <i class="bi bi-qr-code-scan"></i>
+              <h5>Aucune ordonnance en attente</h5>
+              <p class="mb-3">Utilisez le bouton "Scanner Ordonnance" pour commencer</p>
+              <button class="btn-deliver" onclick="document.getElementById('openScannerBtn').click()">
+                <i class="bi bi-qr-code-scan me-2"></i>Scanner une ordonnance
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deliveries Section -->
+      <div class="page-section" id="deliveries">
+        <h2 class="mb-4">Délivrances du jour</h2>
+
+        <div class="card">
+          <div class="card-body">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Heure</th>
+                  <th>ID Ordonnance</th>
+                  <th>Patient (CMU)</th>
+                  <th>Médicaments</th>
+                  <th>Prescripteur</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>14:30</td>
+                  <td><span class="prescription-id">ORD-2026-00144</span></td>
+                  <td>YAO K. (***4532)</td>
+                  <td>Amoxicilline 1g (x21)</td>
+                  <td>Dr. N'GUESSAN Paul</td>
+                  <td><span class="badge bg-success">Délivrée</span></td>
+                </tr>
+                <tr>
+                  <td>11:15</td>
+                  <td><span class="prescription-id">ORD-2026-00142</span></td>
+                  <td>DIALLO F. (***1234)</td>
+                  <td>Paracétamol 500mg (x15)</td>
+                  <td>Dr. KOUASSI Jean</td>
+                  <td><span class="badge bg-success">Délivrée</span></td>
+                </tr>
+                <tr>
+                  <td>09:45</td>
+                  <td><span class="prescription-id">ORD-2026-00139</span></td>
+                  <td>BAMBA S. (***7890)</td>
+                  <td>Metformine 850mg (x60)</td>
+                  <td>Dr. TRA Alphonse</td>
+                  <td><span class="badge bg-success">Délivrée</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Section -->
+      <div class="page-section" id="history">
+        <h2 class="mb-4">Historique des délivrances</h2>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <input type="date" class="form-control" placeholder="Date début">
+              </div>
+              <div class="col-md-4">
+                <input type="date" class="form-control" placeholder="Date fin">
+              </div>
+              <div class="col-md-4">
+                <button class="btn btn-primary w-100">
+                  <i class="bi bi-search me-2"></i>Rechercher
+                </button>
+              </div>
+            </div>
+
+            <p class="text-muted">Derniers 30 jours : <strong>1,247 délivrances</strong></p>
+
+            <div class="text-center mt-4">
+              <button class="btn btn-outline-primary">
+                <i class="bi bi-download me-2"></i>Exporter en Excel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock Section -->
+      <div class="page-section" id="stock">
+        <h2 class="mb-4">Gestion du stock <span class="badge bg-warning">Beta</span></h2>
+
+        <div class="alert alert-warning">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Fonctionnalité en développement :</strong> Cette section permettra de gérer les stocks de médicaments et d'identifier les ruptures.
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <p class="text-muted">Intégration avec votre logiciel de gestion de stock en cours...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Section -->
+      <div class="page-section" id="statistics">
+        <h2 class="mb-4">Statistiques Pharmacie</h2>
+
+        <div class="row">
+          <div class="col-md-6 mb-4">
+            <div class="card">
+              <div class="card-header bg-white">
+                <h6 class="mb-0">Volume de délivrances (7 derniers jours)</h6>
+              </div>
+              <div class="card-body">
+                <div style="height: 250px; background: linear-gradient(to top, rgba(13, 202, 240, 0.1), transparent); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <p class="text-muted">Graphique en développement</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-4">
+            <div class="card">
+              <div class="card-header bg-white">
+                <h6 class="mb-0">Classes thérapeutiques les plus délivrées</h6>
+              </div>
+              <div class="card-body">
+                <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                  <p class="text-muted">Graphique en développement</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts Section -->
+      <div class="page-section" id="alerts">
+        <h2 class="mb-4">Alertes & Interactions médicamenteuses</h2>
+
+        <div class="card mb-3">
+          <div class="card-header bg-white">
+            <h6 class="mb-0">Alertes actives (3)</h6>
+          </div>
+          <div class="card-body">
+            <div class="alert-box danger">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <strong>Interaction majeure détectée :</strong> Warfarine + Aspirine (Patient CMU: ***9876)
+            </div>
+            <div class="alert-box">
+              <i class="bi bi-exclamation-triangle"></i>
+              <strong>Allergie patient :</strong> Pénicilline pour ORD-2026-00145
+            </div>
+            <div class="alert-box">
+              <i class="bi bi-info-circle"></i>
+              <strong>Substitution générique disponible :</strong> Paracétamol → Doliprane
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Section -->
+      <div class="page-section" id="settings">
+        <h2 class="mb-4">Paramètres Pharmacie</h2>
+
+        <div class="card">
+          <div class="card-header bg-white">
+            <h6 class="mb-0">Informations de la pharmacie</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Nom de la pharmacie</label>
+              <input type="text" class="form-control" value="Pharmacie Moderne d'Abidjan" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">N° Licence Ordre des Pharmaciens</label>
+              <input type="text" class="form-control" value="PH-CI-2025" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email professionnel</label>
+              <input type="email" class="form-control" value="pharmacie.moderne@sika-sante.ci">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Téléphone</label>
+              <input type="tel" class="form-control" value="+225 27 20 30 40 50">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Adresse</label>
+              <textarea class="form-control" rows="2">Boulevard de la République, Plateau, Abidjan</textarea>
+            </div>
+            <button class="btn btn-primary">
+              <i class="bi bi-save me-2"></i>Enregistrer les modifications
+            </button>
+          </div>
+        </div>
+
+        <div class="card mt-3">
+          <div class="card-header bg-white">
+            <h6 class="mb-0">Sécurité</h6>
+          </div>
+          <div class="card-body">
+            <button class="btn btn-outline-secondary me-2">
+              <i class="bi bi-key me-2"></i>Modifier mot de passe
+            </button>
+            <button class="btn btn-outline-secondary">
+              <i class="bi bi-shield-check me-2"></i>Activer MFA
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+    <!-- End Main Content -->
+
+    <!-- ======= Status Bar =======-->
+    <div class="status-bar">
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">En ligne</span>
+      </div>
+      <div>
+        <span id="currentTime"></span> • Pharmacie Moderne d'Abidjan • PH-CI-2025
+      </div>
+    </div>
+    <!-- End Status Bar -->
+
+    <!-- ======= Scanner Modal =======-->
+    <div class="scanner-modal" id="scannerModal">
+      <div class="scanner-content">
+        <button class="scanner-close" onclick="closeScanner()">&times;</button>
+
+        <h3 class="text-center mb-4">
+          <i class="bi bi-qr-code-scan text-info"></i>
+          Scanner une e-ordonnance
+        </h3>
+
+        <div class="scanner-area">
+          <div class="scanner-icon">📷</div>
+          <h5>Positionnez le QR code devant la caméra</h5>
+          <p class="text-muted mb-0">ou entrez l'identifiant manuellement ci-dessous</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Identifiant de l'ordonnance</label>
+          <input
+            type="text"
+            class="form-control form-control-lg text-center"
+            id="prescriptionIdInput"
+            placeholder="ORD-2026-XXXXX"
+            style="font-family: monospace; font-weight: bold;"
+          >
+        </div>
+
+        <div class="d-grid gap-2">
+          <button class="btn-deliver btn-lg" onclick="validatePrescription()">
+            <i class="bi bi-check-circle me-2"></i>Valider et afficher l'ordonnance
+          </button>
+          <button class="btn btn-outline-secondary" onclick="closeScanner()">
+            Annuler
+          </button>
+        </div>
+
+        <div class="alert alert-light mt-3 mb-0">
+          <small>
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Note :</strong> En production, cette interface activera la caméra pour scanner le QR code automatiquement.
+          </small>
+        </div>
+      </div>
+    </div>
+    <!-- End Scanner Modal -->
+
+    <!-- ======= Javascripts =======-->
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+      // Navigation entre les pages
+      document.querySelectorAll('.sidebar-menu a[data-page]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Retirer la classe active de tous les liens
+          document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+
+          // Cacher toutes les sections
+          document.querySelectorAll('.page-section').forEach(section => {
+            section.classList.remove('active');
+          });
+
+          // Afficher la section correspondante
+          const pageId = this.getAttribute('data-page');
+          document.getElementById(pageId).classList.add('active');
+        });
+      });
+
+      // Scanner Modal
+      document.getElementById('openScannerBtn').addEventListener('click', function() {
+        document.getElementById('scannerModal').classList.add('show');
+        document.getElementById('prescriptionIdInput').focus();
+      });
+
+      function closeScanner() {
+        document.getElementById('scannerModal').classList.remove('show');
+        document.getElementById('prescriptionIdInput').value = '';
+      }
+
+      function validatePrescription() {
+        const prescriptionId = document.getElementById('prescriptionIdInput').value.trim();
+
+        if (!prescriptionId) {
+          alert('Veuillez entrer un identifiant d\'ordonnance');
+          return;
+        }
+
+        // Simulation de validation
+        console.log('🔍 Validation de l\'ordonnance:', prescriptionId);
+
+        alert(`✓ Ordonnance ${prescriptionId} validée!\n\nEn production, cette fonction afficherait:\n- Les médicaments prescrits\n- Les alertes d\'allergie\n- Les interactions médicamenteuses\n- Le statut de délivrance`);
+
+        closeScanner();
+
+        // Rediriger vers la section des ordonnances
+        document.querySelector('[data-page="prescriptions"]').click();
+      }
+
+      function deliverPrescription(prescriptionId) {
+        if (confirm(`Confirmer la délivrance de l'ordonnance ${prescriptionId} ?`)) {
+          console.log('✓ Délivrance enregistrée:', prescriptionId);
+
+          // Log d'audit
+          const deliveryLog = {
+            prescriptionId: prescriptionId,
+            timestamp: new Date().toISOString(),
+            pharmacy: localStorage.getItem('sika_pharmacy_license'),
+            pharmacist: localStorage.getItem('sika_user_email'),
+            action: 'DELIVERY_COMPLETE'
+          };
+
+          console.log('📋 [AUDIT DÉLIVRANCE]', deliveryLog);
+
+          alert(`✓ Délivrance enregistrée!\n\nL'ordonnance ${prescriptionId} a été marquée comme délivrée.\nUne notification a été envoyée au patient et au prescripteur.`);
+
+          // Recharger la page pour simuler la mise à jour
+          location.reload();
+        }
+      }
+
+      // Mise à jour de l'heure
+      function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        document.getElementById('currentTime').textContent = timeString;
+      }
+
+      setInterval(updateTime, 1000);
+      updateTime();
+
+      // Vérifier l'authentification
+      window.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('sika_access_token');
+        const role = localStorage.getItem('sika_user_role');
+
+        if (!token || role !== 'PHARMACIEN') {
+          alert('Session expirée ou accès non autorisé');
+          window.location.href = 'connexion-pharmacie.html';
+          return;
+        }
+
+        // Charger les infos pharmacie
+        const pharmacyName = localStorage.getItem('sika_pharmacy_name') || 'Pharmacie Moderne d\'Abidjan';
+        const license = localStorage.getItem('sika_pharmacy_license') || 'PH-CI-2025';
+
+        document.getElementById('pharmacyNameDisplay').textContent = getPharmacyDisplayName(pharmacyName);
+        document.getElementById('licenseDisplay').textContent = license;
+      });
+
+      function getPharmacyDisplayName(value) {
+        const names = {
+          'pharmacie-moderne': 'Pharmacie Moderne d\'Abidjan',
+          'pharmacie-plateau': 'Pharmacie du Plateau',
+          'pharmacie-cocody': 'Pharmacie de Cocody',
+          'pharmacie-yopougon': 'Pharmacie de Yopougon',
+          'pharmacie-chu': 'Pharmacie Hospitalière CHU Cocody',
+          'pharmacie-autre': 'Autre pharmacie agréée'
+        };
+        return names[value] || value;
+      }
+
+      // Simuler statut en ligne
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+
+      // Simuler une connexion en ligne
+      statusDot.classList.add('online');
+      statusText.textContent = 'En ligne • Synchronisé';
+    </script>
+    <!-- End JavaScripts-->
+  </body>
+</html>

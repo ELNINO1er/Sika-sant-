@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mon Espace Patient — Sika-Santé</title>
+    <meta name="description" content="Votre carnet de santé numérique">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
+    <link href="assets/vendors/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <style>
+      :root {
+        --sidebar-width: 260px;
+        --header-height: 70px;
+      }
+
+      body {
+        overflow-x: hidden;
+      }
+
+      /* Header */
+      .dashboard-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-height);
+        background: white;
+        border-bottom: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .dashboard-header .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .dashboard-header .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      .emergency-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: var(--sidebar-width);
+        height: calc(100vh - var(--header-height));
+        background: white;
+        border-right: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+        overflow-y: auto;
+        z-index: 999;
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 20px 0;
+        margin: 0;
+      }
+
+      .sidebar-menu li a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        color: var(--bs-body-color);
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+
+      .sidebar-menu li a:hover,
+      .sidebar-menu li a.active {
+        background: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--bs-primary);
+        border-left: 3px solid var(--bs-primary);
+      }
+
+      .sidebar-menu li a i {
+        font-size: 20px;
+        width: 24px;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: var(--header-height);
+        padding: 30px;
+        min-height: calc(100vh - var(--header-height));
+        background: #f8f9fa;
+      }
+
+      @media (max-width: 991px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+      }
+
+      /* Cards */
+      .vital-card {
+        background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+      }
+
+      .vital-card h3 {
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .vital-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+      }
+
+      .vital-item {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 15px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+      }
+
+      .vital-item label {
+        font-size: 12px;
+        opacity: 0.9;
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .vital-item strong {
+        font-size: 18px;
+        display: block;
+      }
+
+      .quick-action {
+        background: white;
+        border: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s;
+        cursor: pointer;
+        height: 100%;
+      }
+
+      .quick-action:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(var(--bs-black-rgb), 0.1);
+      }
+
+      .quick-action i {
+        font-size: 40px;
+        color: var(--bs-primary);
+        margin-bottom: 15px;
+      }
+
+      .alert-item {
+        background: white;
+        border-left: 4px solid var(--bs-warning);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .alert-item.success {
+        border-left-color: var(--bs-success);
+      }
+
+      .alert-item i {
+        font-size: 24px;
+        color: var(--bs-warning);
+      }
+
+      .section-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+      }
+
+      .section-card h4 {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .list-item {
+        padding: 15px;
+        border-bottom: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .list-item:last-child {
+        border-bottom: none;
+      }
+
+      .badge-status {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .qr-box {
+        background: white;
+        border: 2px dashed var(--bs-primary);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .page-section {
+        display: none;
+      }
+
+      .page-section.active {
+        display: block;
+      }
+
+      .offline-indicator {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #ffc107;
+        color: #000;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        display: none;
+      }
+
+      .offline-indicator.show {
+        display: block;
+      }
+    </style>
+
+    <script>
+      // Vérification authentification
+      document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('sika_access_token');
+        const userRole = localStorage.getItem('sika_user_role');
+        const userData = JSON.parse(localStorage.getItem('sika_user_data') || '{}');
+
+        if (!token || userRole !== 'PATIENT') {
+          window.location.href = 'connexion-patient.html';
+          return;
+        }
+
+        // Afficher infos utilisateur
+        document.getElementById('userName').textContent = userData.name || 'Patient';
+        document.getElementById('userNameSidebar').textContent = userData.name || 'Patient';
+        document.getElementById('cmuNumber').textContent = userData.cmuNumber || 'N/A';
+        document.getElementById('cmuNumberVital').textContent = userData.cmuNumber || 'N/A';
+
+        // Initiales avatar
+        const initials = (userData.name || 'P').split(' ').map(n => n[0]).join('').substring(0, 2);
+        document.getElementById('userInitials').textContent = initials;
+
+        // Détection offline
+        window.addEventListener('offline', () => {
+          document.getElementById('offlineIndicator').classList.add('show');
+        });
+
+        window.addEventListener('online', () => {
+          document.getElementById('offlineIndicator').classList.remove('show');
+        });
+      });
+
+      // Navigation
+      function showSection(sectionId) {
+        // Masquer toutes les sections
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+
+        // Afficher la section demandée
+        document.getElementById(sectionId).classList.add('active');
+
+        // Mise à jour menu actif
+        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+        event.target.closest('a').classList.add('active');
+
+        // Masquer sidebar sur mobile
+        if (window.innerWidth < 992) {
+          document.querySelector('.sidebar').classList.remove('show');
+        }
+      }
+
+      function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('show');
+      }
+
+      function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+      }
+
+      function downloadQR() {
+        alert('Téléchargement du QR Code...');
+      }
+
+      function shareQR() {
+        alert('Partage du QR Code...');
+      }
+
+      function emergency() {
+        if (confirm('🚨 Voulez-vous afficher vos informations d\'urgence ?')) {
+          showSection('section-emergency');
+        }
+      }
+
+      function authorizeAccess() {
+        alert('Fonction d\'autorisation d\'accès (à implémenter avec backend)');
+      }
+    </script>
+  </head>
+  <body>
+
+    <!-- ======= Header =======-->
+    <header class="dashboard-header">
+      <button class="btn btn-link d-lg-none me-2" onclick="toggleSidebar()">
+        <i class="bi bi-list fs-3"></i>
+      </button>
+
+      <div class="user-info">
+        <div class="user-avatar" id="userInitials">JK</div>
+        <div class="d-none d-md-block">
+          <strong id="userName">Jean KOUASSI</strong><br>
+          <small class="text-muted">CMU: <span id="cmuNumber">1234567890</span></small>
+        </div>
+      </div>
+
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <button class="btn btn-link position-relative">
+          <i class="bi bi-bell fs-5"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            3
+          </span>
+        </button>
+        <button class="emergency-btn" onclick="emergency()">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          Urgence
+        </button>
+        <button class="btn btn-link" onclick="logout()">
+          <i class="bi bi-box-arrow-right fs-5"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- ======= Sidebar =======-->
+    <aside class="sidebar">
+      <div class="p-3 border-bottom">
+        <strong id="userNameSidebar">Jean KOUASSI</strong>
+        <br><small class="text-muted">Espace Patient</small>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li><a href="#" onclick="showSection('section-dashboard')" class="active">
+          <i class="bi bi-grid"></i>
+          <span>Tableau de bord</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-profile')">
+          <i class="bi bi-person"></i>
+          <span>Mon Profil Santé</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-emergency')">
+          <i class="bi bi-heart-pulse"></i>
+          <span>Infos Vitales (Urgence)</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-consultations')">
+          <i class="bi bi-file-earmark-medical"></i>
+          <span>Consultations</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-examens')">
+          <i class="bi bi-clipboard-pulse"></i>
+          <span>Examens & Résultats</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-ordonnances')">
+          <i class="bi bi-prescription2"></i>
+          <span>Ordonnances</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-vaccins')">
+          <i class="bi bi-shield-check"></i>
+          <span>Vaccinations</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-medicaments')">
+          <i class="bi bi-capsule"></i>
+          <span>Médicaments & Rappels</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-autorisations')">
+          <i class="bi bi-key"></i>
+          <span>Autorisations d'Accès</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-documents')">
+          <i class="bi bi-folder"></i>
+          <span>Mes Documents</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-parametres')">
+          <i class="bi bi-gear"></i>
+          <span>Paramètres</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-aide')">
+          <i class="bi bi-question-circle"></i>
+          <span>Aide & Support</span>
+        </a></li>
+      </ul>
+    </aside>
+
+    <!-- ======= Main Content =======-->
+    <main class="main-content">
+
+      <!-- ====== SECTION: DASHBOARD ====== -->
+      <div id="section-dashboard" class="page-section active">
+
+        <!-- Carte Santé Rapide -->
+        <div class="vital-card">
+          <h3>
+            <i class="bi bi-heart-pulse"></i>
+            Carte Santé Rapide
+          </h3>
+          <div class="vital-grid">
+            <div class="vital-item">
+              <label>Groupe Sanguin</label>
+              <strong>O+</strong>
+            </div>
+            <div class="vital-item">
+              <label>Allergies</label>
+              <strong>Pénicilline</strong>
+            </div>
+            <div class="vital-item">
+              <label>Maladies Chroniques</label>
+              <strong>Aucune</strong>
+            </div>
+            <div class="vital-item">
+              <label>Contact Urgence</label>
+              <strong>+225 07 01 23 45 68</strong>
+            </div>
+            <div class="vital-item">
+              <label>Dernière Consultation</label>
+              <strong>25 Jan 2025</strong>
+            </div>
+            <div class="vital-item">
+              <label>Statut Vaccins</label>
+              <strong>✅ À jour</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions Rapides -->
+        <h4 class="mb-3">Actions Rapides</h4>
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6">
+            <div class="quick-action" onclick="showSection('section-emergency')">
+              <i class="bi bi-heart-pulse"></i>
+              <h5>Infos Vitales</h5>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="quick-action" onclick="showSection('section-ordonnances')">
+              <i class="bi bi-prescription2"></i>
+              <h5>Ordonnances</h5>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="quick-action" onclick="showSection('section-vaccins')">
+              <i class="bi bi-shield-check"></i>
+              <h5>Vaccins</h5>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="quick-action" onclick="authorizeAccess()">
+              <i class="bi bi-key"></i>
+              <h5>Autoriser Accès</h5>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alertes & Rappels -->
+        <h4 class="mb-3">Alertes & Rappels</h4>
+        <div class="alert-item">
+          <i class="bi bi-calendar-check"></i>
+          <div class="flex-grow-1">
+            <strong>Prochain rendez-vous</strong><br>
+            <small>15 Mars 2025 - Dr. KOUASSI - Cardiologie</small>
+          </div>
+        </div>
+        <div class="alert-item success">
+          <i class="bi bi-shield-check text-success"></i>
+          <div class="flex-grow-1">
+            <strong>Vaccinations à jour</strong><br>
+            <small>Prochain rappel : Juin 2025</small>
+          </div>
+        </div>
+        <div class="alert-item">
+          <i class="bi bi-capsule"></i>
+          <div class="flex-grow-1">
+            <strong>Médicament à prendre</strong><br>
+            <small>Paracétamol 500mg - 3x par jour</small>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: PROFIL SANTÉ ====== -->
+      <div id="section-profile" class="page-section">
+        <h3 class="mb-4">Mon Profil Santé</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-person"></i> Identité</h4>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="text-muted small">Nom Complet</label>
+              <p class="mb-0"><strong>Jean KOUASSI</strong></p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="text-muted small">Date de Naissance</label>
+              <p class="mb-0"><strong>15 Janvier 1985 (40 ans)</strong></p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="text-muted small">Numéro CMU</label>
+              <p class="mb-0"><strong id="cmuNumberVital">1234567890</strong></p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="text-muted small">Téléphone</label>
+              <p class="mb-0"><strong>+225 07 01 23 45 67</strong></p>
+            </div>
+          </div>
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i> Modifier
+          </button>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-heart-pulse"></i> Informations Médicales</h4>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="text-muted small">Groupe Sanguin</label>
+              <p class="mb-0"><strong>O+</strong></p>
+            </div>
+            <div class="col-md-8 mb-3">
+              <label class="text-muted small">Allergies</label>
+              <p class="mb-0"><strong>Pénicilline</strong></p>
+            </div>
+            <div class="col-md-12 mb-3">
+              <label class="text-muted small">Maladies Chroniques</label>
+              <p class="mb-0"><strong>Aucune</strong></p>
+            </div>
+            <div class="col-md-12 mb-3">
+              <label class="text-muted small">Handicap / Conditions Particulières</label>
+              <p class="mb-0"><strong>Aucun</strong></p>
+            </div>
+          </div>
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i> Modifier
+          </button>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-person-fill-exclamation"></i> Contact d'Urgence</h4>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="text-muted small">Nom</label>
+              <p class="mb-0"><strong>Marie KOUASSI (Épouse)</strong></p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="text-muted small">Téléphone</label>
+              <p class="mb-0"><strong>+225 07 01 23 45 68</strong></p>
+            </div>
+          </div>
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i> Modifier
+          </button>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-qr-code"></i> Ma Carte QR</h4>
+          <div class="qr-box">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SIKA-CMU-1234567890" alt="QR Code" style="max-width: 200px;">
+            <p class="mt-3 mb-3">Présentez ce code lors de vos consultations</p>
+            <button class="btn btn-primary me-2" onclick="downloadQR()">
+              <i class="bi bi-download me-1"></i> Télécharger
+            </button>
+            <button class="btn btn-outline-primary" onclick="shareQR()">
+              <i class="bi bi-share me-1"></i> Partager
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====== SECTION: URGENCE ====== -->
+      <div id="section-emergency" class="page-section">
+        <div class="alert alert-danger">
+          <h4><i class="bi bi-exclamation-triangle me-2"></i>Mode Urgence</h4>
+          <p class="mb-0">Ces informations sont visibles en cas d'urgence, même sans déverrouillage complet</p>
+        </div>
+
+        <div class="vital-card">
+          <h3><i class="bi bi-heart-pulse"></i> Informations Vitales</h3>
+          <div class="vital-grid">
+            <div class="vital-item">
+              <label>Groupe Sanguin</label>
+              <strong style="font-size: 28px;">O+</strong>
+            </div>
+            <div class="vital-item">
+              <label>⚠️ ALLERGIES CRITIQUES</label>
+              <strong style="color: #ffeb3b;">Pénicilline</strong>
+            </div>
+            <div class="vital-item">
+              <label>Traitements en Cours</label>
+              <strong>Aucun</strong>
+            </div>
+            <div class="vital-item">
+              <label>Maladies Graves</label>
+              <strong>Aucune</strong>
+            </div>
+            <div class="vital-item">
+              <label>📞 Contact Urgence</label>
+              <strong>Marie KOUASSI<br>+225 07 01 23 45 68</strong>
+            </div>
+            <div class="vital-item">
+              <label>Dernière MAJ</label>
+              <strong>04 Fév 2025</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-file-earmark-medical"></i> Dernière Consultation</h4>
+          <p><strong>25 Janvier 2025 - CHU de Cocody</strong></p>
+          <p>Dr. KOUASSI Jean - Cardiologie</p>
+          <p class="text-muted">Contrôle de routine - RAS</p>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: CONSULTATIONS ====== -->
+      <div id="section-consultations" class="page-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3>Historique des Consultations</h3>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-funnel"></i> Filtrer
+            </button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="list-item">
+            <div>
+              <strong>25 Janvier 2025</strong><br>
+              <small class="text-muted">CHU de Cocody - Dr. KOUASSI Jean (Cardiologie)</small><br>
+              <small>Diagnostic: Contrôle de routine - RAS</small>
+            </div>
+            <button class="btn btn-sm btn-outline-primary">Voir</button>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>10 Décembre 2024</strong><br>
+              <small class="text-muted">Centre de Santé Abobo - Dr. KONÉ Marie</small><br>
+              <small>Diagnostic: Grippe saisonnière</small>
+            </div>
+            <button class="btn btn-sm btn-outline-primary">Voir</button>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>05 Septembre 2024</strong><br>
+              <small class="text-muted">CHU de Treichville - Service Urgences</small><br>
+              <small>Diagnostic: Gastro-entérite</small>
+            </div>
+            <button class="btn btn-sm btn-outline-primary">Voir</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: EXAMENS ====== -->
+      <div id="section-examens" class="page-section">
+        <h3 class="mb-4">Examens & Résultats</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-file-earmark-medical"></i> Analyses de Laboratoire</h4>
+          <div class="list-item">
+            <div>
+              <strong>Bilan Sanguin Complet</strong><br>
+              <small class="text-muted">20 Janvier 2025 - Laboratoire BIOLAB</small>
+            </div>
+            <div>
+              <span class="badge bg-success badge-status">Normal</span>
+              <button class="btn btn-sm btn-outline-primary ms-2">
+                <i class="bi bi-download"></i>
+              </button>
+            </div>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>Test COVID-19 (Antigénique)</strong><br>
+              <small class="text-muted">15 Décembre 2024 - CHU Cocody</small>
+            </div>
+            <div>
+              <span class="badge bg-success badge-status">Négatif</span>
+              <button class="btn btn-sm btn-outline-primary ms-2">
+                <i class="bi bi-download"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-camera"></i> Imagerie Médicale</h4>
+          <div class="list-item">
+            <div>
+              <strong>Radiographie Thoracique</strong><br>
+              <small class="text-muted">10 Novembre 2024 - CHU Cocody</small>
+            </div>
+            <button class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye me-1"></i> Voir
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary">
+          <i class="bi bi-upload me-2"></i>
+          Ajouter un Document
+        </button>
+      </div>
+
+      <!-- ====== SECTION: ORDONNANCES ====== -->
+      <div id="section-ordonnances" class="page-section">
+        <h3 class="mb-4">Mes Ordonnances</h3>
+
+        <div class="section-card">
+          <div class="list-item">
+            <div>
+              <strong>Ordonnance #ORD-2025-001</strong><br>
+              <small class="text-muted">25 Janvier 2025 - Dr. KOUASSI Jean</small><br>
+              <small>Paracétamol 500mg, Vitamine C</small>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-success badge-status">Active</span><br>
+              <button class="btn btn-sm btn-outline-primary mt-2">
+                <i class="bi bi-qr-code me-1"></i> QR Code
+              </button>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <div>
+              <strong>Ordonnance #ORD-2024-045</strong><br>
+              <small class="text-muted">10 Décembre 2024 - Dr. KONÉ Marie</small><br>
+              <small>Amoxicilline, Sirop antitussif</small>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-secondary badge-status">Délivrée</span><br>
+              <button class="btn btn-sm btn-outline-primary mt-2">
+                <i class="bi bi-download"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Présentez le QR Code de l'ordonnance au pharmacien pour éviter les contrefaçons
+        </div>
+      </div>
+
+      <!-- ====== SECTION: VACCINS ====== -->
+      <div id="section-vaccins" class="page-section">
+        <h3 class="mb-4">Carnet de Vaccination</h3>
+
+        <div class="alert alert-success">
+          <i class="bi bi-shield-check me-2"></i>
+          <strong>Statut : À jour</strong> - Prochain rappel en Juin 2025
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-shield-check"></i> Vaccinations Effectuées</h4>
+          <div class="list-item">
+            <div>
+              <strong>COVID-19 (Rappel)</strong><br>
+              <small class="text-muted">10 Janvier 2025 - Centre de Santé Abobo</small>
+            </div>
+            <span class="badge bg-success badge-status">✓ Fait</span>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>Fièvre Jaune</strong><br>
+              <small class="text-muted">15 Juin 2020 - Institut Pasteur</small>
+            </div>
+            <span class="badge bg-success badge-status">✓ Fait</span>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>Tétanos</strong><br>
+              <small class="text-muted">10 Janvier 2020 - CHU Cocody</small>
+            </div>
+            <span class="badge bg-warning badge-status">⚠ Rappel dû</span>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-calendar-check"></i> Prochains Vaccins</h4>
+          <div class="list-item">
+            <div>
+              <strong>Tétanos (Rappel)</strong><br>
+              <small class="text-muted">Recommandé : Mars 2025</small>
+            </div>
+            <button class="btn btn-sm btn-primary">Planifier</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: MÉDICAMENTS ====== -->
+      <div id="section-medicaments" class="page-section">
+        <h3 class="mb-4">Médicaments & Rappels</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-capsule"></i> Traitements en Cours</h4>
+          <div class="list-item">
+            <div>
+              <strong>Paracétamol 500mg</strong><br>
+              <small class="text-muted">3x par jour - Durée: 5 jours</small><br>
+              <small>Jusqu'au 09 Février 2025</small>
+            </div>
+            <div>
+              <button class="btn btn-sm btn-success">✓ J'ai pris</button>
+            </div>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>Vitamine C</strong><br>
+              <small class="text-muted">1x par jour - Durée: 30 jours</small><br>
+              <small>Jusqu'au 24 Février 2025</small>
+            </div>
+            <div>
+              <button class="btn btn-sm btn-outline-success">Marquer pris</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <i class="bi bi-bell me-2"></i>
+          Vous recevrez des rappels SMS pour vos prises de médicaments
+        </div>
+      </div>
+
+      <!-- ====== SECTION: AUTORISATIONS ====== -->
+      <div id="section-autorisations" class="page-section">
+        <h3 class="mb-4">Autorisations d'Accès</h3>
+
+        <div class="alert alert-warning">
+          <i class="bi bi-shield-exclamation me-2"></i>
+          <strong>Important :</strong> Vous contrôlez qui peut accéder à votre dossier médical
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-clock-history"></i> Demandes en Attente</h4>
+          <div class="list-item">
+            <div>
+              <strong>Dr. TRAORÉ Ibrahim</strong><br>
+              <small class="text-muted">Pharmacie Centrale - Demande d'accès aux ordonnances</small><br>
+              <small>Il y a 2 heures</small>
+            </div>
+            <div>
+              <button class="btn btn-sm btn-success me-2">✓ Autoriser</button>
+              <button class="btn btn-sm btn-danger">✗ Refuser</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-check-circle"></i> Accès Autorisés</h4>
+          <div class="list-item">
+            <div>
+              <strong>Dr. KOUASSI Jean</strong><br>
+              <small class="text-muted">CHU Cocody - Cardiologie</small><br>
+              <small>Accès: Consultation complète - Expire: Permanent</small>
+            </div>
+            <button class="btn btn-sm btn-outline-danger">Révoquer</button>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>Dr. KONÉ Marie</strong><br>
+              <small class="text-muted">Centre Abobo - Médecine Générale</small><br>
+              <small>Accès: Urgences uniquement - Expire: 07 Fév 2025</small>
+            </div>
+            <button class="btn btn-sm btn-outline-danger">Révoquer</button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-eye"></i> Historique des Accès</h4>
+          <div class="list-item">
+            <div>
+              <strong>Dr. KOUASSI Jean</strong><br>
+              <small class="text-muted">A consulté: Profil santé, Consultations</small><br>
+              <small>25 Janvier 2025 à 14:30 - CHU Cocody</small>
+            </div>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>Dr. KONÉ Marie</strong><br>
+              <small class="text-muted">A consulté: Infos vitales, Vaccinations</small><br>
+              <small>10 Décembre 2024 à 09:15 - Centre Abobo</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: DOCUMENTS ====== -->
+      <div id="section-documents" class="page-section">
+        <h3 class="mb-4">Mes Documents</h3>
+
+        <button class="btn btn-primary mb-4">
+          <i class="bi bi-upload me-2"></i>
+          Ajouter un Document
+        </button>
+
+        <div class="section-card">
+          <div class="list-item">
+            <div>
+              <i class="bi bi-file-earmark-pdf fs-3 text-danger me-3"></i>
+              <div>
+                <strong>Carte CMU</strong><br>
+                <small class="text-muted">Ajouté le 01 Janvier 2025</small>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+          <div class="list-item">
+            <div>
+              <i class="bi bi-file-earmark-pdf fs-3 text-danger me-3"></i>
+              <div>
+                <strong>Certificat Médical</strong><br>
+                <small class="text-muted">Ajouté le 25 Janvier 2025</small>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: PARAMÈTRES ====== -->
+      <div id="section-parametres" class="page-section">
+        <h3 class="mb-4">Paramètres</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-globe"></i> Langue</h4>
+          <select class="form-select">
+            <option selected>Français</option>
+            <option>English</option>
+            <option>Dioula (audio)</option>
+            <option>Baoulé (audio)</option>
+          </select>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-phone"></i> Numéro de Téléphone (OTP)</h4>
+          <p class="text-muted">+225 07 01 23 45 67</p>
+          <button class="btn btn-outline-primary btn-sm">Modifier</button>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-shield-lock"></i> Sécurité</h4>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="switchBiometric" checked>
+            <label class="form-check-label" for="switchBiometric">
+              Activer la biométrie (empreinte digitale)
+            </label>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="switchOTP" checked>
+            <label class="form-check-label" for="switchOTP">
+              Recevoir un OTP à chaque connexion
+            </label>
+          </div>
+          <button class="btn btn-outline-danger btn-sm">
+            Déconnecter tous les appareils
+          </button>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-wifi-off"></i> Mode Offline</h4>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="switchOffline" checked>
+            <label class="form-check-label" for="switchOffline">
+              Télécharger les données essentielles pour consultation hors ligne
+            </label>
+          </div>
+          <p class="text-muted mt-2 mb-0">
+            <small>Dernière synchronisation : Aujourd'hui à 10:30</small>
+          </p>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: AIDE ====== -->
+      <div id="section-aide" class="page-section">
+        <h3 class="mb-4">Aide & Support</h3>
+
+        <div class="section-card">
+          <h4><i class="bi bi-question-circle"></i> Questions Fréquentes (FAQ)</h4>
+          <div class="accordion" id="accordionFAQ">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                  Comment autoriser un médecin à accéder à mon dossier ?
+                </button>
+              </h2>
+              <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                <div class="accordion-body">
+                  Allez dans "Autorisations d'Accès" et acceptez la demande du médecin. Vous pouvez définir une durée d'accès.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                  Comment récupérer mon QR Code ?
+                </button>
+              </h2>
+              <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                <div class="accordion-body">
+                  Allez dans "Mon Profil Santé" puis "Ma Carte QR". Vous pouvez le télécharger ou le partager.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                  Comment fonctionne le mode offline ?
+                </button>
+              </h2>
+              <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                <div class="accordion-body">
+                  Activez-le dans Paramètres. Vos données essentielles seront téléchargées et accessibles sans internet.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-book"></i> Tutoriels Vidéo</h4>
+          <button class="btn btn-outline-primary mb-2 w-100 text-start">
+            <i class="bi bi-play-circle me-2"></i>
+            Première connexion et profil santé
+          </button>
+          <button class="btn btn-outline-primary mb-2 w-100 text-start">
+            <i class="bi bi-play-circle me-2"></i>
+            Autoriser l'accès à un soignant
+          </button>
+          <button class="btn btn-outline-primary w-100 text-start">
+            <i class="bi bi-play-circle me-2"></i>
+            Utiliser mon QR Code en consultation
+          </button>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-headset"></i> Contacter le Support</h4>
+          <div class="d-grid gap-2">
+            <button class="btn btn-success">
+              <i class="bi bi-whatsapp me-2"></i>
+              WhatsApp : +225 27 20 XX XX XX
+            </button>
+            <button class="btn btn-primary">
+              <i class="bi bi-telephone me-2"></i>
+              Appel : +225 27 20 XX XX XX
+            </button>
+            <button class="btn btn-outline-primary">
+              <i class="bi bi-envelope me-2"></i>
+              Email : support@sika-sante.ci
+            </button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-exclamation-triangle"></i> Signaler un Problème</h4>
+          <textarea class="form-control mb-3" rows="4" placeholder="Décrivez le problème..."></textarea>
+          <button class="btn btn-danger">
+            <i class="bi bi-send me-2"></i>
+            Envoyer le Signalement
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ======= Offline Indicator =======-->
+    <div id="offlineIndicator" class="offline-indicator">
+      <i class="bi bi-wifi-off me-2"></i>
+      Mode Offline Activé
+    </div>
+
+    <!-- ======= Javascripts =======-->
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

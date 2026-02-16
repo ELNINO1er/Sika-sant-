@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Connexion — Sika-Santé</title>
+    <meta name="description" content="Choisissez votre profil pour accéder à Sika-Santé">
+
+    <!-- ======= Google Font =======-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- End Google Font-->
+
+    <!-- ======= Styles =======-->
+    <link href="assets/vendors/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="assets/vendors/aos/aos.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <!-- End Styles-->
+
+    <!-- ======= Apply theme =======-->
+    <script>
+      (function() {
+        const storedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', storedTheme);
+      })();
+    </script>
+
+    <style>
+      .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(0, 82, 204, 0.05) 0%, rgba(46, 204, 113, 0.05) 100%);
+      }
+      .profile-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid rgba(var(--inverse-color-rgb), 0.1);
+        height: 100%;
+      }
+      .profile-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--bs-primary);
+        box-shadow: 0 15px 40px rgba(var(--bs-primary-rgb), 0.15);
+      }
+      .profile-icon {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+        color: white;
+        margin: 0 auto 20px;
+      }
+      .back-link {
+        color: var(--bs-primary);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 30px;
+      }
+      .back-link:hover {
+        color: var(--bs-primary-hover);
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ======= Auth Page =======-->
+    <div class="auth-page">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+
+            <!-- Back to home -->
+            <a href="index.html" class="back-link">
+              <i class="bi bi-arrow-left"></i>
+              <span>Retour à l'accueil</span>
+            </a>
+
+            <!-- Header -->
+            <div class="text-center mb-5" data-aos="fade-up">
+              <h1 class="mb-3">Choisissez votre profil</h1>
+              <p class="text-muted fs-5">Sélectionnez le type de compte avec lequel vous souhaitez vous connecter</p>
+            </div>
+
+            <!-- Profile Cards -->
+            <div class="row g-4">
+
+              <!-- Patient Profile -->
+              <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="0">
+                <div class="profile-card p-4 rounded-4 text-center" onclick="window.location.href='connexion-patient.html'">
+                  <div class="profile-icon">
+                    <i class="bi bi-person-heart fs-1"></i>
+                  </div>
+                  <h3 class="mb-3">Patient</h3>
+                  <p class="text-muted mb-3">Accédez à votre dossier médical personnel</p>
+                  <ul class="list-unstyled text-start mb-3" style="font-size: 14px;">
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Connexion par SMS</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Numéro CMU requis</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Code OTP sécurisé</li>
+                  </ul>
+                  <div class="badge bg-primary-subtle text-primary">Connexion par OTP</div>
+                </div>
+              </div>
+
+              <!-- Professional Profile -->
+              <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="profile-card p-4 rounded-4 text-center position-relative" onclick="window.location.href='connexion-professionnel.html'">
+                  <span class="badge bg-primary position-absolute top-0 end-0 m-3">Populaire</span>
+                  <div class="profile-icon">
+                    <i class="bi bi-hospital fs-1"></i>
+                  </div>
+                  <h3 class="mb-3">Professionnel</h3>
+                  <p class="text-muted mb-3">Accès dossiers patients et consultations</p>
+                  <ul class="list-unstyled text-start mb-3" style="font-size: 14px;">
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Identifiant pro</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Auth 2 facteurs</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Accès par rôle</li>
+                  </ul>
+                  <div class="badge bg-primary-subtle text-primary">Auth + MFA</div>
+                </div>
+              </div>
+
+              <!-- Pharmacy Profile -->
+              <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="profile-card p-4 rounded-4 text-center" onclick="window.location.href='connexion-pharmacie.html'">
+                  <div class="profile-icon" style="background: linear-gradient(135deg, #0dcaf0, #6f42c1);">
+                    <i class="bi bi-capsule fs-1"></i>
+                  </div>
+                  <h3 class="mb-3">Pharmacie</h3>
+                  <p class="text-muted mb-3">Validation et délivrance d'e-ordonnances</p>
+                  <ul class="list-unstyled text-start mb-3" style="font-size: 14px;">
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Scanner QR code</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Licence Ordre</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Traçabilité totale</li>
+                  </ul>
+                  <div class="badge" style="background: rgba(13, 202, 240, 0.1); color: #0dcaf0;">E-Ordonnance</div>
+                </div>
+              </div>
+
+              <!-- Institution Profile -->
+              <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="profile-card p-4 rounded-4 text-center" onclick="window.location.href='connexion-institution.html'">
+                  <div class="profile-icon">
+                    <i class="bi bi-building fs-1"></i>
+                  </div>
+                  <h3 class="mb-3">Institution</h3>
+                  <p class="text-muted mb-3">Tableau de bord épidémiologique</p>
+                  <ul class="list-unstyled text-start mb-3" style="font-size: 14px;">
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Accès institutionnel</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Sécurité renforcée</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Données anonymes</li>
+                  </ul>
+                  <div class="badge bg-primary-subtle text-primary">Accès restreint</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Security Notice -->
+            <div class="alert alert-info d-flex align-items-center mt-5" role="alert" data-aos="fade-up" data-aos-delay="300">
+              <i class="bi bi-shield-lock fs-4 me-3"></i>
+              <div>
+                <strong>Connexion sécurisée</strong><br>
+                Toutes les connexions sont chiffrées et tracées pour votre sécurité. En cas de difficulté, contactez le support au +225 27 20 XX XX XX
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Auth Page-->
+
+    <!-- ======= Javascripts =======-->
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendors/aos/aos.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        AOS.init({
+          duration: 800,
+          easing: 'slide',
+          once: true
+        });
+      });
+    </script>
+    <!-- End JavaScripts-->
+  </body>
+</html>
