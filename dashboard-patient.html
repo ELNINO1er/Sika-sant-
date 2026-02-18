@@ -292,53 +292,503 @@
       .offline-indicator.show {
         display: block;
       }
+
+      .notifications-panel {
+        position: fixed;
+        top: calc(var(--header-height) + 10px);
+        right: 20px;
+        width: min(420px, calc(100vw - 40px));
+        max-height: 65vh;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid rgba(var(--inverse-color-rgb), 0.12);
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(var(--bs-black-rgb), 0.14);
+        z-index: 1200;
+        padding: 14px;
+        display: none;
+      }
+
+      .notifications-panel.show {
+        display: block;
+      }
+
+      .notification-item {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(var(--inverse-color-rgb), 0.1);
+      }
+
+      .notification-item:last-child {
+        border-bottom: none;
+      }
+
+      .notification-item.unread {
+        background: rgba(var(--bs-primary-rgb), 0.04);
+      }
+
+      .todo-item {
+        border: 1px solid rgba(var(--inverse-color-rgb), 0.12);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: #fff;
+      }
+
+      .todo-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .status-select {
+        min-width: 140px;
+      }
     </style>
 
     <script>
-      // Vérification authentification
-      document.addEventListener('DOMContentLoaded', function() {
-        const token = localStorage.getItem('sika_access_token');
-        const userRole = localStorage.getItem('sika_user_role');
-        const userData = JSON.parse(localStorage.getItem('sika_user_data') || '{}');
+      const DASHBOARD_STATE_KEY = 'sika_patient_dashboard_state_v1';
+      const TOKEN_KEY    = 'sika_access_token';
+      const ROLE_KEY     = 'sika_user_role';
+      const USER_KEY     = 'sika_user_data';
+      const PROFILE_KEY  = 'sika_patient_profile';
+      const MEDICAL_KEY  = 'sika_patient_medical_record';
+      const LOGIN_HISTORY_KEY = 'sika_patient_login_history_v1';
+      const DEVICES_KEY  = 'sika_patient_devices_v1';
+      const SESSION_KEY  = 'sika_patient_session_id';
+      const OFFLINE_ALLOWED_SECTIONS = ['section-emergency', 'section-ordonnances', 'section-vaccins'];
+
+      let userContext = { name: 'Patient', cmuNumber: 'N/A', isProvisional: false, createdByCenter: null };
+      let patientProfile = {};
+      let patientMedical = {};
+      let dashboardState = null;
+
+      const PRESCRIPTION_STATUSES = ['Active', 'Partielle', 'Delivree', 'Expiree'];
+      const ACCESS_DURATIONS = [
+        { key: '15m', label: '15 min' },
+        { key: '1d', label: '1 jour' },
+        { key: '7d', label: '7 jours' }
+      ];
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const token = localStorage.getItem(TOKEN_KEY);
+        const userRole = localStorage.getItem(ROLE_KEY);
+        let userData = {};
+        try { userData = JSON.parse(localStorage.getItem(USER_KEY) || '{}'); } catch (_) {}
+        try { patientProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}'); } catch (_) {}
+        try { patientMedical = JSON.parse(localStorage.getItem(MEDICAL_KEY) || '{}'); } catch (_) {}
 
         if (!token || userRole !== 'PATIENT') {
           window.location.href = 'connexion-patient.html';
           return;
         }
 
-        // Afficher infos utilisateur
-        document.getElementById('userName').textContent = userData.name || 'Patient';
-        document.getElementById('userNameSidebar').textContent = userData.name || 'Patient';
-        document.getElementById('cmuNumber').textContent = userData.cmuNumber || 'N/A';
-        document.getElementById('cmuNumberVital').textContent = userData.cmuNumber || 'N/A';
+        const fullName = patientProfile.firstName
+          ? (patientProfile.firstName + ' ' + patientProfile.lastName)
+          : (userData.name || 'Patient');
 
-        // Initiales avatar
-        const initials = (userData.name || 'P').split(' ').map(n => n[0]).join('').substring(0, 2);
-        document.getElementById('userInitials').textContent = initials;
+        userContext = {
+          name            : fullName,
+          cmuNumber       : patientProfile.cmu || patientProfile.temporaryId || userData.cmuNumber || 'N/A',
+          isProvisional   : !patientProfile.cmu && !!patientProfile.temporaryId,
+          createdByCenter : patientProfile.createdByCenter || null,
+          activatedAt     : patientProfile.activatedAt || null
+        };
 
-        // Détection offline
-        window.addEventListener('offline', () => {
-          document.getElementById('offlineIndicator').classList.add('show');
-        });
+        applyUserContext();
+        initDashboardState();
+        renderDynamicSections();
+        renderPatientQr();
+        renderAccess();
+        renderPrescriptions();
+        renderTodoList();
+        renderNotifications();
+        renderProfileData();
+        renderDashboardOverview();
+        renderEmergencySnapshot();
+        renderVaccinesState();
+        renderDocumentsList();
+        renderMedicationState();
+        renderMedicationHistory();
+        renderLoginHistory();
+        renderDevicesState();
+        syncSettingsUI();
+        bindPatientActions();
+        bindConnectivityEvents();
 
-        window.addEventListener('online', () => {
-          document.getElementById('offlineIndicator').classList.remove('show');
+        document.addEventListener('click', function (event) {
+          const panel = document.getElementById('notificationsPanel');
+          const button = document.getElementById('notificationsBtn');
+          if (!panel || !button) {
+            return;
+          }
+          if (!panel.contains(event.target) && !button.contains(event.target)) {
+            panel.classList.remove('show');
+          }
         });
       });
 
-      // Navigation
-      function showSection(sectionId) {
-        // Masquer toutes les sections
-        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+      function applyUserContext() {
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-        // Afficher la section demandée
-        document.getElementById(sectionId).classList.add('active');
+        set('userName',        userContext.name);
+        set('userNameSidebar', userContext.name);
+        set('cmuNumber',       userContext.cmuNumber);
+        set('cmuNumberVital',  userContext.cmuNumber);
 
-        // Mise à jour menu actif
-        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-        event.target.closest('a').classList.add('active');
+        const initials = userContext.name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+        set('userInitials', initials || 'P');
 
-        // Masquer sidebar sur mobile
+        // Badge ID provisoire dans le header
+        const provBadge = document.getElementById('provisionalHeaderBadge');
+        if (provBadge) provBadge.style.display = userContext.isProvisional ? 'inline-flex' : 'none';
+
+        // Centre de création (affiché dans sidebar et profil)
+        const centerEls = document.querySelectorAll('.created-by-center-text');
+        centerEls.forEach(el => {
+          el.textContent = userContext.createdByCenter || 'Centre de santé';
+        });
+
+        // Bloc centre → toujours visible si valeur disponible
+        const centerBlocks = document.querySelectorAll('.creation-center-block');
+        centerBlocks.forEach(el => {
+          el.style.display = userContext.createdByCenter ? 'flex' : 'none';
+        });
+
+        // Date activation
+        const actEls = document.querySelectorAll('.activated-at-text');
+        actEls.forEach(el => {
+          el.textContent = userContext.activatedAt
+            ? new Date(userContext.activatedAt).toLocaleDateString('fr-FR')
+            : '—';
+        });
+      }
+
+      function initDashboardState() {
+        let persisted = null;
+        try {
+          persisted = JSON.parse(localStorage.getItem(DASHBOARD_STATE_KEY) || 'null');
+        } catch (error) {
+          persisted = null;
+        }
+
+        if (persisted) {
+          dashboardState = persisted;
+          ensureDashboardStateDefaults();
+          saveDashboardState();
+          return;
+        }
+
+        const now = Date.now();
+        dashboardState = {
+          qr: null,
+          notifications: [
+            {
+              id: 'n-1',
+              type: 'warning',
+              title: 'Demande d acces en attente',
+              message: 'Un professionnel attend votre autorisation.',
+              createdAt: now - 1000 * 60 * 30,
+              read: false
+            },
+            {
+              id: 'n-2',
+              type: 'info',
+              title: 'Rappel vaccin',
+              message: 'Le rappel Tetanos est recommande.',
+              createdAt: now - 1000 * 60 * 90,
+              read: false
+            },
+            {
+              id: 'n-3',
+              type: 'warning',
+              title: 'Alerte sanitaire regionale',
+              message: 'Campagne de prevention dengue active dans votre district.',
+              createdAt: now - 1000 * 60 * 180,
+              read: false
+            }
+          ],
+          access: {
+            pending: [
+              {
+                id: 'req-1',
+                requester: 'Dr. TRAORE Ibrahim',
+                structure: 'Pharmacie Centrale',
+                scope: 'Ordonnances',
+                requestedAt: now - 1000 * 60 * 120
+              }
+            ],
+            granted: [
+              {
+                id: 'gr-1',
+                requester: 'Dr. KOUASSI Jean',
+                structure: 'CHU Cocody - Cardiologie',
+                scope: 'Consultation complete',
+                expiresAt: null,
+                grantedAt: now - 1000 * 60 * 60 * 24 * 20
+              }
+            ],
+            history: [
+              {
+                id: 'h-1',
+                actor: 'Dr. KOUASSI Jean',
+                action: 'Consultation du profil sante',
+                structure: 'CHU Cocody - Cardiologie',
+                at: now - 1000 * 60 * 60 * 24
+              }
+            ]
+          },
+          prescriptions: [
+            {
+              id: 'ORD-2025-001',
+              issuedAt: '25 Janvier 2025',
+              doctor: 'Dr. KOUASSI Jean',
+              details: 'Paracetamol 500mg, Vitamine C',
+              status: 'Active',
+              dispenses: []
+            },
+            {
+              id: 'ORD-2024-045',
+              issuedAt: '10 Decembre 2024',
+              doctor: 'Dr. KONE Marie',
+              details: 'Amoxicilline, Sirop antitussif',
+              status: 'Delivree',
+              dispenses: [
+                { at: now - 1000 * 60 * 60 * 24 * 40, pharmacy: 'Pharmacie Centrale' }
+              ]
+            }
+          ],
+          profile: {
+            fullName: 'Jean KOUASSI',
+            birthDate: '15 Janvier 1985 (40 ans)',
+            phone: '+225 07 01 23 45 67',
+            bloodGroup: 'O+',
+            allergies: 'Penicilline',
+            chronicDiseases: 'Aucune',
+            specialConditions: 'Aucun',
+            emergencyName: 'Marie KOUASSI (Epouse)',
+            emergencyPhone: '+225 07 01 23 45 68'
+          },
+          medications: [
+            { id: 'med-paracetamol', name: 'Paracetamol 500mg', taken: false, lastTakenAt: null },
+            { id: 'med-vitc', name: 'Vitamine C', taken: false, lastTakenAt: null }
+          ],
+          medicationHistory: [],
+          consultations: [
+            { id: 'c-2025-01', title: 'Controle de routine - RAS', place: 'CHU de Cocody', doctor: 'Dr. KOUASSI Jean', date: '25 Janvier 2025', type: 'Cardiologie' },
+            { id: 'c-2024-12', title: 'Grippe saisonniere', place: 'Centre de Sante Abobo', doctor: 'Dr. KONE Marie', date: '10 Decembre 2024', type: 'Generaliste' },
+            { id: 'c-2024-09', title: 'Gastro-enterite', place: 'CHU de Treichville', doctor: 'Service Urgences', date: '05 Septembre 2024', type: 'Urgences' }
+          ],
+          documents: [
+            { id: 'doc-cmu', name: 'Carte CMU.pdf', addedAt: now - 1000 * 60 * 60 * 24 * 35, mime: 'application/pdf', source: 'system', content: null },
+            { id: 'doc-certif', name: 'Certificat Medical.pdf', addedAt: now - 1000 * 60 * 60 * 24 * 22, mime: 'application/pdf', source: 'system', content: null }
+          ],
+          settings: {
+            language: 'Français',
+            phoneOtp: '+225 07 01 23 45 67',
+            biometric: true,
+            otpEachLogin: true,
+            offlineMode: true,
+            lastSyncAt: now
+          },
+          loginHistory: [],
+          devices: [],
+          supportReports: []
+        };
+
+        ensureDashboardStateDefaults();
+        saveDashboardState();
+      }
+
+      function saveDashboardState() {
+        localStorage.setItem(DASHBOARD_STATE_KEY, JSON.stringify(dashboardState));
+        localStorage.setItem(LOGIN_HISTORY_KEY, JSON.stringify(dashboardState.loginHistory || []));
+        localStorage.setItem(DEVICES_KEY, JSON.stringify(dashboardState.devices || []));
+      }
+
+      function readArrayStorage(key) {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function ensureDashboardStateDefaults() {
+        if (!dashboardState.profile) {
+          dashboardState.profile = {
+            fullName: userContext.name || 'Patient',
+            birthDate: 'N/A',
+            phone: '+225 07 00 00 00 00',
+            bloodGroup: 'N/A',
+            allergies: 'Aucune',
+            chronicDiseases: 'Aucune',
+            specialConditions: 'Aucune',
+            emergencyName: 'Contact urgence',
+            emergencyPhone: '+225 07 00 00 00 00'
+          };
+        }
+        dashboardState.profile.fullName = dashboardState.profile.fullName || userContext.name || 'Patient';
+        dashboardState.profile.birthDate = dashboardState.profile.birthDate || 'N/A';
+        dashboardState.profile.phone = dashboardState.profile.phone || '+225 07 00 00 00 00';
+        dashboardState.profile.bloodGroup = dashboardState.profile.bloodGroup || 'N/A';
+        dashboardState.profile.allergies = dashboardState.profile.allergies || 'Aucune';
+        dashboardState.profile.chronicDiseases = dashboardState.profile.chronicDiseases || 'Aucune';
+        dashboardState.profile.specialConditions = dashboardState.profile.specialConditions || 'Aucune';
+        dashboardState.profile.emergencyName = dashboardState.profile.emergencyName || 'Contact urgence';
+        dashboardState.profile.emergencyPhone = dashboardState.profile.emergencyPhone || '+225 07 00 00 00 00';
+        if (!Array.isArray(dashboardState.medications)) {
+          dashboardState.medications = [];
+        }
+        if (!Array.isArray(dashboardState.consultations)) {
+          dashboardState.consultations = [];
+        }
+        if (!Array.isArray(dashboardState.documents)) {
+          dashboardState.documents = [];
+        }
+        if (!Array.isArray(dashboardState.notifications)) {
+          dashboardState.notifications = [];
+        }
+        if (!dashboardState.access) {
+          dashboardState.access = { pending: [], granted: [], history: [] };
+        }
+        if (!Array.isArray(dashboardState.access.pending)) {
+          dashboardState.access.pending = [];
+        }
+        if (!Array.isArray(dashboardState.access.granted)) {
+          dashboardState.access.granted = [];
+        }
+        if (!Array.isArray(dashboardState.access.history)) {
+          dashboardState.access.history = [];
+        }
+        if (!Array.isArray(dashboardState.prescriptions)) {
+          dashboardState.prescriptions = [];
+        }
+        if (!Array.isArray(dashboardState.medicationHistory)) {
+          dashboardState.medicationHistory = [];
+        }
+        if (!dashboardState.settings) {
+          dashboardState.settings = {
+            language: 'Français',
+            phoneOtp: '+225 07 00 00 00 00',
+            biometric: true,
+            otpEachLogin: true,
+            offlineMode: true,
+            lastSyncAt: Date.now()
+          };
+        }
+        dashboardState.settings.language = dashboardState.settings.language || 'Français';
+        dashboardState.settings.phoneOtp = dashboardState.settings.phoneOtp || dashboardState.profile.phone || '+225 07 00 00 00 00';
+        dashboardState.settings.biometric = dashboardState.settings.biometric !== false;
+        dashboardState.settings.otpEachLogin = dashboardState.settings.otpEachLogin !== false;
+        dashboardState.settings.offlineMode = dashboardState.settings.offlineMode !== false;
+        dashboardState.settings.lastSyncAt = dashboardState.settings.lastSyncAt || Date.now();
+        dashboardState.loginHistory = readArrayStorage(LOGIN_HISTORY_KEY);
+        dashboardState.devices = readArrayStorage(DEVICES_KEY);
+        if (dashboardState.loginHistory.length === 0) {
+          dashboardState.loginHistory.push({
+            id: `login-${Date.now()}`,
+            at: Date.now() - (1000 * 60 * 45),
+            status: 'SUCCESS',
+            cmuNumber: userContext.cmuNumber,
+            method: 'CMU + OTP',
+            device: 'Navigateur Web',
+            location: 'Abidjan (mock)'
+          });
+        }
+        if (dashboardState.devices.length === 0) {
+          const sessionId = localStorage.getItem(SESSION_KEY) || `sess-${Date.now()}`;
+          dashboardState.devices.push({
+            id: sessionId,
+            label: 'Navigateur Web',
+            cmuNumber: userContext.cmuNumber,
+            firstSeenAt: Date.now() - (1000 * 60 * 90),
+            lastSeenAt: Date.now(),
+            status: 'active',
+            isCurrent: true
+          });
+        }
+        if (!Array.isArray(dashboardState.supportReports)) {
+          dashboardState.supportReports = [];
+        }
+      }
+
+      function bindConnectivityEvents() {
+        const indicator = document.getElementById('offlineIndicator');
+        renderConnectionStatus();
+
+        window.addEventListener('offline', () => {
+          if (indicator) indicator.classList.add('show');
+          renderConnectionStatus();
+          addNotification('warning', 'Mode offline actif', 'Connexion perdue. Les infos vitales restent accessibles.');
+          renderPrescriptions();
+          renderVaccinesState();
+          renderEmergencySnapshot();
+          if (isOfflineStrictMode()) {
+            showSection('section-emergency');
+          }
+        });
+
+        window.addEventListener('online', () => {
+          if (indicator) indicator.classList.remove('show');
+          renderConnectionStatus();
+          addNotification('success', 'Connexion retablie', 'Synchronisation locale terminee.');
+          renderPrescriptions();
+          renderVaccinesState();
+          renderEmergencySnapshot();
+        });
+
+        if (!navigator.onLine && indicator) {
+          indicator.classList.add('show');
+        }
+      }
+
+      function isOfflineStrictMode() {
+        return !navigator.onLine && dashboardState.settings && dashboardState.settings.offlineMode;
+      }
+
+      function renderConnectionStatus() {
+        const statusBadge = document.getElementById('connectionStatusBadge');
+        if (!statusBadge) {
+          return;
+        }
+        if (navigator.onLine) {
+          statusBadge.className = 'badge bg-success';
+          statusBadge.textContent = 'En ligne';
+        } else {
+          statusBadge.className = 'badge bg-warning text-dark';
+          statusBadge.textContent = dashboardState.settings && dashboardState.settings.offlineMode ? 'Offline securise' : 'Hors ligne';
+        }
+      }
+
+      function canAccessSectionInOffline(sectionId) {
+        if (!isOfflineStrictMode()) {
+          return true;
+        }
+        return OFFLINE_ALLOWED_SECTIONS.includes(sectionId);
+      }
+
+      function showSection(sectionId, linkElement) {
+        if (!canAccessSectionInOffline(sectionId)) {
+          addNotification('warning', 'Section limitee hors ligne', 'Cette section est indisponible en mode offline strict.');
+          sectionId = 'section-emergency';
+        }
+
+        document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
+
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+          targetSection.classList.add('active');
+        }
+
+        document.querySelectorAll('.sidebar-menu a').forEach(link => link.classList.remove('active'));
+
+        const activeLink =
+          linkElement ||
+          document.querySelector(`.sidebar-menu a[onclick*="${sectionId}"]`);
+
+        if (activeLink) {
+          activeLink.classList.add('active');
+        }
+
         if (window.innerWidth < 992) {
           document.querySelector('.sidebar').classList.remove('show');
         }
@@ -349,26 +799,1337 @@
       }
 
       function logout() {
-        localStorage.clear();
+        const currentSession = localStorage.getItem(SESSION_KEY);
+        if (currentSession && dashboardState && Array.isArray(dashboardState.devices)) {
+          dashboardState.devices = dashboardState.devices.map((device) => (
+            device.id === currentSession
+              ? { ...device, status: 'revoked', isCurrent: false, lastSeenAt: Date.now() }
+              : device
+          ));
+          saveDashboardState();
+        }
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(ROLE_KEY);
+        localStorage.removeItem(USER_KEY);
+        localStorage.removeItem(SESSION_KEY);
         window.location.href = 'index.html';
       }
 
-      function downloadQR() {
-        alert('Téléchargement du QR Code...');
+      function createQrPayload() {
+        const patientId = userContext.cmuNumber || 'UNKNOWN';
+        const ts = Date.now().toString();
+        const raw = `PID:${patientId}|TS:${ts}`;
+        const checksum = simpleChecksum(raw);
+        return `${raw}|SIG:${checksum}`;
       }
 
-      function shareQR() {
-        alert('Partage du QR Code...');
+      function simpleChecksum(input) {
+        let hash = 0;
+        for (let i = 0; i < input.length; i += 1) {
+          hash = ((hash << 5) - hash) + input.charCodeAt(i);
+          hash |= 0;
+        }
+        return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0').slice(0, 8);
+      }
+
+      function renderPatientQr() {
+        if (!dashboardState.qr || !dashboardState.qr.payload || !String(dashboardState.qr.imageUrl || '').startsWith('data:image/svg+xml')) {
+          const payload = createQrPayload();
+          dashboardState.qr = {
+            payload,
+            generatedAt: Date.now(),
+            imageUrl: createMockQrDataUrl(payload)
+          };
+          saveDashboardState();
+        }
+
+        const qrImg = document.getElementById('patientQrImage') || document.querySelector('.qr-box img');
+        const qrPayload = document.getElementById('patientQrPayload');
+
+        if (qrImg) {
+          qrImg.src = dashboardState.qr.imageUrl;
+          qrImg.alt = `QR patient ${userContext.cmuNumber}`;
+        }
+
+        if (qrPayload) {
+          qrPayload.textContent = `Identifiant signe: ${dashboardState.qr.payload}`;
+        }
+      }
+
+      function createMockQrDataUrl(payload) {
+        const signature = simpleChecksum(payload);
+        const bits = signature.split('').map((ch) => parseInt(ch, 16).toString(2).padStart(4, '0')).join('');
+        let cells = '';
+        const size = 12;
+        const cell = 12;
+        for (let y = 0; y < size; y += 1) {
+          for (let x = 0; x < size; x += 1) {
+            const bit = bits[(x + y * size) % bits.length];
+            if (bit === '1') {
+              cells += `<rect x="${x * cell}" y="${y * cell}" width="${cell}" height="${cell}" fill="#1f3c88" />`;
+            }
+          }
+        }
+
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220"><rect width="220" height="220" fill="#ffffff"/><rect x="20" y="20" width="180" height="180" fill="#f8fbff" stroke="#1f3c88" stroke-width="3"/>${cells}<text x="110" y="208" text-anchor="middle" font-size="10" fill="#1f3c88">SIKA ${signature}</text></svg>`;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      }
+
+      async function downloadQR() {
+        try {
+          renderPatientQr();
+          const response = await fetch(dashboardState.qr.imageUrl);
+          const blob = await response.blob();
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `sika-qr-${userContext.cmuNumber}.png`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          addNotification('success', 'QR telecharge', 'Votre QR patient a ete telecharge.');
+        } catch (error) {
+          addNotification('warning', 'Telechargement indisponible', 'Impossible de telecharger le QR pour le moment.');
+        }
+      }
+
+      async function shareQR() {
+        renderPatientQr();
+        const shareText = `Mon identifiant SIKA Sante: ${dashboardState.qr.payload}`;
+
+        try {
+          if (navigator.share) {
+            await navigator.share({
+              title: 'QR Patient SIKA Sante',
+              text: shareText,
+              url: dashboardState.qr.imageUrl
+            });
+          } else if (navigator.clipboard) {
+            await navigator.clipboard.writeText(shareText);
+            addNotification('info', 'QR copie', 'Le payload QR a ete copie dans le presse-papiers.');
+          } else {
+            alert(shareText);
+          }
+        } catch (error) {
+          addNotification('warning', 'Partage annule', 'Le partage du QR a ete annule ou indisponible.');
+        }
       }
 
       function emergency() {
-        if (confirm('🚨 Voulez-vous afficher vos informations d\'urgence ?')) {
+        if (confirm('Voulez-vous afficher vos informations d urgence ?')) {
           showSection('section-emergency');
         }
       }
 
       function authorizeAccess() {
-        alert('Fonction d\'autorisation d\'accès (à implémenter avec backend)');
+        showSection('section-autorisations');
+      }
+
+      function renderDynamicSections() {
+        const ordSection = document.getElementById('section-ordonnances');
+        if (ordSection) {
+          ordSection.innerHTML = `
+            <h3 class="mb-4">Mes Ordonnances</h3>
+            <div class="section-card">
+              <div id="prescriptionsList"></div>
+            </div>
+            <div class="section-card">
+              <h4><i class="bi bi-clock-history"></i> Historique de delivrance</h4>
+              <div id="dispenseHistoryList"></div>
+            </div>
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Le QR ordonnance contient un identifiant de verification, sans donnees medicales sensibles.
+            </div>
+          `;
+        }
+
+        const accessSection = document.getElementById('section-autorisations');
+        if (accessSection) {
+          accessSection.innerHTML = `
+            <h3 class="mb-4">Autorisations d'Acces</h3>
+            <div class="alert alert-warning">
+              <i class="bi bi-shield-exclamation me-2"></i>
+              <strong>Important :</strong> Vous controlez qui peut acceder a votre dossier medical.
+            </div>
+            <div class="section-card">
+              <h4><i class="bi bi-clock-history"></i> Demandes en attente</h4>
+              <div id="pendingRequestsList"></div>
+            </div>
+            <div class="section-card">
+              <h4><i class="bi bi-check-circle"></i> Acces autorises</h4>
+              <div id="grantedRequestsList"></div>
+            </div>
+            <div class="section-card">
+              <h4><i class="bi bi-eye"></i> Historique des acces</h4>
+              <div id="accessHistoryList"></div>
+            </div>
+          `;
+        }
+      }
+
+      function renderPrescriptions() {
+        const prescriptionsList = document.getElementById('prescriptionsList');
+        const dispenseHistoryList = document.getElementById('dispenseHistoryList');
+        const strictOffline = isOfflineStrictMode();
+        const sourceList = strictOffline ? dashboardState.prescriptions.slice(0, 1) : dashboardState.prescriptions;
+
+        if (prescriptionsList) {
+          if (sourceList.length === 0) {
+            prescriptionsList.innerHTML = '<p class="text-muted mb-0">Aucune ordonnance disponible.</p>';
+          } else {
+            prescriptionsList.innerHTML = sourceList.map((prescription) => {
+              const badge = getPrescriptionBadgeClass(prescription.status);
+              const options = PRESCRIPTION_STATUSES.map((status) => {
+                const selected = status === prescription.status ? 'selected' : '';
+                return `<option value="${status}" ${selected}>${status}</option>`;
+              }).join('');
+              const disabled = strictOffline ? 'disabled' : '';
+              const offlineHint = strictOffline ? '<small class="text-muted d-block">Mode offline: derniere ordonnance uniquement</small>' : '';
+
+              return `
+                <div class="list-item">
+                  <div>
+                    <strong>Ordonnance #${prescription.id}</strong><br>
+                    <small class="text-muted">${prescription.issuedAt} - ${prescription.doctor}</small><br>
+                    <small>${prescription.details}</small><br>
+                    ${offlineHint}
+                  </div>
+                  <div class="text-end">
+                    <span class="badge ${badge} badge-status">${prescription.status}</span><br>
+                    <select class="form-select form-select-sm status-select mt-2" onchange="changePrescriptionStatus('${prescription.id}', this.value)" ${disabled}>
+                      ${options}
+                    </select>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="openPrescriptionQr('${prescription.id}')">
+                      <i class="bi bi-qr-code me-1"></i> QR
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary mt-2" onclick="downloadPrescription('${prescription.id}')">
+                      <i class="bi bi-download me-1"></i> Telecharger
+                    </button>
+                    <button class="btn btn-sm btn-outline-success mt-2" onclick="verifyPrescriptionAuthenticity('${prescription.id}')">
+                      <i class="bi bi-shield-check me-1"></i> Verifier
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        if (dispenseHistoryList) {
+          const events = dashboardState.prescriptions
+            .flatMap((prescription) => (prescription.dispenses || []).map((dispense) => ({
+              prescriptionId: prescription.id,
+              at: dispense.at,
+              pharmacy: dispense.pharmacy
+            })))
+            .sort((a, b) => b.at - a.at);
+
+          if (events.length === 0) {
+            dispenseHistoryList.innerHTML = '<p class="text-muted mb-0">Aucune delivrance enregistree.</p>';
+          } else {
+            dispenseHistoryList.innerHTML = events.map((eventItem) => `
+              <div class="list-item">
+                <div>
+                  <strong>Ordonnance #${eventItem.prescriptionId}</strong><br>
+                  <small class="text-muted">${formatDateTime(eventItem.at)} - ${eventItem.pharmacy}</small>
+                </div>
+              </div>
+            `).join('');
+          }
+        }
+      }
+
+      function getPrescriptionBadgeClass(status) {
+        if (status === 'Active') return 'bg-success';
+        if (status === 'Partielle') return 'bg-warning text-dark';
+        if (status === 'Delivree') return 'bg-secondary';
+        return 'bg-danger';
+      }
+
+      function openPrescriptionQr(prescriptionId) {
+        renderPatientQr();
+        addNotification('info', 'QR ordonnance affiche', `Ordonnance #${prescriptionId} prete pour verification.`);
+        if (isOfflineStrictMode()) {
+          showSection('section-emergency');
+          return;
+        }
+        showSection('section-profile');
+      }
+
+      function downloadPrescription(prescriptionId) {
+        const prescription = dashboardState.prescriptions.find((item) => item.id === prescriptionId);
+        if (!prescription) {
+          return;
+        }
+
+        const lines = [
+          'SIKA SANTE - ORDONNANCE',
+          `Reference: ${prescription.id}`,
+          `Date: ${prescription.issuedAt}`,
+          `Medecin: ${prescription.doctor}`,
+          `Traitement: ${prescription.details}`,
+          `Statut: ${prescription.status}`
+        ];
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${prescription.id}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        addNotification('success', 'Ordonnance telechargee', `Le fichier ${prescription.id}.txt est pret.`);
+      }
+
+      function verifyPrescriptionAuthenticity(prescriptionId) {
+        const prescription = dashboardState.prescriptions.find((item) => item.id === prescriptionId);
+        if (!prescription) {
+          return;
+        }
+
+        const signature = simpleChecksum(`${prescription.id}|${prescription.issuedAt}|${prescription.doctor}`);
+        alert(`Verification reussie.\nOrdonnance: ${prescription.id}\nSignature mock: ${signature}`);
+        addNotification('success', 'Authenticite validee', `Ordonnance ${prescription.id} verifiee.`);
+      }
+
+      function changePrescriptionStatus(prescriptionId, newStatus) {
+        const prescription = dashboardState.prescriptions.find((item) => item.id === prescriptionId);
+        if (!prescription || prescription.status === newStatus) {
+          return;
+        }
+
+        const previousStatus = prescription.status;
+        prescription.status = newStatus;
+
+        if (newStatus === 'Delivree') {
+          prescription.dispenses = prescription.dispenses || [];
+          prescription.dispenses.unshift({
+            at: Date.now(),
+            pharmacy: 'Pharmacie Centrale'
+          });
+          addNotification('success', 'Ordonnance delivree', `Ordonnance #${prescriptionId} marquee delivree.`);
+        }
+
+        saveDashboardState();
+        renderPrescriptions();
+        renderTodoList();
+        renderEmergencySnapshot();
+        addNotification('info', 'Statut ordonnance modifie', `#${prescriptionId}: ${previousStatus} -> ${newStatus}.`);
+      }
+
+      function renderAccess() {
+        const pendingList = document.getElementById('pendingRequestsList');
+        const grantedList = document.getElementById('grantedRequestsList');
+        const historyList = document.getElementById('accessHistoryList');
+
+        if (pendingList) {
+          if (dashboardState.access.pending.length === 0) {
+            pendingList.innerHTML = '<p class="text-muted mb-0">Aucune demande en attente.</p>';
+          } else {
+            pendingList.innerHTML = dashboardState.access.pending.map((request) => {
+              const durationOptions = ACCESS_DURATIONS.map((duration) =>
+                `<option value="${duration.key}">${duration.label}</option>`
+              ).join('');
+
+              return `
+                <div class="list-item">
+                  <div>
+                    <strong>${request.requester}</strong><br>
+                    <small class="text-muted">${request.structure} - Demande d'acces: ${request.scope}</small><br>
+                    <small>${formatDateTime(request.requestedAt)}</small>
+                  </div>
+                  <div class="text-end">
+                    <select class="form-select form-select-sm status-select mb-2" id="duration-${request.id}">
+                      ${durationOptions}
+                    </select>
+                    <button class="btn btn-sm btn-success me-1" onclick="approveAccessRequest('${request.id}')">Autoriser</button>
+                    <button class="btn btn-sm btn-danger" onclick="rejectAccessRequest('${request.id}')">Refuser</button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        if (grantedList) {
+          if (dashboardState.access.granted.length === 0) {
+            grantedList.innerHTML = '<p class="text-muted mb-0">Aucun acces autorise.</p>';
+          } else {
+            grantedList.innerHTML = dashboardState.access.granted.map((grant) => {
+              const expiry = grant.expiresAt ? formatDateTime(grant.expiresAt) : 'Permanent';
+              return `
+                <div class="list-item">
+                  <div>
+                    <strong>${grant.requester}</strong><br>
+                    <small class="text-muted">${grant.structure}</small><br>
+                    <small>Acces: ${grant.scope} - Expire: ${expiry}</small>
+                  </div>
+                  <button class="btn btn-sm btn-outline-danger" onclick="revokeAccessRequest('${grant.id}')">Revoquer</button>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        if (historyList) {
+          const sortedHistory = [...dashboardState.access.history].sort((a, b) => b.at - a.at);
+          if (sortedHistory.length === 0) {
+            historyList.innerHTML = '<p class="text-muted mb-0">Aucun historique disponible.</p>';
+          } else {
+            historyList.innerHTML = sortedHistory.map((entry) => `
+              <div class="list-item">
+                <div>
+                  <strong>${entry.actor}</strong><br>
+                  <small class="text-muted">${entry.action} - ${entry.structure || 'Structure non precisee'}</small><br>
+                  <small>${formatDateTime(entry.at)}</small>
+                </div>
+              </div>
+            `).join('');
+          }
+        }
+      }
+
+      function approveAccessRequest(requestId) {
+        const requestIndex = dashboardState.access.pending.findIndex((item) => item.id === requestId);
+        if (requestIndex < 0) {
+          return;
+        }
+
+        const request = dashboardState.access.pending[requestIndex];
+        const durationSelect = document.getElementById(`duration-${requestId}`);
+        const durationKey = durationSelect ? durationSelect.value : '1d';
+        const expiresAt = computeExpiry(durationKey);
+
+        dashboardState.access.pending.splice(requestIndex, 1);
+        dashboardState.access.granted.unshift({
+          id: `gr-${Date.now()}`,
+          requester: request.requester,
+          structure: request.structure,
+          scope: request.scope,
+          expiresAt,
+          grantedAt: Date.now()
+        });
+
+        dashboardState.access.history.unshift({
+          id: `h-${Date.now()}`,
+          actor: request.requester,
+          action: `Acces autorise (${getDurationLabel(durationKey)})`,
+          structure: request.structure,
+          at: Date.now()
+        });
+
+        saveDashboardState();
+        renderAccess();
+        renderTodoList();
+        addNotification('success', 'Acces autorise', `${request.requester} peut consulter: ${request.scope}.`);
+      }
+
+      function rejectAccessRequest(requestId) {
+        const requestIndex = dashboardState.access.pending.findIndex((item) => item.id === requestId);
+        if (requestIndex < 0) {
+          return;
+        }
+
+        const request = dashboardState.access.pending[requestIndex];
+        dashboardState.access.pending.splice(requestIndex, 1);
+        dashboardState.access.history.unshift({
+          id: `h-${Date.now()}`,
+          actor: request.requester,
+          action: 'Demande refusee',
+          structure: request.structure,
+          at: Date.now()
+        });
+
+        saveDashboardState();
+        renderAccess();
+        renderTodoList();
+        addNotification('info', 'Demande refusee', `Demande de ${request.requester} refusee.`);
+      }
+
+      function revokeAccessRequest(grantId) {
+        const grantIndex = dashboardState.access.granted.findIndex((item) => item.id === grantId);
+        if (grantIndex < 0) {
+          return;
+        }
+
+        const grant = dashboardState.access.granted[grantIndex];
+        dashboardState.access.granted.splice(grantIndex, 1);
+        dashboardState.access.history.unshift({
+          id: `h-${Date.now()}`,
+          actor: grant.requester,
+          action: 'Acces revoque par le patient',
+          structure: grant.structure,
+          at: Date.now()
+        });
+
+        saveDashboardState();
+        renderAccess();
+        addNotification('warning', 'Acces revoque', `${grant.requester} n'a plus acces au dossier.`);
+      }
+
+      function computeExpiry(durationKey) {
+        const now = Date.now();
+        if (durationKey === '15m') return now + (15 * 60 * 1000);
+        if (durationKey === '1d') return now + (24 * 60 * 60 * 1000);
+        if (durationKey === '7d') return now + (7 * 24 * 60 * 60 * 1000);
+        return null;
+      }
+
+      function getDurationLabel(durationKey) {
+        const option = ACCESS_DURATIONS.find((item) => item.key === durationKey);
+        return option ? option.label : durationKey;
+      }
+
+      function renderTodoList() {
+        const todoList = document.getElementById('todoNowList');
+        if (!todoList) {
+          return;
+        }
+
+        const todoItems = [];
+        const pendingCount = dashboardState.access.pending.length;
+        const activePrescriptionCount = dashboardState.prescriptions.filter((item) => item.status === 'Active' || item.status === 'Partielle').length;
+
+        if (pendingCount > 0) {
+          todoItems.push({
+            title: `${pendingCount} demande(s) d'acces en attente`,
+            cta: 'Voir',
+            action: "showSection('section-autorisations')"
+          });
+        }
+
+        todoItems.push({
+          title: 'Vaccin Tetanos a planifier',
+          cta: 'Planifier',
+          action: 'planVaccine()'
+        });
+
+        todoItems.push({
+          title: 'Medicament a prendre maintenant',
+          cta: 'Marquer pris',
+          action: 'markMedicationTaken()'
+        });
+
+        if (activePrescriptionCount > 0) {
+          todoItems.push({
+            title: `${activePrescriptionCount} ordonnance(s) active(s)`,
+            cta: 'Afficher QR',
+            action: 'openPrescriptionQrFromTodo()'
+          });
+        }
+
+        todoList.innerHTML = todoItems.map((item) => `
+          <div class="todo-item d-flex justify-content-between align-items-center gap-3">
+            <span>${item.title}</span>
+            <button class="btn btn-sm btn-primary" onclick="${item.action}">${item.cta}</button>
+          </div>
+        `).join('');
+      }
+
+      function openPrescriptionQrFromTodo() {
+        const firstActive = dashboardState.prescriptions.find((item) => item.status === 'Active' || item.status === 'Partielle');
+        if (firstActive) {
+          openPrescriptionQr(firstActive.id);
+        }
+      }
+
+      function planVaccine() {
+        showSection('section-vaccins');
+        const btn = document.getElementById('vaccinePlanBtn');
+        if (btn) {
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-outline-success');
+          btn.textContent = 'Planifie';
+          btn.disabled = true;
+        }
+        renderVaccinesState();
+        renderDashboardOverview();
+        addNotification('info', 'Vaccin planifie', 'Le rappel Tetanos a ete planifie.');
+      }
+
+      function markMedicationTaken(medicationId) {
+        let medication = null;
+
+        if (medicationId) {
+          medication = dashboardState.medications.find((item) => item.id === medicationId);
+        } else {
+          medication = dashboardState.medications.find((item) => !item.taken) || dashboardState.medications[0];
+        }
+
+        if (!medication) {
+          return;
+        }
+
+        medication.taken = true;
+        medication.lastTakenAt = Date.now();
+        dashboardState.medicationHistory.unshift({
+          id: `mh-${Date.now()}`,
+          medicationName: medication.name,
+          at: medication.lastTakenAt,
+          status: 'pris'
+        });
+        dashboardState.medicationHistory = dashboardState.medicationHistory.slice(0, 40);
+        saveDashboardState();
+        renderMedicationState();
+        renderMedicationHistory();
+        renderDashboardOverview();
+        renderEmergencySnapshot();
+        addNotification('success', 'Prise enregistree', `${medication.name} marque comme pris.`);
+      }
+
+      function bindPatientActions() {
+        const editIdentityBtn = document.getElementById('editIdentityBtn');
+        const editMedicalBtn = document.getElementById('editMedicalBtn');
+        const editEmergencyBtn = document.getElementById('editEmergencyBtn');
+        const consultationsFilterBtn = document.getElementById('consultationsFilterBtn');
+        const examensAddDocumentBtn = document.getElementById('examensAddDocumentBtn');
+        const documentsAddBtn = document.getElementById('documentsAddBtn');
+        const vaccinePlanBtn = document.getElementById('vaccinePlanBtn');
+        const uploadInput = document.getElementById('documentsUploadInput');
+        const settingsLanguageSelect = document.getElementById('settingsLanguageSelect');
+        const settingsPhoneEditBtn = document.getElementById('settingsPhoneEditBtn');
+        const disconnectDevicesBtn = document.getElementById('disconnectDevicesBtn');
+        const settingsLogoutBtn = document.getElementById('settingsLogoutBtn');
+        const tutorialIntroBtn = document.getElementById('tutorialIntroBtn');
+        const tutorialAccessBtn = document.getElementById('tutorialAccessBtn');
+        const tutorialQrBtn = document.getElementById('tutorialQrBtn');
+        const supportWhatsappBtn = document.getElementById('supportWhatsappBtn');
+        const supportCallBtn = document.getElementById('supportCallBtn');
+        const supportEmailBtn = document.getElementById('supportEmailBtn');
+        const supportIssueSendBtn = document.getElementById('supportIssueSendBtn');
+
+        if (editIdentityBtn) {
+          editIdentityBtn.addEventListener('click', editIdentityInfo);
+        }
+        if (editMedicalBtn) {
+          editMedicalBtn.addEventListener('click', editMedicalInfo);
+        }
+        if (editEmergencyBtn) {
+          editEmergencyBtn.addEventListener('click', editEmergencyInfo);
+        }
+
+        if (consultationsFilterBtn) {
+          consultationsFilterBtn.addEventListener('click', toggleConsultationsFilter);
+        }
+
+        document.querySelectorAll('[data-consultation-id]').forEach((btn) => {
+          btn.addEventListener('click', function () {
+            const consultationId = this.getAttribute('data-consultation-id');
+            viewConsultation(consultationId);
+          });
+        });
+
+        document.querySelectorAll('[data-exam-download]').forEach((btn) => {
+          btn.addEventListener('click', function () {
+            const examId = this.getAttribute('data-exam-download');
+            downloadExamResult(examId);
+          });
+        });
+
+        const imagingViewBtn = document.getElementById('imagingViewBtn');
+        if (imagingViewBtn) {
+          imagingViewBtn.addEventListener('click', function () {
+            addNotification('info', 'Imagerie ouverte', 'Apercu de radiographie affiche (simulation).');
+            alert('Apercu de la radiographie (simulation locale).');
+          });
+        }
+
+        if (examensAddDocumentBtn) {
+          examensAddDocumentBtn.addEventListener('click', function () {
+            if (uploadInput) uploadInput.click();
+          });
+        }
+
+        if (documentsAddBtn) {
+          documentsAddBtn.addEventListener('click', function () {
+            if (uploadInput) uploadInput.click();
+          });
+        }
+
+        if (vaccinePlanBtn) {
+          vaccinePlanBtn.addEventListener('click', planVaccine);
+        }
+
+        if (uploadInput) {
+          uploadInput.addEventListener('change', handleDocumentUpload);
+        }
+
+        document.querySelectorAll('[data-medication-id]').forEach((btn) => {
+          btn.addEventListener('click', function () {
+            markMedicationTaken(this.getAttribute('data-medication-id'));
+          });
+        });
+
+        if (settingsLanguageSelect) {
+          settingsLanguageSelect.addEventListener('change', function () {
+            dashboardState.settings.language = this.value;
+            saveDashboardState();
+            addNotification('info', 'Langue mise a jour', `Langue active: ${this.value}.`);
+          });
+        }
+
+        if (settingsPhoneEditBtn) {
+          settingsPhoneEditBtn.addEventListener('click', editOtpPhone);
+        }
+
+        const biometricSwitch = document.getElementById('switchBiometric');
+        const otpSwitch = document.getElementById('switchOTP');
+        const offlineSwitch = document.getElementById('switchOffline');
+
+        if (biometricSwitch) {
+          biometricSwitch.addEventListener('change', function () {
+            dashboardState.settings.biometric = this.checked;
+            saveDashboardState();
+            addNotification('info', 'Securite', `Biometrie ${this.checked ? 'activee' : 'desactivee'}.`);
+          });
+        }
+        if (otpSwitch) {
+          otpSwitch.addEventListener('change', function () {
+            dashboardState.settings.otpEachLogin = this.checked;
+            saveDashboardState();
+            addNotification('info', 'Securite', `OTP a chaque connexion ${this.checked ? 'active' : 'desactive'}.`);
+          });
+        }
+        if (offlineSwitch) {
+          offlineSwitch.addEventListener('change', function () {
+            dashboardState.settings.offlineMode = this.checked;
+            dashboardState.settings.lastSyncAt = Date.now();
+            saveDashboardState();
+            syncSettingsUI();
+            renderConnectionStatus();
+            renderPrescriptions();
+            renderVaccinesState();
+            renderEmergencySnapshot();
+            addNotification('info', 'Mode offline', this.checked ? 'Mode offline active.' : 'Mode offline desactive.');
+            if (isOfflineStrictMode()) {
+              showSection('section-emergency');
+            }
+          });
+        }
+
+        if (disconnectDevicesBtn) {
+          disconnectDevicesBtn.addEventListener('click', function () {
+            if (confirm('Deconnecter toutes les autres sessions ?')) {
+              revokeAllOtherDevices();
+            }
+          });
+        }
+
+        if (settingsLogoutBtn) {
+          settingsLogoutBtn.addEventListener('click', logout);
+        }
+
+        if (tutorialIntroBtn) tutorialIntroBtn.addEventListener('click', () => playTutorial('Premiere connexion et profil sante'));
+        if (tutorialAccessBtn) tutorialAccessBtn.addEventListener('click', () => playTutorial('Autoriser l acces a un soignant'));
+        if (tutorialQrBtn) tutorialQrBtn.addEventListener('click', () => playTutorial('Utiliser mon QR Code en consultation'));
+
+        if (supportWhatsappBtn) {
+          supportWhatsappBtn.addEventListener('click', function () {
+            window.open('https://wa.me/2252720000000', '_blank');
+          });
+        }
+        if (supportCallBtn) {
+          supportCallBtn.addEventListener('click', function () {
+            window.location.href = 'tel:+2252720000000';
+          });
+        }
+        if (supportEmailBtn) {
+          supportEmailBtn.addEventListener('click', function () {
+            window.location.href = 'mailto:support@sika-sante.ci';
+          });
+        }
+        if (supportIssueSendBtn) {
+          supportIssueSendBtn.addEventListener('click', submitSupportIssue);
+        }
+      }
+
+      function setText(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.textContent = value;
+        }
+      }
+
+      function renderProfileData() {
+        const profile = dashboardState.profile;
+        setText('profileFullName', profile.fullName);
+        setText('profileBirthDate', profile.birthDate);
+        setText('profilePhone', profile.phone);
+        setText('profileBloodGroup', profile.bloodGroup);
+        setText('profileAllergies', profile.allergies);
+        setText('profileChronicDiseases', profile.chronicDiseases);
+        setText('profileSpecialConditions', profile.specialConditions);
+        setText('profileEmergencyName', profile.emergencyName);
+        setText('profileEmergencyPhone', profile.emergencyPhone);
+      }
+
+      function renderDocumentsList() {
+        const container = document.getElementById('documentsList');
+        if (!container) {
+          return;
+        }
+
+        const sortedDocs = [...dashboardState.documents].sort((a, b) => b.addedAt - a.addedAt);
+        if (sortedDocs.length === 0) {
+          container.innerHTML = '<p class="text-muted mb-0">Aucun document pour le moment.</p>';
+          return;
+        }
+
+        container.innerHTML = sortedDocs.map((doc) => {
+          const iconClass = doc.mime && doc.mime.includes('pdf') ? 'bi-file-earmark-pdf text-danger' : 'bi-file-earmark text-primary';
+          const category = getDocumentCategory(doc);
+          return `
+            <div class="list-item">
+              <div class="d-flex align-items-center">
+                <i class="bi ${iconClass} fs-3 me-3"></i>
+                <div>
+                  <strong>${doc.name}</strong><br>
+                  <small class="text-muted">Ajoute le ${formatDateTime(doc.addedAt)} - ${category}</small>
+                </div>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="downloadDocument('${doc.id}')">
+                  <i class="bi bi-download"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteDocument('${doc.id}')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderMedicationState() {
+        document.querySelectorAll('[data-medication-id]').forEach((button) => {
+          const medicationId = button.getAttribute('data-medication-id');
+          const medication = dashboardState.medications.find((item) => item.id === medicationId);
+          if (!medication) {
+            return;
+          }
+
+          if (medication.taken) {
+            button.disabled = true;
+            button.classList.remove('btn-outline-success');
+            button.classList.add('btn-success');
+            button.textContent = 'Pris';
+          }
+        });
+      }
+
+      function renderMedicationHistory() {
+        const container = document.getElementById('medicationHistoryList');
+        if (!container) {
+          return;
+        }
+        if (!dashboardState.medicationHistory || dashboardState.medicationHistory.length === 0) {
+          container.innerHTML = '<p class="text-muted mb-0">Aucune prise enregistree pour le moment.</p>';
+          return;
+        }
+
+        container.innerHTML = dashboardState.medicationHistory
+          .slice(0, 8)
+          .map((entry) => `
+            <div class="list-item">
+              <div>
+                <strong>${entry.medicationName}</strong><br>
+                <small class="text-muted">Marque comme ${entry.status}</small>
+              </div>
+              <small>${formatDateTime(entry.at)}</small>
+            </div>
+          `).join('');
+      }
+
+      function syncSettingsUI() {
+        const languageSelect = document.getElementById('settingsLanguageSelect');
+        const phoneValue = document.getElementById('settingsPhoneValue');
+        const lastSync = document.getElementById('settingsLastSync');
+        const status = document.getElementById('settingsConnectionStatus');
+        const switchBiometric = document.getElementById('switchBiometric');
+        const switchOTP = document.getElementById('switchOTP');
+        const switchOffline = document.getElementById('switchOffline');
+
+        if (languageSelect) {
+          const preferred = dashboardState.settings.language;
+          const optionMatch = Array.from(languageSelect.options).find((option) => option.text === preferred);
+          if (optionMatch) {
+            languageSelect.value = optionMatch.value;
+          }
+        }
+        if (phoneValue) phoneValue.textContent = dashboardState.settings.phoneOtp;
+        if (switchBiometric) switchBiometric.checked = !!dashboardState.settings.biometric;
+        if (switchOTP) switchOTP.checked = !!dashboardState.settings.otpEachLogin;
+        if (switchOffline) switchOffline.checked = !!dashboardState.settings.offlineMode;
+        if (lastSync) lastSync.textContent = `Derniere synchronisation : ${formatDateTime(dashboardState.settings.lastSyncAt || Date.now())}`;
+        if (status) status.textContent = navigator.onLine ? 'En ligne' : 'Hors ligne';
+        renderConnectionStatus();
+      }
+
+      function editIdentityInfo() {
+        const newName = prompt('Nom complet', dashboardState.profile.fullName);
+        if (!newName) return;
+        const newBirthDate = prompt('Date de naissance', dashboardState.profile.birthDate);
+        if (!newBirthDate) return;
+        const nameValue = newName.trim();
+        const birthDateValue = newBirthDate.trim();
+        if (nameValue.length < 3) {
+          alert('Nom complet invalide.');
+          return;
+        }
+        dashboardState.profile.fullName = nameValue;
+        dashboardState.profile.birthDate = birthDateValue;
+        dashboardState.profile.phone = dashboardState.profile.phone || dashboardState.settings.phoneOtp;
+        userContext.name = nameValue;
+        let currentUserData = {};
+        try {
+          currentUserData = JSON.parse(localStorage.getItem(USER_KEY) || '{}');
+        } catch (error) {
+          currentUserData = {};
+        }
+        currentUserData.name = nameValue;
+        localStorage.setItem(USER_KEY, JSON.stringify(currentUserData));
+        saveDashboardState();
+        applyUserContext();
+        renderProfileData();
+        renderDashboardOverview();
+        addNotification('success', 'Profil mis a jour', 'Informations d identite mises a jour.');
+      }
+
+      function editMedicalInfo() {
+        const blood = prompt('Groupe sanguin', dashboardState.profile.bloodGroup);
+        if (!blood) return;
+        const allergies = prompt('Allergies', dashboardState.profile.allergies);
+        if (allergies === null) return;
+        const chronic = prompt('Maladies chroniques', dashboardState.profile.chronicDiseases);
+        if (chronic === null) return;
+        const special = prompt('Conditions particulieres', dashboardState.profile.specialConditions);
+        if (special === null) return;
+
+        const bloodGroup = blood.trim().toUpperCase();
+        if (bloodGroup.length < 2) {
+          alert('Groupe sanguin invalide.');
+          return;
+        }
+        dashboardState.profile.bloodGroup = bloodGroup;
+        dashboardState.profile.allergies = allergies.trim() || 'Aucune';
+        dashboardState.profile.chronicDiseases = chronic.trim() || 'Aucune';
+        dashboardState.profile.specialConditions = special.trim() || 'Aucune';
+        saveDashboardState();
+        renderProfileData();
+        renderDashboardOverview();
+        renderEmergencySnapshot();
+        addNotification('success', 'Profil medical mis a jour', 'Informations medicales enregistrees.');
+      }
+
+      function editEmergencyInfo() {
+        const name = prompt('Nom du contact urgence', dashboardState.profile.emergencyName);
+        if (!name) return;
+        const phone = prompt('Telephone du contact urgence', dashboardState.profile.emergencyPhone);
+        if (!phone) return;
+
+        dashboardState.profile.emergencyName = name.trim();
+        dashboardState.profile.emergencyPhone = phone.trim();
+        saveDashboardState();
+        renderProfileData();
+        renderDashboardOverview();
+        renderEmergencySnapshot();
+        addNotification('success', 'Contact urgence mis a jour', 'Le contact d urgence a ete mis a jour.');
+      }
+
+      function toggleConsultationsFilter() {
+        const rows = document.querySelectorAll('#section-consultations .list-item');
+        if (!rows.length) return;
+        const isFiltered = document.body.dataset.consultationsFiltered === '1';
+        const filterBtn = document.getElementById('consultationsFilterBtn');
+        rows.forEach((row, index) => {
+          if (!isFiltered) {
+            row.style.display = index === 0 ? 'flex' : 'none';
+          } else {
+            row.style.display = 'flex';
+          }
+        });
+        document.body.dataset.consultationsFiltered = isFiltered ? '0' : '1';
+        if (filterBtn) {
+          filterBtn.innerHTML = isFiltered ? '<i class="bi bi-funnel"></i> Filtrer' : '<i class="bi bi-funnel-fill"></i> Filtre actif';
+        }
+        addNotification('info', 'Consultations', isFiltered ? 'Filtre retire.' : 'Filtre applique: derniere consultation.');
+      }
+
+      function viewConsultation(consultationId) {
+        const consultation = dashboardState.consultations.find((item) => item.id === consultationId);
+        if (!consultation) {
+          return;
+        }
+        alert(`${consultation.date}\n${consultation.place} - ${consultation.doctor}\nDiagnostic: ${consultation.title}`);
+      }
+
+      function downloadExamResult(examId) {
+        const mockResults = {
+          'exam-bilan': 'Resultat bilan sanguin: Hemoglobine normale, leucocytes normaux.',
+          'exam-covid': 'Resultat test COVID-19: NEGATIF.'
+        };
+        const content = mockResults[examId] || `Resultat ${examId} (mock).`;
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${examId}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        addNotification('info', 'Telechargement resultat', `Resultat ${examId} telecharge.`);
+      }
+
+      function handleDocumentUpload(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) {
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+          alert('Fichier trop volumineux. Limite prototype: 2 Mo.');
+          event.target.value = '';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function () {
+          dashboardState.documents.unshift({
+            id: `doc-${Date.now()}`,
+            name: file.name,
+            addedAt: Date.now(),
+            mime: file.type || 'application/octet-stream',
+            source: 'upload',
+            content: reader.result
+          });
+
+          dashboardState.settings.lastSyncAt = Date.now();
+          saveDashboardState();
+          renderDocumentsList();
+          syncSettingsUI();
+          addNotification('success', 'Document ajoute', `${file.name} a ete ajoute a votre dossier.`);
+        };
+        reader.readAsDataURL(file);
+        event.target.value = '';
+      }
+
+      function downloadDocument(documentId) {
+        const doc = dashboardState.documents.find((item) => item.id === documentId);
+        if (!doc) return;
+
+        if (doc.content) {
+          const link = document.createElement('a');
+          link.href = doc.content;
+          link.download = doc.name;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        } else {
+          alert(`Telechargement de ${doc.name} (simulation).`);
+        }
+      }
+
+      function deleteDocument(documentId) {
+        const index = dashboardState.documents.findIndex((item) => item.id === documentId);
+        if (index < 0) {
+          return;
+        }
+        const doc = dashboardState.documents[index];
+        if (!confirm(`Supprimer le document "${doc.name}" ?`)) {
+          return;
+        }
+        dashboardState.documents.splice(index, 1);
+        dashboardState.settings.lastSyncAt = Date.now();
+        saveDashboardState();
+        renderDocumentsList();
+        syncSettingsUI();
+        addNotification('warning', 'Document supprime', `${doc.name} a ete supprime de votre espace.`);
+      }
+
+      function getDocumentCategory(doc) {
+        const name = (doc.name || '').toLowerCase();
+        if (name.includes('cmu')) return 'Carte CMU';
+        if (name.includes('certificat')) return 'Certificat';
+        if (name.includes('resultat') || name.includes('bilan') || name.includes('analyse')) return 'Resultat';
+        return 'Document medical';
+      }
+
+      function editOtpPhone() {
+        const phone = prompt('Nouveau numero OTP', dashboardState.settings.phoneOtp);
+        if (!phone) return;
+        const cleanPhone = phone.trim();
+        if (!/^\+?\d[\d\s]{7,}$/.test(cleanPhone)) {
+          alert('Numero invalide. Exemple attendu: +225 07 01 23 45 67');
+          return;
+        }
+        dashboardState.settings.phoneOtp = cleanPhone;
+        dashboardState.profile.phone = cleanPhone;
+        saveDashboardState();
+        syncSettingsUI();
+        renderProfileData();
+        renderDashboardOverview();
+        addNotification('success', 'Numero OTP mis a jour', `Nouveau numero: ${cleanPhone}`);
+      }
+
+      function playTutorial(title) {
+        addNotification('info', 'Tutoriel lance', title);
+        alert(`Lecture du tutoriel: ${title} (simulation).`);
+      }
+
+      function submitSupportIssue() {
+        const textarea = document.getElementById('supportIssueText');
+        if (!textarea) return;
+        const message = textarea.value.trim();
+        if (message.length < 10) {
+          alert('Veuillez decrire le probleme avec au moins 10 caracteres.');
+          return;
+        }
+
+        dashboardState.supportReports.unshift({
+          id: `issue-${Date.now()}`,
+          message,
+          createdAt: Date.now()
+        });
+        saveDashboardState();
+        textarea.value = '';
+        addNotification('success', 'Signalement envoye', 'Votre signalement a ete transmis au support.');
+      }
+
+      function renderDashboardOverview() {
+        const profile = dashboardState.profile || {};
+        setText('dashBloodGroup', profile.bloodGroup || 'N/A');
+        setText('dashAllergies', profile.allergies || 'Aucune');
+        setText('dashChronic', profile.chronicDiseases || 'Aucune');
+        setText('dashEmergency', profile.emergencyPhone || '+225');
+
+        const appointment = dashboardState.consultations && dashboardState.consultations[0];
+        if (appointment) {
+          setText('dashLastConsultation', appointment.date || 'N/A');
+          setText('dashboardNextAppointment', `${appointment.date} - ${appointment.doctor}`);
+        }
+        const pendingMedication = dashboardState.medications.find((item) => !item.taken);
+        if (pendingMedication) {
+          setText('dashboardMedicationReminder', `${pendingMedication.name} - prise attendue`);
+        } else {
+          setText('dashboardMedicationReminder', 'Tous les medicaments du jour sont marques pris');
+        }
+
+        setText('dashboardVaccineReminder', document.getElementById('vaccinePlanBtn') && document.getElementById('vaccinePlanBtn').disabled
+          ? 'Rappel vaccine planifie'
+          : 'Prochain rappel : Tetanos');
+
+        const overdue = document.getElementById('dashboardVaccineStatus');
+        if (overdue) {
+          overdue.textContent = document.getElementById('vaccinePlanBtn') && document.getElementById('vaccinePlanBtn').disabled
+            ? 'Planifie'
+            : 'Rappel requis';
+        }
+      }
+
+      function renderVaccinesState() {
+        const rows = document.querySelectorAll('#section-vaccins .list-item');
+        const hint = document.getElementById('vaccinesOfflineHint');
+        if (!rows.length) {
+          return;
+        }
+        const strict = isOfflineStrictMode();
+        rows.forEach((row, index) => {
+          if (!strict) {
+            row.style.display = 'flex';
+            return;
+          }
+          row.style.display = index === 0 ? 'flex' : 'none';
+        });
+        if (hint) {
+          hint.style.display = strict ? 'block' : 'none';
+        }
+      }
+
+      function renderEmergencySnapshot() {
+        const profile = dashboardState.profile || {};
+        setText('emergencyBloodGroup', profile.bloodGroup || 'N/A');
+        setText('emergencyAllergies', profile.allergies || 'Aucune');
+        const activeMed = dashboardState.medications.filter((item) => item.taken !== true).map((item) => item.name);
+        setText('emergencyTreatments', activeMed.length ? activeMed.join(', ') : 'Aucun');
+        setText('emergencyDiseases', profile.chronicDiseases || 'Aucune');
+        setText('emergencyContact', `${profile.emergencyName || 'Contact'} - ${profile.emergencyPhone || 'N/A'}`);
+        if (dashboardState.consultations && dashboardState.consultations[0]) {
+          setText('emergencyLastConsult', `${dashboardState.consultations[0].date} - ${dashboardState.consultations[0].doctor}`);
+        }
+
+        const emergencyPrescription = dashboardState.prescriptions && dashboardState.prescriptions[0];
+        if (emergencyPrescription) {
+          setText('offlineLastPrescription', `${emergencyPrescription.id} (${emergencyPrescription.status})`);
+        }
+
+        const planned = document.getElementById('vaccinePlanBtn') && document.getElementById('vaccinePlanBtn').disabled;
+        setText('offlineLastVaccine', planned ? 'Tetanos - rappel planifie' : 'Tetanos - rappel recommande');
+        renderPatientQr();
+        const emergencyQr = document.getElementById('emergencyQrImage');
+        if (emergencyQr && dashboardState.qr) {
+          emergencyQr.src = dashboardState.qr.imageUrl;
+          emergencyQr.alt = 'QR urgence patient';
+        }
+      }
+
+      function renderLoginHistory() {
+        const container = document.getElementById('loginHistoryList');
+        if (!container) {
+          return;
+        }
+        if (!dashboardState.loginHistory || dashboardState.loginHistory.length === 0) {
+          container.innerHTML = '<p class="text-muted mb-0">Aucun historique de connexion.</p>';
+          return;
+        }
+
+        container.innerHTML = dashboardState.loginHistory
+          .slice(0, 8)
+          .map((entry) => {
+            const badge = entry.status === 'SUCCESS' ? 'bg-success' : (entry.status === 'REVOKE' ? 'bg-warning text-dark' : 'bg-danger');
+            return `
+              <div class="list-item">
+                <div>
+                  <strong>${entry.device || 'Navigateur'}</strong><br>
+                  <small class="text-muted">${entry.method || 'CMU + OTP'} - ${entry.location || 'CI (mock)'}</small>
+                </div>
+                <div class="text-end">
+                  <span class="badge ${badge}">${entry.status}</span><br>
+                  <small>${formatDateTime(entry.at)}</small>
+                </div>
+              </div>
+            `;
+          }).join('');
+      }
+
+      function renderDevicesState() {
+        const container = document.getElementById('connectedDevicesList');
+        if (!container) {
+          return;
+        }
+        if (!dashboardState.devices || dashboardState.devices.length === 0) {
+          container.innerHTML = '<p class="text-muted mb-0">Aucun appareil connecte.</p>';
+          return;
+        }
+
+        container.innerHTML = dashboardState.devices
+          .slice(0, 8)
+          .map((device) => {
+            const status = device.status === 'revoked' ? 'Revoque' : 'Actif';
+            const badge = device.status === 'revoked' ? 'bg-secondary' : 'bg-success';
+            return `
+              <div class="list-item">
+                <div>
+                  <strong>${device.label || 'Appareil'}</strong><br>
+                  <small class="text-muted">Derniere activite: ${formatDateTime(device.lastSeenAt || Date.now())}</small><br>
+                  ${device.isCurrent ? '<small class="text-primary">Session actuelle</small>' : ''}
+                </div>
+                <span class="badge ${badge}">${status}</span>
+              </div>
+            `;
+          }).join('');
+      }
+
+      function revokeAllOtherDevices() {
+        const currentSession = localStorage.getItem(SESSION_KEY);
+        dashboardState.devices = (dashboardState.devices || []).map((device) => {
+          if (device.id === currentSession || device.isCurrent) {
+            return { ...device, status: 'active', isCurrent: true, lastSeenAt: Date.now() };
+          }
+          return { ...device, status: 'revoked', isCurrent: false };
+        });
+        dashboardState.loginHistory.unshift({
+          id: `login-${Date.now()}`,
+          at: Date.now(),
+          status: 'REVOKE',
+          cmuNumber: userContext.cmuNumber,
+          method: 'Session Security',
+          device: 'Toutes sessions externes',
+          location: 'Espace patient'
+        });
+        dashboardState.loginHistory = dashboardState.loginHistory.slice(0, 80);
+        saveDashboardState();
+        renderDevicesState();
+        renderLoginHistory();
+        addNotification('warning', 'Appareils revoques', 'Tous les autres appareils ont ete deconnectes.');
+      }
+
+      function toggleNotificationsPanel() {
+        const panel = document.getElementById('notificationsPanel');
+        if (!panel) {
+          return;
+        }
+        panel.classList.toggle('show');
+      }
+
+      function markAllNotificationsRead() {
+        dashboardState.notifications = dashboardState.notifications.map((notification) => ({
+          ...notification,
+          read: true
+        }));
+        saveDashboardState();
+        renderNotifications();
+      }
+
+      function addNotification(type, title, message) {
+        dashboardState.notifications.unshift({
+          id: `n-${Date.now()}`,
+          type,
+          title,
+          message,
+          createdAt: Date.now(),
+          read: false
+        });
+
+        dashboardState.notifications = dashboardState.notifications.slice(0, 60);
+        saveDashboardState();
+        renderNotifications();
+      }
+
+      function renderNotifications() {
+        const badge = document.getElementById('notificationsBadge');
+        const list = document.getElementById('notificationsList');
+
+        if (!list || !badge) {
+          return;
+        }
+
+        const unreadCount = dashboardState.notifications.filter((notification) => !notification.read).length;
+
+        badge.textContent = unreadCount.toString();
+        badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+
+        if (dashboardState.notifications.length === 0) {
+          list.innerHTML = '<p class="text-muted mb-0">Aucune notification.</p>';
+          return;
+        }
+
+        list.innerHTML = dashboardState.notifications.map((notification) => {
+          const icon = getNotificationIcon(notification.type);
+          const unreadClass = notification.read ? '' : 'unread';
+          return `
+            <div class="notification-item ${unreadClass}">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div>
+                  <strong><i class="bi ${icon} me-1"></i>${notification.title}</strong><br>
+                  <small>${notification.message}</small>
+                </div>
+                <small class="text-muted">${formatDateTime(notification.createdAt)}</small>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function getNotificationIcon(type) {
+        if (type === 'success') return 'bi-check-circle';
+        if (type === 'warning') return 'bi-exclamation-triangle';
+        return 'bi-bell';
+      }
+
+      function formatDateTime(timestamp) {
+        return new Date(timestamp).toLocaleString('fr-FR', {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
       }
     </script>
   </head>
@@ -384,15 +2145,21 @@
         <div class="user-avatar" id="userInitials">JK</div>
         <div class="d-none d-md-block">
           <strong id="userName">Jean KOUASSI</strong><br>
-          <small class="text-muted">CMU: <span id="cmuNumber">1234567890</span></small>
+          <small class="text-muted">
+            CMU: <span id="cmuNumber">1234567890</span>
+            <span id="provisionalHeaderBadge" style="display:none; align-items:center; gap:4px; background:#fff3cd; border:1px solid #ffc107; color:#856404; border-radius:10px; padding:1px 7px; font-size:11px; font-weight:600; margin-left:6px;">
+              <i class="bi bi-clock-history"></i> ID Provisoire
+            </span>
+          </small>
         </div>
       </div>
 
       <div class="ms-auto d-flex align-items-center gap-2">
-        <button class="btn btn-link position-relative">
+        <span class="badge bg-success" id="connectionStatusBadge">En ligne</span>
+        <button class="btn btn-link position-relative" id="notificationsBtn" onclick="toggleNotificationsPanel()">
           <i class="bi bi-bell fs-5"></i>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            3
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationsBadge">
+            0
           </span>
         </button>
         <button class="emergency-btn" onclick="emergency()">
@@ -405,6 +2172,14 @@
       </div>
     </header>
 
+    <div class="notifications-panel" id="notificationsPanel">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">Centre d'alertes</h6>
+        <button class="btn btn-sm btn-outline-primary" onclick="markAllNotificationsRead()">Tout lire</button>
+      </div>
+      <div id="notificationsList"></div>
+    </div>
+
     <!-- ======= Sidebar =======-->
     <aside class="sidebar">
       <div class="p-3 border-bottom">
@@ -413,62 +2188,62 @@
       </div>
 
       <ul class="sidebar-menu">
-        <li><a href="#" onclick="showSection('section-dashboard')" class="active">
+        <li><a href="#" onclick="showSection('section-dashboard', this); return false;" class="active">
           <i class="bi bi-grid"></i>
           <span>Tableau de bord</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-profile')">
+        <li><a href="#" onclick="showSection('section-profile', this); return false;">
           <i class="bi bi-person"></i>
           <span>Mon Profil Santé</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-emergency')">
+        <li><a href="#" onclick="showSection('section-emergency', this); return false;">
           <i class="bi bi-heart-pulse"></i>
           <span>Infos Vitales (Urgence)</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-consultations')">
+        <li><a href="#" onclick="showSection('section-consultations', this); return false;">
           <i class="bi bi-file-earmark-medical"></i>
           <span>Consultations</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-examens')">
+        <li><a href="#" onclick="showSection('section-examens', this); return false;">
           <i class="bi bi-clipboard-pulse"></i>
           <span>Examens & Résultats</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-ordonnances')">
+        <li><a href="#" onclick="showSection('section-ordonnances', this); return false;">
           <i class="bi bi-prescription2"></i>
           <span>Ordonnances</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-vaccins')">
+        <li><a href="#" onclick="showSection('section-vaccins', this); return false;">
           <i class="bi bi-shield-check"></i>
           <span>Vaccinations</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-medicaments')">
+        <li><a href="#" onclick="showSection('section-medicaments', this); return false;">
           <i class="bi bi-capsule"></i>
           <span>Médicaments & Rappels</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-autorisations')">
+        <li><a href="#" onclick="showSection('section-autorisations', this); return false;">
           <i class="bi bi-key"></i>
           <span>Autorisations d'Accès</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-documents')">
+        <li><a href="#" onclick="showSection('section-documents', this); return false;">
           <i class="bi bi-folder"></i>
           <span>Mes Documents</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-parametres')">
+        <li><a href="#" onclick="showSection('section-parametres', this); return false;">
           <i class="bi bi-gear"></i>
           <span>Paramètres</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-aide')">
+        <li><a href="#" onclick="showSection('section-aide', this); return false;">
           <i class="bi bi-question-circle"></i>
           <span>Aide & Support</span>
         </a></li>
@@ -490,29 +2265,34 @@
           <div class="vital-grid">
             <div class="vital-item">
               <label>Groupe Sanguin</label>
-              <strong>O+</strong>
+              <strong id="dashBloodGroup">O+</strong>
             </div>
             <div class="vital-item">
               <label>Allergies</label>
-              <strong>Pénicilline</strong>
+              <strong id="dashAllergies">Pénicilline</strong>
             </div>
             <div class="vital-item">
               <label>Maladies Chroniques</label>
-              <strong>Aucune</strong>
+              <strong id="dashChronic">Aucune</strong>
             </div>
             <div class="vital-item">
               <label>Contact Urgence</label>
-              <strong>+225 07 01 23 45 68</strong>
+              <strong id="dashEmergency">+225 07 01 23 45 68</strong>
             </div>
             <div class="vital-item">
               <label>Dernière Consultation</label>
-              <strong>25 Jan 2025</strong>
+              <strong id="dashLastConsultation">25 Jan 2025</strong>
             </div>
             <div class="vital-item">
               <label>Statut Vaccins</label>
-              <strong>✅ À jour</strong>
+              <strong id="dashboardVaccineStatus">✅ À jour</strong>
             </div>
           </div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-check2-square"></i> A faire maintenant</h4>
+          <div id="todoNowList"></div>
         </div>
 
         <!-- Actions Rapides -->
@@ -550,21 +2330,21 @@
           <i class="bi bi-calendar-check"></i>
           <div class="flex-grow-1">
             <strong>Prochain rendez-vous</strong><br>
-            <small>15 Mars 2025 - Dr. KOUASSI - Cardiologie</small>
+            <small id="dashboardNextAppointment">15 Mars 2025 - Dr. KOUASSI - Cardiologie</small>
           </div>
         </div>
         <div class="alert-item success">
           <i class="bi bi-shield-check text-success"></i>
           <div class="flex-grow-1">
             <strong>Vaccinations à jour</strong><br>
-            <small>Prochain rappel : Juin 2025</small>
+            <small id="dashboardVaccineReminder">Prochain rappel : Juin 2025</small>
           </div>
         </div>
         <div class="alert-item">
           <i class="bi bi-capsule"></i>
           <div class="flex-grow-1">
             <strong>Médicament à prendre</strong><br>
-            <small>Paracétamol 500mg - 3x par jour</small>
+            <small id="dashboardMedicationReminder">Paracétamol 500mg - 3x par jour</small>
           </div>
         </div>
 
@@ -579,11 +2359,11 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="text-muted small">Nom Complet</label>
-              <p class="mb-0"><strong>Jean KOUASSI</strong></p>
+              <p class="mb-0"><strong id="profileFullName">Jean KOUASSI</strong></p>
             </div>
             <div class="col-md-6 mb-3">
               <label class="text-muted small">Date de Naissance</label>
-              <p class="mb-0"><strong>15 Janvier 1985 (40 ans)</strong></p>
+              <p class="mb-0"><strong id="profileBirthDate">15 Janvier 1985 (40 ans)</strong></p>
             </div>
             <div class="col-md-6 mb-3">
               <label class="text-muted small">Numéro CMU</label>
@@ -591,10 +2371,25 @@
             </div>
             <div class="col-md-6 mb-3">
               <label class="text-muted small">Téléphone</label>
-              <p class="mb-0"><strong>+225 07 01 23 45 67</strong></p>
+              <p class="mb-0"><strong id="profilePhone">+225 07 01 23 45 67</strong></p>
             </div>
+
+            <!-- Centre de création -->
+            <div class="col-md-6 mb-3 creation-center-block" style="display:none; align-items:flex-start;">
+              <div>
+                <label class="text-muted small">Créé au</label>
+                <p class="mb-0"><strong class="created-by-center-text">—</strong></p>
+              </div>
+            </div>
+
+            <!-- Date d'activation -->
+            <div class="col-md-6 mb-3">
+              <label class="text-muted small">Compte activé le</label>
+              <p class="mb-0"><strong class="activated-at-text">—</strong></p>
+            </div>
+
           </div>
-          <button class="btn btn-outline-primary btn-sm">
+          <button class="btn btn-outline-primary btn-sm" id="editIdentityBtn">
             <i class="bi bi-pencil me-1"></i> Modifier
           </button>
         </div>
@@ -604,22 +2399,22 @@
           <div class="row">
             <div class="col-md-4 mb-3">
               <label class="text-muted small">Groupe Sanguin</label>
-              <p class="mb-0"><strong>O+</strong></p>
+              <p class="mb-0"><strong id="profileBloodGroup">O+</strong></p>
             </div>
             <div class="col-md-8 mb-3">
               <label class="text-muted small">Allergies</label>
-              <p class="mb-0"><strong>Pénicilline</strong></p>
+              <p class="mb-0"><strong id="profileAllergies">Pénicilline</strong></p>
             </div>
             <div class="col-md-12 mb-3">
               <label class="text-muted small">Maladies Chroniques</label>
-              <p class="mb-0"><strong>Aucune</strong></p>
+              <p class="mb-0"><strong id="profileChronicDiseases">Aucune</strong></p>
             </div>
             <div class="col-md-12 mb-3">
               <label class="text-muted small">Handicap / Conditions Particulières</label>
-              <p class="mb-0"><strong>Aucun</strong></p>
+              <p class="mb-0"><strong id="profileSpecialConditions">Aucun</strong></p>
             </div>
           </div>
-          <button class="btn btn-outline-primary btn-sm">
+          <button class="btn btn-outline-primary btn-sm" id="editMedicalBtn">
             <i class="bi bi-pencil me-1"></i> Modifier
           </button>
         </div>
@@ -629,14 +2424,14 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="text-muted small">Nom</label>
-              <p class="mb-0"><strong>Marie KOUASSI (Épouse)</strong></p>
+              <p class="mb-0"><strong id="profileEmergencyName">Marie KOUASSI (Épouse)</strong></p>
             </div>
             <div class="col-md-6 mb-3">
               <label class="text-muted small">Téléphone</label>
-              <p class="mb-0"><strong>+225 07 01 23 45 68</strong></p>
+              <p class="mb-0"><strong id="profileEmergencyPhone">+225 07 01 23 45 68</strong></p>
             </div>
           </div>
-          <button class="btn btn-outline-primary btn-sm">
+          <button class="btn btn-outline-primary btn-sm" id="editEmergencyBtn">
             <i class="bi bi-pencil me-1"></i> Modifier
           </button>
         </div>
@@ -644,7 +2439,8 @@
         <div class="section-card">
           <h4><i class="bi bi-qr-code"></i> Ma Carte QR</h4>
           <div class="qr-box">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SIKA-CMU-1234567890" alt="QR Code" style="max-width: 200px;">
+            <img id="patientQrImage" src="" alt="QR Code patient" style="max-width: 200px;">
+            <small class="d-block text-muted mb-3" id="patientQrPayload"></small>
             <p class="mt-3 mb-3">Présentez ce code lors de vos consultations</p>
             <button class="btn btn-primary me-2" onclick="downloadQR()">
               <i class="bi bi-download me-1"></i> Télécharger
@@ -669,23 +2465,23 @@
           <div class="vital-grid">
             <div class="vital-item">
               <label>Groupe Sanguin</label>
-              <strong style="font-size: 28px;">O+</strong>
+              <strong style="font-size: 28px;" id="emergencyBloodGroup">O+</strong>
             </div>
             <div class="vital-item">
               <label>⚠️ ALLERGIES CRITIQUES</label>
-              <strong style="color: #ffeb3b;">Pénicilline</strong>
+              <strong style="color: #ffeb3b;" id="emergencyAllergies">Pénicilline</strong>
             </div>
             <div class="vital-item">
               <label>Traitements en Cours</label>
-              <strong>Aucun</strong>
+              <strong id="emergencyTreatments">Aucun</strong>
             </div>
             <div class="vital-item">
               <label>Maladies Graves</label>
-              <strong>Aucune</strong>
+              <strong id="emergencyDiseases">Aucune</strong>
             </div>
             <div class="vital-item">
               <label>📞 Contact Urgence</label>
-              <strong>Marie KOUASSI<br>+225 07 01 23 45 68</strong>
+              <strong id="emergencyContact">Marie KOUASSI - +225 07 01 23 45 68</strong>
             </div>
             <div class="vital-item">
               <label>Dernière MAJ</label>
@@ -696,9 +2492,18 @@
 
         <div class="section-card">
           <h4><i class="bi bi-file-earmark-medical"></i> Dernière Consultation</h4>
-          <p><strong>25 Janvier 2025 - CHU de Cocody</strong></p>
+          <p><strong id="emergencyLastConsult">25 Janvier 2025 - CHU de Cocody</strong></p>
           <p>Dr. KOUASSI Jean - Cardiologie</p>
           <p class="text-muted">Contrôle de routine - RAS</p>
+        </div>
+        <div class="section-card">
+          <h4><i class="bi bi-wifi-off"></i> Resume Offline</h4>
+          <p class="mb-1"><strong>Derniere ordonnance:</strong> <span id="offlineLastPrescription">N/A</span></p>
+          <p class="mb-1"><strong>Dernier vaccin:</strong> <span id="offlineLastVaccine">N/A</span></p>
+          <div class="qr-box mt-3">
+            <img id="emergencyQrImage" src="" alt="QR urgence" style="max-width: 160px;">
+            <p class="mt-2 mb-0 small">QR urgence accessible meme hors ligne</p>
+          </div>
         </div>
       </div>
 
@@ -707,7 +2512,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h3>Historique des Consultations</h3>
           <div class="btn-group">
-            <button class="btn btn-sm btn-outline-primary">
+            <button class="btn btn-sm btn-outline-primary" id="consultationsFilterBtn">
               <i class="bi bi-funnel"></i> Filtrer
             </button>
           </div>
@@ -720,7 +2525,7 @@
               <small class="text-muted">CHU de Cocody - Dr. KOUASSI Jean (Cardiologie)</small><br>
               <small>Diagnostic: Contrôle de routine - RAS</small>
             </div>
-            <button class="btn btn-sm btn-outline-primary">Voir</button>
+            <button class="btn btn-sm btn-outline-primary" data-consultation-id="c-2025-01">Voir</button>
           </div>
           <div class="list-item">
             <div>
@@ -728,7 +2533,7 @@
               <small class="text-muted">Centre de Santé Abobo - Dr. KONÉ Marie</small><br>
               <small>Diagnostic: Grippe saisonnière</small>
             </div>
-            <button class="btn btn-sm btn-outline-primary">Voir</button>
+            <button class="btn btn-sm btn-outline-primary" data-consultation-id="c-2024-12">Voir</button>
           </div>
           <div class="list-item">
             <div>
@@ -736,7 +2541,7 @@
               <small class="text-muted">CHU de Treichville - Service Urgences</small><br>
               <small>Diagnostic: Gastro-entérite</small>
             </div>
-            <button class="btn btn-sm btn-outline-primary">Voir</button>
+            <button class="btn btn-sm btn-outline-primary" data-consultation-id="c-2024-09">Voir</button>
           </div>
         </div>
       </div>
@@ -754,7 +2559,7 @@
             </div>
             <div>
               <span class="badge bg-success badge-status">Normal</span>
-              <button class="btn btn-sm btn-outline-primary ms-2">
+              <button class="btn btn-sm btn-outline-primary ms-2" data-exam-download="exam-bilan">
                 <i class="bi bi-download"></i>
               </button>
             </div>
@@ -766,7 +2571,7 @@
             </div>
             <div>
               <span class="badge bg-success badge-status">Négatif</span>
-              <button class="btn btn-sm btn-outline-primary ms-2">
+              <button class="btn btn-sm btn-outline-primary ms-2" data-exam-download="exam-covid">
                 <i class="bi bi-download"></i>
               </button>
             </div>
@@ -780,13 +2585,13 @@
               <strong>Radiographie Thoracique</strong><br>
               <small class="text-muted">10 Novembre 2024 - CHU Cocody</small>
             </div>
-            <button class="btn btn-sm btn-outline-primary">
+            <button class="btn btn-sm btn-outline-primary" id="imagingViewBtn">
               <i class="bi bi-eye me-1"></i> Voir
             </button>
           </div>
         </div>
 
-        <button class="btn btn-primary">
+        <button class="btn btn-primary" id="examensAddDocumentBtn">
           <i class="bi bi-upload me-2"></i>
           Ajouter un Document
         </button>
@@ -794,47 +2599,15 @@
 
       <!-- ====== SECTION: ORDONNANCES ====== -->
       <div id="section-ordonnances" class="page-section">
-        <h3 class="mb-4">Mes Ordonnances</h3>
-
         <div class="section-card">
-          <div class="list-item">
-            <div>
-              <strong>Ordonnance #ORD-2025-001</strong><br>
-              <small class="text-muted">25 Janvier 2025 - Dr. KOUASSI Jean</small><br>
-              <small>Paracétamol 500mg, Vitamine C</small>
-            </div>
-            <div class="text-end">
-              <span class="badge bg-success badge-status">Active</span><br>
-              <button class="btn btn-sm btn-outline-primary mt-2">
-                <i class="bi bi-qr-code me-1"></i> QR Code
-              </button>
-            </div>
-          </div>
-
-          <div class="list-item">
-            <div>
-              <strong>Ordonnance #ORD-2024-045</strong><br>
-              <small class="text-muted">10 Décembre 2024 - Dr. KONÉ Marie</small><br>
-              <small>Amoxicilline, Sirop antitussif</small>
-            </div>
-            <div class="text-end">
-              <span class="badge bg-secondary badge-status">Délivrée</span><br>
-              <button class="btn btn-sm btn-outline-primary mt-2">
-                <i class="bi bi-download"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="alert alert-info">
-          <i class="bi bi-info-circle me-2"></i>
-          Présentez le QR Code de l'ordonnance au pharmacien pour éviter les contrefaçons
+          <small class="text-muted">Chargement des ordonnances...</small>
         </div>
       </div>
 
       <!-- ====== SECTION: VACCINS ====== -->
       <div id="section-vaccins" class="page-section">
         <h3 class="mb-4">Carnet de Vaccination</h3>
+        <small class="text-muted" id="vaccinesOfflineHint" style="display: none;">Mode offline: derniers vaccins uniquement.</small>
 
         <div class="alert alert-success">
           <i class="bi bi-shield-check me-2"></i>
@@ -873,7 +2646,7 @@
               <strong>Tétanos (Rappel)</strong><br>
               <small class="text-muted">Recommandé : Mars 2025</small>
             </div>
-            <button class="btn btn-sm btn-primary">Planifier</button>
+            <button class="btn btn-sm btn-primary" id="vaccinePlanBtn">Planifier</button>
           </div>
         </div>
       </div>
@@ -891,7 +2664,7 @@
               <small>Jusqu'au 09 Février 2025</small>
             </div>
             <div>
-              <button class="btn btn-sm btn-success">✓ J'ai pris</button>
+              <button class="btn btn-sm btn-success" data-medication-id="med-paracetamol">✓ J'ai pris</button>
             </div>
           </div>
           <div class="list-item">
@@ -901,77 +2674,26 @@
               <small>Jusqu'au 24 Février 2025</small>
             </div>
             <div>
-              <button class="btn btn-sm btn-outline-success">Marquer pris</button>
+              <button class="btn btn-sm btn-outline-success" data-medication-id="med-vitc">Marquer pris</button>
             </div>
           </div>
         </div>
 
         <div class="alert alert-info">
           <i class="bi bi-bell me-2"></i>
-          Vous recevrez des rappels SMS pour vos prises de médicaments
+          Vous recevrez des rappels SMS pour vos prises de medicaments
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-clock-history"></i> Historique de prise</h4>
+          <div id="medicationHistoryList"></div>
         </div>
       </div>
 
       <!-- ====== SECTION: AUTORISATIONS ====== -->
       <div id="section-autorisations" class="page-section">
-        <h3 class="mb-4">Autorisations d'Accès</h3>
-
-        <div class="alert alert-warning">
-          <i class="bi bi-shield-exclamation me-2"></i>
-          <strong>Important :</strong> Vous contrôlez qui peut accéder à votre dossier médical
-        </div>
-
         <div class="section-card">
-          <h4><i class="bi bi-clock-history"></i> Demandes en Attente</h4>
-          <div class="list-item">
-            <div>
-              <strong>Dr. TRAORÉ Ibrahim</strong><br>
-              <small class="text-muted">Pharmacie Centrale - Demande d'accès aux ordonnances</small><br>
-              <small>Il y a 2 heures</small>
-            </div>
-            <div>
-              <button class="btn btn-sm btn-success me-2">✓ Autoriser</button>
-              <button class="btn btn-sm btn-danger">✗ Refuser</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-card">
-          <h4><i class="bi bi-check-circle"></i> Accès Autorisés</h4>
-          <div class="list-item">
-            <div>
-              <strong>Dr. KOUASSI Jean</strong><br>
-              <small class="text-muted">CHU Cocody - Cardiologie</small><br>
-              <small>Accès: Consultation complète - Expire: Permanent</small>
-            </div>
-            <button class="btn btn-sm btn-outline-danger">Révoquer</button>
-          </div>
-          <div class="list-item">
-            <div>
-              <strong>Dr. KONÉ Marie</strong><br>
-              <small class="text-muted">Centre Abobo - Médecine Générale</small><br>
-              <small>Accès: Urgences uniquement - Expire: 07 Fév 2025</small>
-            </div>
-            <button class="btn btn-sm btn-outline-danger">Révoquer</button>
-          </div>
-        </div>
-
-        <div class="section-card">
-          <h4><i class="bi bi-eye"></i> Historique des Accès</h4>
-          <div class="list-item">
-            <div>
-              <strong>Dr. KOUASSI Jean</strong><br>
-              <small class="text-muted">A consulté: Profil santé, Consultations</small><br>
-              <small>25 Janvier 2025 à 14:30 - CHU Cocody</small>
-            </div>
-          </div>
-          <div class="list-item">
-            <div>
-              <strong>Dr. KONÉ Marie</strong><br>
-              <small class="text-muted">A consulté: Infos vitales, Vaccinations</small><br>
-              <small>10 Décembre 2024 à 09:15 - Centre Abobo</small>
-            </div>
-          </div>
+          <small class="text-muted">Chargement des autorisations...</small>
         </div>
       </div>
 
@@ -979,36 +2701,14 @@
       <div id="section-documents" class="page-section">
         <h3 class="mb-4">Mes Documents</h3>
 
-        <button class="btn btn-primary mb-4">
+        <button class="btn btn-primary mb-4" id="documentsAddBtn">
           <i class="bi bi-upload me-2"></i>
           Ajouter un Document
         </button>
+        <input type="file" id="documentsUploadInput" class="d-none" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx">
 
         <div class="section-card">
-          <div class="list-item">
-            <div>
-              <i class="bi bi-file-earmark-pdf fs-3 text-danger me-3"></i>
-              <div>
-                <strong>Carte CMU</strong><br>
-                <small class="text-muted">Ajouté le 01 Janvier 2025</small>
-              </div>
-            </div>
-            <button class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-download"></i>
-            </button>
-          </div>
-          <div class="list-item">
-            <div>
-              <i class="bi bi-file-earmark-pdf fs-3 text-danger me-3"></i>
-              <div>
-                <strong>Certificat Médical</strong><br>
-                <small class="text-muted">Ajouté le 25 Janvier 2025</small>
-              </div>
-            </div>
-            <button class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-download"></i>
-            </button>
-          </div>
+          <div id="documentsList"></div>
         </div>
       </div>
 
@@ -1018,7 +2718,7 @@
 
         <div class="section-card">
           <h4><i class="bi bi-globe"></i> Langue</h4>
-          <select class="form-select">
+          <select class="form-select" id="settingsLanguageSelect">
             <option selected>Français</option>
             <option>English</option>
             <option>Dioula (audio)</option>
@@ -1028,8 +2728,8 @@
 
         <div class="section-card">
           <h4><i class="bi bi-phone"></i> Numéro de Téléphone (OTP)</h4>
-          <p class="text-muted">+225 07 01 23 45 67</p>
-          <button class="btn btn-outline-primary btn-sm">Modifier</button>
+          <p class="text-muted" id="settingsPhoneValue">+225 07 01 23 45 67</p>
+          <button class="btn btn-outline-primary btn-sm" id="settingsPhoneEditBtn">Modifier</button>
         </div>
 
         <div class="section-card">
@@ -1046,7 +2746,7 @@
               Recevoir un OTP à chaque connexion
             </label>
           </div>
-          <button class="btn btn-outline-danger btn-sm">
+          <button class="btn btn-outline-danger btn-sm" id="disconnectDevicesBtn">
             Déconnecter tous les appareils
           </button>
         </div>
@@ -1056,12 +2756,29 @@
           <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="switchOffline" checked>
             <label class="form-check-label" for="switchOffline">
-              Télécharger les données essentielles pour consultation hors ligne
+              Telecharger les donnees essentielles pour consultation hors ligne
             </label>
           </div>
           <p class="text-muted mt-2 mb-0">
-            <small>Dernière synchronisation : Aujourd'hui à 10:30</small>
+            <small id="settingsLastSync">Derniere synchronisation : Aujourd'hui a 10:30</small>
           </p>
+          <small class="text-muted d-block mt-2">Statut connexion: <span id="settingsConnectionStatus">En ligne</span></small>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-clock-history"></i> Historique des connexions</h4>
+          <div id="loginHistoryList"></div>
+        </div>
+
+        <div class="section-card">
+          <h4><i class="bi bi-phone"></i> Appareils connectes</h4>
+          <div id="connectedDevicesList"></div>
+        </div>
+
+        <div class="section-card">
+          <button class="btn btn-danger" id="settingsLogoutBtn">
+            <i class="bi bi-box-arrow-right me-2"></i>Se deconnecter
+          </button>
         </div>
       </div>
 
@@ -1113,15 +2830,15 @@
 
         <div class="section-card">
           <h4><i class="bi bi-book"></i> Tutoriels Vidéo</h4>
-          <button class="btn btn-outline-primary mb-2 w-100 text-start">
+          <button class="btn btn-outline-primary mb-2 w-100 text-start" id="tutorialIntroBtn">
             <i class="bi bi-play-circle me-2"></i>
             Première connexion et profil santé
           </button>
-          <button class="btn btn-outline-primary mb-2 w-100 text-start">
+          <button class="btn btn-outline-primary mb-2 w-100 text-start" id="tutorialAccessBtn">
             <i class="bi bi-play-circle me-2"></i>
             Autoriser l'accès à un soignant
           </button>
-          <button class="btn btn-outline-primary w-100 text-start">
+          <button class="btn btn-outline-primary w-100 text-start" id="tutorialQrBtn">
             <i class="bi bi-play-circle me-2"></i>
             Utiliser mon QR Code en consultation
           </button>
@@ -1130,15 +2847,15 @@
         <div class="section-card">
           <h4><i class="bi bi-headset"></i> Contacter le Support</h4>
           <div class="d-grid gap-2">
-            <button class="btn btn-success">
+            <button class="btn btn-success" id="supportWhatsappBtn">
               <i class="bi bi-whatsapp me-2"></i>
               WhatsApp : +225 27 20 XX XX XX
             </button>
-            <button class="btn btn-primary">
+            <button class="btn btn-primary" id="supportCallBtn">
               <i class="bi bi-telephone me-2"></i>
               Appel : +225 27 20 XX XX XX
             </button>
-            <button class="btn btn-outline-primary">
+            <button class="btn btn-outline-primary" id="supportEmailBtn">
               <i class="bi bi-envelope me-2"></i>
               Email : support@sika-sante.ci
             </button>
@@ -1147,8 +2864,8 @@
 
         <div class="section-card">
           <h4><i class="bi bi-exclamation-triangle"></i> Signaler un Problème</h4>
-          <textarea class="form-control mb-3" rows="4" placeholder="Décrivez le problème..."></textarea>
-          <button class="btn btn-danger">
+          <textarea class="form-control mb-3" rows="4" placeholder="Décrivez le problème..." id="supportIssueText"></textarea>
+          <button class="btn btn-danger" id="supportIssueSendBtn">
             <i class="bi bi-send me-2"></i>
             Envoyer le Signalement
           </button>

@@ -76,15 +76,91 @@
         gap: 8px;
         margin-bottom: 20px;
       }
-      .back-link:hover {
-        color: var(--bs-primary-hover);
-      }
-      #otpSection {
+      .back-link:hover { color: var(--bs-primary-hover); }
+      #otpSection        { display: none; }
+      #activationSection { display: none; }
+      .resend-timer { color: var(--bs-secondary); font-weight: 600; }
+
+      /* Badge ID provisoire */
+      .badge-provisional {
         display: none;
-      }
-      .resend-timer {
-        color: var(--bs-secondary);
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 193, 7, 0.15);
+        border: 1px solid #ffc107;
+        color: #856404;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 12px;
         font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      /* Bloc centre de création */
+      .creation-center-info {
+        display: none;
+        background: rgba(var(--bs-primary-rgb), 0.06);
+        border-left: 3px solid var(--bs-primary);
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 13px;
+        margin-bottom: 12px;
+        color: var(--bs-body-color);
+      }
+
+      /* Écran activation */
+      .activation-success {
+        text-align: center;
+        padding: 20px 0;
+      }
+      .activation-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        font-size: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        animation: popIn 0.5s ease;
+      }
+      @keyframes popIn {
+        0%   { transform: scale(0); opacity: 0; }
+        70%  { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      .activation-steps {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+        text-align: left;
+      }
+      .activation-steps li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 14px;
+        color: var(--bs-body-color);
+        border-bottom: 1px solid rgba(var(--inverse-color-rgb), 0.08);
+      }
+      .activation-steps li i { color: #2ecc71; font-size: 18px; }
+
+      /* OTP expiry info */
+      .otp-expiry-info {
+        font-size: 12px;
+        color: var(--bs-secondary);
+        text-align: center;
+        margin-top: -15px;
+        margin-bottom: 15px;
+      }
+      .attempts-info {
+        font-size: 12px;
+        color: var(--bs-secondary);
+        text-align: center;
+        margin-bottom: 10px;
       }
     </style>
   </head>
@@ -118,19 +194,21 @@
               <div id="requestOtpSection">
                 <form id="requestOtpForm">
 
-                  <!-- CMU Input -->
+                  <!-- CMU / ID Provisoire Input -->
                   <div class="mb-3">
-                    <label for="cmuNumber" class="form-label">Numéro CMU ou Identifiant</label>
+                    <label for="cmuNumber" class="form-label fw-semibold">Numéro CMU ou Identifiant</label>
                     <input
                       type="text"
                       class="form-control form-control-lg"
                       id="cmuNumber"
-                      placeholder="Ex: 1234567890"
+                      placeholder="Ex: 1234567890 ou PROV-ABJ001"
                       required
-                      pattern="[0-9]{10}"
-                      maxlength="10"
+                      maxlength="16"
+                      autocomplete="off"
                     >
-                    <small class="text-muted">Entrez votre numéro de Couverture Maladie Universelle (10 chiffres)</small>
+                    <small class="text-muted">
+                      CMU (10 chiffres) ou ID provisoire remis par votre centre de santé
+                    </small>
                   </div>
 
                   <!-- Submit Button -->
@@ -152,16 +230,27 @@
               <!-- Step 2: Verify OTP -->
               <div id="otpSection">
 
+                <!-- Badge ID provisoire -->
+                <div class="badge-provisional" id="provisionalBadge">
+                  <i class="bi bi-clock-history"></i>
+                  ID Provisoire — En attente de rattachement CMU
+                </div>
+
+                <!-- Centre de création -->
+                <div class="creation-center-info" id="creationCenterInfo">
+                  <i class="bi bi-hospital me-1 text-primary"></i>
+                </div>
+
                 <!-- OTP Info -->
-                <div class="alert alert-info mb-4">
+                <div class="alert alert-info mb-3">
                   <i class="bi bi-info-circle me-2"></i>
-                  Un code à 6 chiffres a été envoyé au <strong id="phoneDisplay"></strong>
+                  Code envoyé au <strong id="phoneDisplay"></strong>
                 </div>
 
                 <form id="verifyOtpForm">
 
                   <!-- OTP Inputs -->
-                  <label class="form-label text-center d-block mb-3">Entrez le code de vérification</label>
+                  <label class="form-label text-center d-block mb-3 fw-semibold">Code de vérification</label>
                   <div class="otp-inputs">
                     <input type="text" class="form-control otp-input" maxlength="1" data-index="0" />
                     <input type="text" class="form-control otp-input" maxlength="1" data-index="1" />
@@ -169,6 +258,10 @@
                     <input type="text" class="form-control otp-input" maxlength="1" data-index="3" />
                     <input type="text" class="form-control otp-input" maxlength="1" data-index="4" />
                     <input type="text" class="form-control otp-input" maxlength="1" data-index="5" />
+                  </div>
+                  <div class="text-center mb-3">
+                    <small class="text-muted d-block" id="attemptsInfo">Tentatives restantes: 5/5</small>
+                    <small class="text-muted d-block" id="otpExpiryInfo">Code valide pendant 05:00</small>
                   </div>
 
                   <!-- Verify Button -->
@@ -189,12 +282,47 @@
                   <div class="text-center mt-3">
                     <button type="button" class="btn btn-link btn-sm" id="backToCmuBtn">
                       <i class="bi bi-arrow-left me-1"></i>
-                      Modifier le numéro CMU
+                      Modifier l'identifiant
                     </button>
                   </div>
 
                 </form>
 
+              </div>
+
+              <!-- Step 3: Écran d'activation (première connexion) -->
+              <div id="activationSection" style="display:none;">
+                <div class="text-center py-3">
+
+                  <!-- Icône succès animée -->
+                  <div class="activation-icon mx-auto mb-3">
+                    <i class="bi bi-check-lg"></i>
+                  </div>
+
+                  <h3 class="mb-1">🎉 Compte activé !</h3>
+                  <p class="text-muted mb-1">Bienvenue sur Sika-Santé,</p>
+                  <h5 class="mb-3 text-primary" id="activationName"></h5>
+
+                  <ul class="activation-steps text-start">
+                    <li><i class="bi bi-check-circle-fill"></i> Dossier santé numérique créé</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Ordonnances accessibles</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Carnet vaccinal disponible</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Autorisations d'accès gérables</li>
+                  </ul>
+
+                  <div class="alert alert-light text-start mt-2">
+                    <small>
+                      <i class="bi bi-hospital me-1 text-primary"></i>
+                      Compte créé au : <strong id="activationCenter">Centre de santé</strong>
+                    </small>
+                  </div>
+
+                  <p class="text-muted small">
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    Redirection dans 3 secondes...
+                  </p>
+
+                </div>
               </div>
 
               <!-- Error Message -->
