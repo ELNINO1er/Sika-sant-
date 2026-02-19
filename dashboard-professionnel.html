@@ -20,6 +20,11 @@
         --header-height: 70px;
       }
 
+      @keyframes slideInRight {
+        from { transform: translateX(120%); opacity: 0; }
+        to   { transform: translateX(0);    opacity: 1; }
+      }
+
       body {
         overflow-x: hidden;
         background: #f8f9fa;
@@ -402,6 +407,124 @@
     try { return JSON.parse(value); } catch (_) { return fallback; }
   }
 
+  // ── Utilitaires UI : toast, confirm, prompt (sans alert/confirm/prompt natifs) ──
+
+  function showToast(message, type = 'success') {
+    const colors = { success: '#2ecc71', danger: '#e74c3c', warning: '#f39c12', info: '#3498db' };
+    const icons  = { success: 'check-circle-fill', danger: 'x-circle-fill', warning: 'exclamation-triangle-fill', info: 'info-circle-fill' };
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position:fixed;top:80px;right:20px;z-index:9999;
+      background:#fff;border-left:4px solid ${colors[type] || colors.info};
+      border-radius:8px;padding:14px 18px;min-width:280px;max-width:380px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;
+      animation:slideInRight .3s ease;
+    `;
+    toast.innerHTML = `
+      <i class="bi bi-${icons[type] || icons.info}" style="font-size:20px;color:${colors[type]};flex-shrink:0;"></i>
+      <span style="font-size:14px;color:#333;flex:1;">${message}</span>
+      <button onclick="this.parentElement.remove()" style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;padding:0;line-height:1;">&times;</button>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 4000);
+  }
+
+  function uiConfirm(message, onConfirm, { title = 'Confirmation', confirmLabel = 'Confirmer', confirmClass = 'btn-primary', cancelLabel = 'Annuler' } = {}) {
+    const id = `confirm-${Date.now()}`;
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+    backdrop.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+        <h5 style="margin:0 0 12px;font-weight:700;">${title}</h5>
+        <p style="margin:0 0 24px;color:#555;font-size:14px;">${message}</p>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button id="${id}-cancel" class="btn btn-outline-secondary btn-sm">${cancelLabel}</button>
+          <button id="${id}-ok" class="btn ${confirmClass} btn-sm">${confirmLabel}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+    document.getElementById(`${id}-cancel`).onclick = () => backdrop.remove();
+    document.getElementById(`${id}-ok`).onclick = () => { backdrop.remove(); onConfirm(); };
+  }
+
+  function uiPrompt(label, defaultValue, onSubmit, { title = 'Saisie' } = {}) {
+    const id = `prompt-${Date.now()}`;
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+    backdrop.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:440px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+        <h5 style="margin:0 0 16px;font-weight:700;">${title}</h5>
+        <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">${label}</label>
+        <input id="${id}-input" class="form-control" value="${defaultValue || ''}" style="margin-bottom:20px;">
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button id="${id}-cancel" class="btn btn-outline-secondary btn-sm">Annuler</button>
+          <button id="${id}-ok" class="btn btn-primary btn-sm">Valider</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+    const input = document.getElementById(`${id}-input`);
+    input.focus();
+    document.getElementById(`${id}-cancel`).onclick = () => backdrop.remove();
+    document.getElementById(`${id}-ok`).onclick = () => { const v = input.value.trim(); backdrop.remove(); onSubmit(v); };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const v = input.value.trim(); backdrop.remove(); onSubmit(v); } });
+  }
+
+  function uiLoadPatientChoice(patientName, onEmergency, onNormal) {
+    const id = `choice-${Date.now()}`;
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+    backdrop.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:440px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+        <h5 style="margin:0 0 6px;font-weight:700;">Accès au dossier</h5>
+        <p style="color:#555;font-size:14px;margin-bottom:20px;">Patient : <strong>${patientName}</strong></p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button id="${id}-emergency" class="btn btn-danger w-100"><i class="bi bi-lightning-fill me-2"></i>Mode urgence (accès immédiat)</button>
+          <button id="${id}-normal" class="btn btn-primary w-100"><i class="bi bi-shield-check me-2"></i>Consultation normale (avec consentement)</button>
+          <button id="${id}-cancel" class="btn btn-outline-secondary w-100">Annuler</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+    document.getElementById(`${id}-emergency`).onclick = () => { backdrop.remove(); onEmergency(); };
+    document.getElementById(`${id}-normal`).onclick   = () => { backdrop.remove(); onNormal(); };
+    document.getElementById(`${id}-cancel`).onclick   = () => backdrop.remove();
+  }
+
+  function uiConsentOtp(onSubmit) {
+    const id = `otp-consent-${Date.now()}`;
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+    backdrop.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+        <h5 style="margin:0 0 6px;font-weight:700;"><i class="bi bi-shield-lock me-2 text-primary"></i>Code de consentement</h5>
+        <p style="color:#555;font-size:14px;margin-bottom:16px;">Demandez au patient son code OTP de consentement :</p>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;" id="${id}-inputs">
+          ${[0,1,2,3,4,5].map((i) => `<input type="text" maxlength="1" class="form-control text-center fw-bold" id="${id}-d${i}" style="width:46px;height:56px;font-size:22px;">`).join('')}
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button id="${id}-cancel" class="btn btn-outline-secondary btn-sm">Annuler</button>
+          <button id="${id}-ok" class="btn btn-primary btn-sm"><i class="bi bi-shield-check me-1"></i>Valider</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+    // navigation entre chiffres
+    [0,1,2,3,4,5].forEach((i) => {
+      const inp = document.getElementById(`${id}-d${i}`);
+      inp.addEventListener('input', () => { inp.value = inp.value.replace(/\D/g,''); if (inp.value && i < 5) document.getElementById(`${id}-d${i+1}`).focus(); });
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !inp.value && i > 0) document.getElementById(`${id}-d${i-1}`).focus(); });
+    });
+    document.getElementById(`${id}-d0`).focus();
+    document.getElementById(`${id}-cancel`).onclick = () => backdrop.remove();
+    document.getElementById(`${id}-ok`).onclick = () => {
+      const code = [0,1,2,3,4,5].map((i) => document.getElementById(`${id}-d${i}`).value).join('');
+      if (code.length < 6) { showToast('Entrez les 6 chiffres du code.', 'warning'); return; }
+      backdrop.remove(); onSubmit(code);
+    };
+  }
+
   function readArrayStorage(key) {
     const parsed = safeParse(localStorage.getItem(key) || '[]', []);
     return Array.isArray(parsed) ? parsed : [];
@@ -523,13 +646,14 @@
   }
 
   function logout() {
-    if (!confirm('Etes-vous sur de vouloir vous deconnecter ?')) return;
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(ROLE_KEY);
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(PERMISSIONS_KEY);
-    localStorage.removeItem('sika_refresh_token');
-    window.location.href = 'index.html';
+    uiConfirm('Voulez-vous vraiment vous déconnecter ?', () => {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(ROLE_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(PERMISSIONS_KEY);
+      localStorage.removeItem('sika_refresh_token');
+      window.location.href = 'index.html';
+    }, { title: 'Déconnexion', confirmLabel: 'Se déconnecter', confirmClass: 'btn-danger' });
   }
 
   function initProfessionalWorkspace() {
@@ -597,13 +721,113 @@
       const id = p.cmu || p.temporaryId || p.patientId;
       const age = calculateAge(p.dateOfBirth);
       const lastConsult = (m.consultations && m.consultations[0] && m.consultations[0].date) || 'N/A';
+      const statusBadge = p.accountStatus === 'ACTIVE'
+        ? '<span class="badge bg-success ms-1" style="font-size:10px;">Actif</span>'
+        : '<span class="badge bg-warning text-dark ms-1" style="font-size:10px;">En attente</span>';
       return `
-        <div class="patient-card" onclick="loadPatient('${id}')">
-          <strong>${name}</strong> <span class="text-muted">(ID: ${id})</span><br>
-          <small class="text-muted">${age ? `${age} ans` : 'Age N/A'} - Derniere consultation: ${lastConsult}</small>
+        <div class="patient-card d-flex justify-content-between align-items-center" style="cursor:default;">
+          <div onclick="loadPatient('${id}')" style="cursor:pointer;flex:1;">
+            <strong>${name}</strong> ${statusBadge} <span class="text-muted">(ID: ${id})</span><br>
+            <small class="text-muted">${age ? `${age} ans` : 'Age N/A'} - Derniere consultation: ${lastConsult}</small>
+          </div>
+          <div class="d-flex gap-2 ms-3">
+            <button class="btn btn-sm btn-outline-primary" title="Modifier" onclick="openEditPatient('${record.patientId}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" title="Supprimer" onclick="confirmDeletePatient('${record.patientId}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
         </div>
       `;
     }).join('');
+  }
+
+  function openEditPatient(patientId) {
+    const record = patientRegistry.find((r) => r.patientId === patientId);
+    if (!record) return;
+    const p = record.profile || {};
+    const m = record.medical || {};
+
+    document.getElementById('editPatientId').value = patientId;
+    document.getElementById('editFirstName').value = p.firstName || '';
+    document.getElementById('editLastName').value = p.lastName || '';
+    document.getElementById('editPhone').value = p.phone || '';
+    document.getElementById('editCmu').value = p.cmu || '';
+    document.getElementById('editDob').value = p.dateOfBirth || '';
+    document.getElementById('editSex').value = p.sex || '';
+    document.getElementById('editAddress').value = p.address || '';
+    document.getElementById('editEmergencyName').value = (p.emergencyContact && p.emergencyContact.name) || '';
+    document.getElementById('editEmergencyPhone').value = (p.emergencyContact && p.emergencyContact.phone) || '';
+    document.getElementById('editBloodGroup').value = m.bloodType || '';
+    document.getElementById('editAllergies').value = (m.allergies || []).map((a) => a.label).join(', ');
+    document.getElementById('editChronicDiseases').value = m.chronicDiseases || '';
+    document.getElementById('editNotes').value = m.notes || '';
+
+    const modal = new bootstrap.Modal(document.getElementById('editPatientModal'));
+    modal.show();
+  }
+
+  function saveEditPatient() {
+    const patientId = document.getElementById('editPatientId').value;
+    const idx = patientRegistry.findIndex((r) => r.patientId === patientId);
+    if (idx < 0) return;
+
+    const firstName = document.getElementById('editFirstName').value.trim();
+    const lastName = document.getElementById('editLastName').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    if (!firstName || !lastName || !phone) {
+      showToast('Prénom, nom et téléphone sont obligatoires.', 'warning');
+      return;
+    }
+
+    const allergiesRaw = document.getElementById('editAllergies').value.trim();
+    const allergies = allergiesRaw
+      ? allergiesRaw.split(',').map((a) => ({ label: a.trim(), status: 'DECLARED' })).filter((a) => a.label)
+      : [];
+
+    patientRegistry[idx].profile.firstName = firstName;
+    patientRegistry[idx].profile.lastName = lastName;
+    patientRegistry[idx].profile.phone = phone;
+    patientRegistry[idx].profile.cmu = document.getElementById('editCmu').value.trim() || patientRegistry[idx].profile.cmu;
+    patientRegistry[idx].profile.dateOfBirth = document.getElementById('editDob').value.trim();
+    patientRegistry[idx].profile.sex = document.getElementById('editSex').value.trim();
+    patientRegistry[idx].profile.address = document.getElementById('editAddress').value.trim();
+    patientRegistry[idx].profile.emergencyContact = {
+      name: document.getElementById('editEmergencyName').value.trim(),
+      phone: document.getElementById('editEmergencyPhone').value.trim()
+    };
+    if (!patientRegistry[idx].medical) patientRegistry[idx].medical = {};
+    patientRegistry[idx].medical.bloodType = document.getElementById('editBloodGroup').value.trim();
+    patientRegistry[idx].medical.allergies = allergies;
+    patientRegistry[idx].medical.chronicDiseases = document.getElementById('editChronicDiseases').value.trim();
+    patientRegistry[idx].medical.notes = document.getElementById('editNotes').value.trim();
+    patientRegistry[idx].medical.updatedAt = new Date().toISOString();
+
+    savePatientRegistry();
+    addAuditEntry('UPDATE_PATIENT', `Patient ${firstName} ${lastName} (${patientId}) modifie`);
+    renderPatientsList();
+
+    bootstrap.Modal.getInstance(document.getElementById('editPatientModal')).hide();
+    showToast('Dossier patient modifié avec succès.', 'success');
+  }
+
+  function confirmDeletePatient(patientId) {
+    const record = patientRegistry.find((r) => r.patientId === patientId);
+    if (!record) return;
+    const p = record.profile || {};
+    const name = `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'ce patient';
+    uiConfirm(
+      `Supprimer définitivement le dossier de <strong>${name}</strong> ? Cette action est irréversible.`,
+      () => {
+        patientRegistry = patientRegistry.filter((r) => r.patientId !== patientId);
+        savePatientRegistry();
+        addAuditEntry('DELETE_PATIENT', `Patient ${name} (${patientId}) supprime`);
+        renderPatientsList();
+        showToast(`Dossier de ${name} supprimé.`, 'danger');
+      },
+      { title: 'Supprimer le dossier', confirmLabel: 'Supprimer', confirmClass: 'btn-danger' }
+    );
   }
 
   function openCreatePatient() {
@@ -661,18 +885,18 @@
     const notes = (document.getElementById('newPatientMedicalNotes')?.value || '').trim();
 
     if (!firstName || !lastName || !phone) {
-      alert('Nom, prenom et telephone OTP sont obligatoires.');
+      showToast('Nom, prénom et téléphone OTP sont obligatoires.', 'warning');
       return;
     }
 
     const phoneNorm = normalizePhone(phone);
     if (phoneNorm.length < 8) {
-      alert('Numero de telephone invalide.');
+      showToast('Numéro de téléphone invalide (minimum 8 chiffres).', 'warning');
       return;
     }
 
     if (cmu && !/^\d{10}$/.test(cmu)) {
-      alert('Le numero CMU doit contenir 10 chiffres.');
+      showToast('Le numéro CMU doit contenir exactement 10 chiffres.', 'warning');
       return;
     }
 
@@ -681,7 +905,7 @@
       return (cmu && p.cmu === cmu) || normalizePhone(p.phone) === phoneNorm;
     });
     if (duplicate) {
-      alert('Un patient existe deja avec ce CMU ou ce telephone.');
+      showToast('Un patient existe déjà avec ce CMU ou ce téléphone.', 'danger');
       return;
     }
 
@@ -752,16 +976,14 @@
     addAuditEntry('CREATE_PATIENT', `Patient ${firstName} ${lastName} (${identifier}) cree`);
     renderPatientsList();
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    if (mode === 'otp') {
-      alert(`Patient cree: ${firstName} ${lastName}\nID: ${identifier}\nOTP activation (mock SMS): ${otp}`);
-    } else {
-      alert(`Patient cree: ${firstName} ${lastName}\nQR payload: ${qrPayload}`);
-    }
-
     const form = document.getElementById('createPatientForm');
     if (form) form.reset();
     showSection('section-patients');
+    if (mode === 'otp') {
+      showToast(`Patient ${firstName} ${lastName} créé — ID: ${identifier}`, 'success');
+    } else {
+      showToast(`Patient ${firstName} ${lastName} créé — QR généré`, 'success');
+    }
   }
 
   function openScanner() {
@@ -773,10 +995,11 @@
   }
 
   function simulateScan() {
-    const identifier = prompt('Entrez CMU, ID provisoire ou telephone du patient:', '');
-    if (!identifier) return;
-    loadPatient(identifier);
-    closeScanner();
+    uiPrompt('CMU, ID provisoire ou téléphone du patient', '', (identifier) => {
+      if (!identifier) return;
+      loadPatient(identifier);
+      closeScanner();
+    }, { title: 'Scanner un patient' });
   }
 
   function searchPatient() {
@@ -796,17 +1019,13 @@
   function loadPatient(identifier) {
     const record = findPatientByIdentifier(identifier);
     if (!record) {
-      alert('Patient introuvable. Creez d abord son dossier.');
+      showToast('Patient introuvable. Créez d\'abord son dossier.', 'danger');
       return;
     }
-
     currentPatient = record;
-    const isEmergency = confirm('Est-ce une situation d URGENCE ?\n\nOui = Mode urgence (sans consentement)\nNon = Consultation normale (consentement requis)');
-    if (isEmergency) {
-      showEmergencyMode();
-    } else {
-      requestConsent();
-    }
+    const p = record.profile || {};
+    const name = `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Patient';
+    uiLoadPatientChoice(name, showEmergencyMode, requestConsent);
   }
 
   function showEmergencyMode() {
@@ -814,7 +1033,7 @@
     const p = currentPatient.profile || {};
     const name = `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Patient';
     const id = p.cmu || p.temporaryId || p.patientId;
-    alert('MODE URGENCE ACTIVE. Acces immediat journalise.');
+    showToast('Mode urgence activé — accès journalisé.', 'danger');
     showSection('section-emergency-view');
     setText('emergencyPatientName', name);
     setText('emergencyPatientCMU', id || '-');
@@ -823,12 +1042,13 @@
 
   function requestConsent() {
     if (!currentPatient) return;
-    const otp = prompt('Demandez au patient son code de consentement OTP :');
-    if (!otp) return;
-    alert('Consentement valide. Acces autorise au dossier.');
-    addAuditEntry('CONSENT_VALIDATED', `Consentement patient ${currentPatient.patientId}`);
-    showSection('section-patient-file');
-    loadPatientFile();
+    uiConsentOtp((otp) => {
+      if (!otp) return;
+      showToast('Consentement validé — accès autorisé.', 'success');
+      addAuditEntry('CONSENT_VALIDATED', `Consentement patient ${currentPatient.patientId}`);
+      showSection('section-patient-file');
+      loadPatientFile();
+    });
   }
 
   function loadPatientFile() {
@@ -882,14 +1102,14 @@
 
   function saveConsultation() {
     if (!currentPatient) {
-      alert('Chargez d abord un patient.');
+      showToast('Chargez d\'abord un patient.', 'warning');
       return;
     }
 
     const symptoms = (document.getElementById('symptoms')?.value || '').trim();
     const diagnosis = (document.getElementById('diagnosis')?.value || '').trim();
     if (!symptoms || !diagnosis) {
-      alert('Veuillez remplir tous les champs obligatoires.');
+      showToast('Veuillez remplir tous les champs obligatoires.', 'warning');
       return;
     }
 
@@ -912,21 +1132,21 @@
 
     addAuditEntry('ADD_CONSULTATION', `Consultation ajoutee pour ${currentPatient.patientId}`);
     if (!navigator.onLine) {
-      alert('Hors ligne : la consultation sera synchronisee des le retour de connexion.');
+      showToast('Hors ligne — la consultation sera synchronisée à la reconnexion.', 'warning');
     } else {
-      alert('Consultation enregistree avec succes.');
+      showToast('Consultation enregistrée avec succès.', 'success');
     }
     showSection('section-dashboard');
   }
 
   function generatePrescription() {
     if (!currentPatient) {
-      alert('Chargez d abord un patient.');
+      showToast('Chargez d\'abord un patient.', 'warning');
       return;
     }
 
     if (!currentUser.role || currentUser.role === 'NURSE') {
-      alert('Vous n avez pas la permission de prescrire.');
+      showToast('Vous n\'avez pas la permission de prescrire.', 'danger');
       return;
     }
 
@@ -948,65 +1168,45 @@
     });
 
     addAuditEntry('ADD_PRESCRIPTION', `Ordonnance creee pour ${currentPatient.patientId}`);
-    alert('Ordonnance electronique creee.');
+    showToast('Ordonnance électronique créée.', 'success');
     showSection('section-ordonnances');
   }
 
   function addMockExam() {
     if (!currentPatient) {
-      alert('Chargez d abord un patient.');
+      showToast('Chargez d\'abord un patient.', 'warning');
       return;
     }
-    const examName = prompt('Nom de l examen', 'Bilan sanguin complet');
-    if (!examName) return;
+    uiPrompt('Nom de l\'examen', 'Bilan sanguin complet', (examName) => {
+      if (!examName) return;
 
-    updateCurrentPatientRecord((record) => {
-      const medical = record.medical || {};
-      medical.exams = Array.isArray(medical.exams) ? medical.exams : [];
-      medical.exams.unshift({
-        id: `EXAM-${Date.now()}`,
-        name: examName,
-        date: new Date().toLocaleDateString('fr-FR'),
-        lab: 'Laboratoire SIKA (mock)',
-        result: 'En attente'
+      updateCurrentPatientRecord((record) => {
+        const medical = record.medical || {};
+        medical.exams = Array.isArray(medical.exams) ? medical.exams : [];
+        medical.exams.unshift({
+          id: `EXAM-${Date.now()}`,
+          name: examName,
+          date: new Date().toLocaleDateString('fr-FR'),
+          lab: 'Laboratoire SIKA (mock)',
+          result: 'En attente'
+        });
+        medical.updatedAt = new Date().toISOString();
+        medical.updatedBy = currentUser.name || 'Professionnel';
+        record.medical = medical;
       });
-      medical.updatedAt = new Date().toISOString();
-      medical.updatedBy = currentUser.name || 'Professionnel';
-      record.medical = medical;
-    });
-
-    addAuditEntry('ADD_EXAM', `Examen prescrit pour ${currentPatient.patientId}`);
-    alert(`Examen prescrit: ${examName}`);
-    showSection('section-examens');
+      addAuditEntry('ADD_EXAM', `Examen prescrit pour ${currentPatient.patientId}`);
+      showToast(`Examen "${examName}" prescrit.`, 'success');
+      showSection('section-examens');
+    }, { title: 'Prescrire un examen' });
   }
 
   function updatePatientMedicalInfo() {
     if (!currentPatient) {
-      alert('Chargez d abord un patient.');
+      showToast('Chargez d\'abord un patient.', 'warning');
       return;
     }
-
-    const allergyValue = prompt('Allergie a ajouter (laisser vide si aucune)');
-    if (allergyValue === null) return;
-    const allergyStatus = confirm('Allergie confirmee cliniquement ?') ? 'CONFIRMED' : 'DECLARED';
-    const chronic = prompt('Maladies chroniques (texte libre)', (currentPatient.medical && currentPatient.medical.chronicDiseases) || '');
-    if (chronic === null) return;
-
-    updateCurrentPatientRecord((record) => {
-      const medical = record.medical || {};
-      medical.allergies = Array.isArray(medical.allergies) ? medical.allergies : [];
-      if (allergyValue.trim()) {
-        medical.allergies.unshift({ label: allergyValue.trim(), status: allergyStatus });
-      }
-      medical.chronicDiseases = chronic.trim();
-      medical.updatedAt = new Date().toISOString();
-      medical.updatedBy = currentUser.name || 'Professionnel';
-      record.medical = medical;
-    });
-
-    addAuditEntry('UPDATE_MEDICAL_QUALITY', `Mise a jour allergies/chroniques pour ${currentPatient.patientId}`);
-    loadPatientFile();
-    alert('Dossier medical mis a jour.');
+    // Utilise le modal d'édition directement pour éviter les prompt/confirm chainés
+    openEditPatient(currentPatient.patientId);
   }
 </script>
   </head>
@@ -1726,6 +1926,103 @@
           <button class="btn btn-outline-secondary" onclick="closeScanner()">
             Annuler
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= Modal Modification Patient =======-->
+    <div class="modal fade" id="editPatientModal" tabindex="-1" aria-labelledby="editPatientModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editPatientModalLabel">
+              <i class="bi bi-pencil-square me-2 text-primary"></i>Modifier le dossier patient
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editPatientId">
+
+            <h6 class="text-primary mb-3">Informations personnelles</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="editFirstName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nom <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="editLastName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Téléphone OTP <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control" id="editPhone">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">CMU</label>
+                <input type="text" class="form-control" id="editCmu" maxlength="10" placeholder="10 chiffres">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Date de naissance</label>
+                <input type="date" class="form-control" id="editDob">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Sexe</label>
+                <select class="form-select" id="editSex">
+                  <option value="">-- Choisir --</option>
+                  <option value="M">Masculin</option>
+                  <option value="F">Féminin</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Groupe sanguin</label>
+                <select class="form-select" id="editBloodGroup">
+                  <option value="">-- Choisir --</option>
+                  <option value="A+">A+</option><option value="A-">A-</option>
+                  <option value="B+">B+</option><option value="B-">B-</option>
+                  <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                  <option value="O+">O+</option><option value="O-">O-</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Adresse</label>
+                <input type="text" class="form-control" id="editAddress" placeholder="Quartier / Ville">
+              </div>
+            </div>
+
+            <h6 class="text-primary mb-3">Contact d'urgence</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nom du contact</label>
+                <input type="text" class="form-control" id="editEmergencyName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Téléphone du contact</label>
+                <input type="tel" class="form-control" id="editEmergencyPhone">
+              </div>
+            </div>
+
+            <h6 class="text-primary mb-3">Informations médicales</h6>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Allergies <small class="text-muted">(séparées par virgule)</small></label>
+                <input type="text" class="form-control" id="editAllergies" placeholder="Ex: Pénicilline, Aspirine">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Maladies chroniques</label>
+                <input type="text" class="form-control" id="editChronicDiseases" placeholder="Ex: Diabète type 2, HTA">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Notes</label>
+                <textarea class="form-control" id="editNotes" rows="2" placeholder="Observations particulières..."></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="button" class="btn btn-primary" onclick="saveEditPatient()">
+              <i class="bi bi-check-lg me-1"></i>Enregistrer les modifications
+            </button>
+          </div>
         </div>
       </div>
     </div>

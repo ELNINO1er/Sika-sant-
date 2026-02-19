@@ -70,6 +70,11 @@ function safeParse(value, fallback) {
   try { return JSON.parse(value); } catch (_) { return fallback; }
 }
 
+function readArrayStorage(key) {
+  const parsed = safeParse(localStorage.getItem(key) || '[]', []);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
 function readRegistry() {
   const parsed = safeParse(localStorage.getItem(PATIENT_REGISTRY_KEY) || '[]', []);
   return Array.isArray(parsed) ? parsed : [];
@@ -145,6 +150,15 @@ async function handleRequestOtp(e) {
     appState.otpDeadline = Date.now() + appState.otpExpirationTime;
 
     if (phoneDisplay) phoneDisplay.textContent = maskPhoneNumber(response.phoneNumber);
+
+    // MODE DEV : afficher l'OTP simulé directement dans l'UI
+    const devOtpBanner = document.getElementById('devOtpBanner');
+    const devOtpCode = document.getElementById('devOtpCode');
+    if (devOtpBanner && devOtpCode && response.devOtp) {
+      devOtpCode.textContent = response.devOtp;
+      devOtpBanner.style.display = 'block';
+    }
+
     if (provisionalBadge) provisionalBadge.style.display = response.isProvisional ? 'inline-flex' : 'none';
     if (creationCenterInfo) {
       creationCenterInfo.textContent = response.createdByCenter ? `Cree au : ${response.createdByCenter}` : '';
@@ -231,6 +245,7 @@ async function handleVerifyOtp(e) {
       setTimeout(() => { window.location.href = 'dashboard-patient.html'; }, 1200);
     }
   } catch (error) {
+    console.error('[Auth] Erreur simulateVerifyOtp:', error);
     showError('Erreur de verification. Reessayez.');
   } finally {
     verifyOtpBtn.disabled = false;
@@ -255,6 +270,13 @@ async function handleResendOtp() {
     renderAttemptsInfo();
     startResendCountdown();
     startOtpExpiryCountdown();
+    // MODE DEV : mettre à jour le code affiché
+    const devOtpBanner = document.getElementById('devOtpBanner');
+    const devOtpCode = document.getElementById('devOtpCode');
+    if (devOtpBanner && devOtpCode && response.devOtp) {
+      devOtpCode.textContent = response.devOtp;
+      devOtpBanner.style.display = 'block';
+    }
     showSuccess('Nouveau code OTP envoye.');
   } catch (_) {
     showError('Erreur de connexion.');
@@ -284,6 +306,9 @@ function backToCmu() {
   requestOtpSection.style.display = 'block';
   clearOtpInputs();
   stopOtpTimers();
+  // Masquer le bloc dev OTP
+  const devOtpBanner = document.getElementById('devOtpBanner');
+  if (devOtpBanner) devOtpBanner.style.display = 'none';
   appState.otpAttempts = 0;
   appState.otpDeadline = null;
   verifyOtpBtn.disabled = false;
@@ -443,9 +468,10 @@ async function simulateRequestOtp(identifier) {
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  sessionStorage.setItem('sika_temp_otp', otp);
-  sessionStorage.setItem('sika_temp_otp_time', Date.now().toString());
-  sessionStorage.setItem('sika_temp_patient_id', record.patientId);
+  // Utiliser localStorage au lieu de sessionStorage pour compatibilité multi-onglets
+  localStorage.setItem('sika_temp_otp', otp);
+  localStorage.setItem('sika_temp_otp_time', Date.now().toString());
+  localStorage.setItem('sika_temp_patient_id', record.patientId);
 
   return {
     success: true,
@@ -454,23 +480,24 @@ async function simulateRequestOtp(identifier) {
     patientStatus: status,
     createdByCenter: (record.profile && record.profile.createdByCenter) || '',
     isProvisional: !record.profile.cmu && !!record.profile.temporaryId,
-    patientId: record.patientId
+    patientId: record.patientId,
+    devOtp: otp  // MODE DEV LOCAL : code visible côté UI
   };
 }
 
 async function simulateVerifyOtp(otpRequestId, otpCode) {
   await new Promise((resolve) => setTimeout(resolve, 600));
-  const storedOtp = sessionStorage.getItem('sika_temp_otp');
-  const storedTime = parseInt(sessionStorage.getItem('sika_temp_otp_time') || '0', 10);
-  const patientId = sessionStorage.getItem('sika_temp_patient_id');
+  const storedOtp = localStorage.getItem('sika_temp_otp');
+  const storedTime = parseInt(localStorage.getItem('sika_temp_otp_time') || '0', 10);
+  const patientId = localStorage.getItem('sika_temp_patient_id');
   if (!storedOtp || !storedTime || !patientId || (Date.now() - storedTime > appState.otpExpirationTime)) {
     return { success: false, message: 'OTP expire.' };
   }
   if (otpCode !== storedOtp) return { success: false, message: 'OTP invalide.' };
 
-  sessionStorage.removeItem('sika_temp_otp');
-  sessionStorage.removeItem('sika_temp_otp_time');
-  sessionStorage.removeItem('sika_temp_patient_id');
+  localStorage.removeItem('sika_temp_otp');
+  localStorage.removeItem('sika_temp_otp_time');
+  localStorage.removeItem('sika_temp_patient_id');
 
   const registry = readRegistry();
   const idx = registry.findIndex((entry) => entry.patientId === patientId);

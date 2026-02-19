@@ -68,6 +68,11 @@
         animation: pulse 2s infinite;
       }
 
+      @keyframes slideInToast {
+        from { transform: translateX(120%); opacity: 0; }
+        to   { transform: translateX(0);    opacity: 1; }
+      }
+
       @keyframes pulse {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
@@ -359,6 +364,113 @@
       let patientProfile = {};
       let patientMedical = {};
       let dashboardState = null;
+
+      // ── Utilitaires UI (sans alert/confirm/prompt natifs) ──
+      function showToast(message, type = 'success') {
+        const colors = { success: '#2ecc71', danger: '#e74c3c', warning: '#f39c12', info: '#3498db' };
+        const icons  = { success: 'check-circle-fill', danger: 'x-circle-fill', warning: 'exclamation-triangle-fill', info: 'info-circle-fill' };
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position:fixed;top:80px;right:20px;z-index:9999;
+          background:#fff;border-left:4px solid ${colors[type]||colors.info};
+          border-radius:8px;padding:14px 18px;min-width:280px;max-width:380px;
+          box-shadow:0 4px 20px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;
+          animation:slideInToast .3s ease;
+        `;
+        toast.innerHTML = `
+          <i class="bi bi-${icons[type]||icons.info}" style="font-size:20px;color:${colors[type]};flex-shrink:0;"></i>
+          <span style="font-size:14px;color:#333;flex:1;">${message}</span>
+          <button onclick="this.parentElement.remove()" style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;padding:0;">&times;</button>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => { if (toast.parentElement) toast.remove(); }, 4000);
+      }
+
+      function uiConfirm(message, onConfirm, { title='Confirmation', confirmLabel='Confirmer', confirmClass='btn-primary', cancelLabel='Annuler' } = {}) {
+        const id = `pat-confirm-${Date.now()}`;
+        const bd = document.createElement('div');
+        bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+        bd.innerHTML = `
+          <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:400px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+            <h5 style="margin:0 0 10px;font-weight:700;">${title}</h5>
+            <p style="margin:0 0 22px;color:#555;font-size:14px;">${message}</p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button id="${id}-no" class="btn btn-outline-secondary btn-sm">${cancelLabel}</button>
+              <button id="${id}-yes" class="btn ${confirmClass} btn-sm">${confirmLabel}</button>
+            </div>
+          </div>`;
+        document.body.appendChild(bd);
+        document.getElementById(`${id}-no`).onclick = () => bd.remove();
+        document.getElementById(`${id}-yes`).onclick = () => { bd.remove(); onConfirm(); };
+      }
+
+      function uiPrompt(label, defaultVal, onSubmit, { title='Saisie' } = {}) {
+        const id = `pat-prompt-${Date.now()}`;
+        const bd = document.createElement('div');
+        bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+        bd.innerHTML = `
+          <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+            <h5 style="margin:0 0 14px;font-weight:700;">${title}</h5>
+            <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">${label}</label>
+            <input id="${id}-input" class="form-control" value="${defaultVal||''}" style="margin-bottom:18px;">
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button id="${id}-no" class="btn btn-outline-secondary btn-sm">Annuler</button>
+              <button id="${id}-yes" class="btn btn-primary btn-sm">Valider</button>
+            </div>
+          </div>`;
+        document.body.appendChild(bd);
+        const inp = document.getElementById(`${id}-input`);
+        inp.focus(); inp.select();
+        const submit = () => { const v = inp.value.trim(); bd.remove(); onSubmit(v); };
+        document.getElementById(`${id}-no`).onclick = () => bd.remove();
+        document.getElementById(`${id}-yes`).onclick = submit;
+        inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+      }
+
+      function uiFormModal(title, fields, onSubmit) {
+        const id = `pat-form-${Date.now()}`;
+        const bd = document.createElement('div');
+        bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+        const fieldsHtml = fields.map((f) => `
+          <div style="margin-bottom:14px;">
+            <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:5px;">${f.label}</label>
+            <input id="${id}-${f.key}" class="form-control" value="${f.value||''}" type="${f.type||'text'}">
+          </div>`).join('');
+        bd.innerHTML = `
+          <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:440px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+            <h5 style="margin:0 0 18px;font-weight:700;">${title}</h5>
+            ${fieldsHtml}
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+              <button id="${id}-no" class="btn btn-outline-secondary btn-sm">Annuler</button>
+              <button id="${id}-yes" class="btn btn-primary btn-sm">Enregistrer</button>
+            </div>
+          </div>`;
+        document.body.appendChild(bd);
+        document.getElementById(`${id}-no`).onclick = () => bd.remove();
+        document.getElementById(`${id}-yes`).onclick = () => {
+          const values = {};
+          fields.forEach((f) => { values[f.key] = document.getElementById(`${id}-${f.key}`).value.trim(); });
+          bd.remove();
+          onSubmit(values);
+        };
+        document.getElementById(`${id}-${fields[0].key}`).focus();
+      }
+
+      function uiInfo(message, { title='Information' } = {}) {
+        const id = `pat-info-${Date.now()}`;
+        const bd = document.createElement('div');
+        bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+        bd.innerHTML = `
+          <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:400px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+            <h5 style="margin:0 0 10px;font-weight:700;">${title}</h5>
+            <p style="margin:0 0 22px;color:#444;font-size:14px;white-space:pre-line;">${message}</p>
+            <div style="display:flex;justify-content:flex-end;">
+              <button id="${id}-ok" class="btn btn-primary btn-sm">OK</button>
+            </div>
+          </div>`;
+        document.body.appendChild(bd);
+        document.getElementById(`${id}-ok`).onclick = () => bd.remove();
+      }
 
       const PRESCRIPTION_STATUSES = ['Active', 'Partielle', 'Delivree', 'Expiree'];
       const ACCESS_DURATIONS = [
@@ -1007,7 +1119,7 @@
             await navigator.clipboard.writeText(shareText);
             addNotification('info', 'QR copie', 'Le payload QR a ete copie dans le presse-papiers.');
           } else {
-            alert(shareText);
+            uiInfo(shareText, { title: 'QR Patient' });
           }
         } catch (error) {
           addNotification('warning', 'Partage annule', 'Le partage du QR a ete annule ou indisponible.');
@@ -1015,9 +1127,7 @@
       }
 
       function emergency() {
-        if (confirm('Voulez-vous afficher vos informations d urgence ?')) {
-          showSection('section-emergency');
-        }
+        showSection('section-emergency');
       }
 
       function authorizeAccess() {
@@ -1187,7 +1297,7 @@
         }
 
         const signature = simpleChecksum(`${prescription.id}|${prescription.issuedAt}|${prescription.doctor}`);
-        alert(`Verification reussie.\nOrdonnance: ${prescription.id}\nSignature mock: ${signature}`);
+        uiInfo(`Ordonnance: ${prescription.id}\nSignature mock: ${signature}`, { title: 'Vérification réussie' });
         addNotification('success', 'Authenticite validee', `Ordonnance ${prescription.id} verifiee.`);
       }
 
@@ -1532,7 +1642,7 @@
         if (imagingViewBtn) {
           imagingViewBtn.addEventListener('click', function () {
             addNotification('info', 'Imagerie ouverte', 'Apercu de radiographie affiche (simulation).');
-            alert('Apercu de la radiographie (simulation locale).');
+            showToast('Aperçu de la radiographie (simulation locale).', 'info');
           });
         }
 
@@ -1611,9 +1721,8 @@
 
         if (disconnectDevicesBtn) {
           disconnectDevicesBtn.addEventListener('click', function () {
-            if (confirm('Deconnecter toutes les autres sessions ?')) {
-              revokeAllOtherDevices();
-            }
+            uiConfirm('Déconnecter toutes les autres sessions actives ?', revokeAllOtherDevices,
+              { title: 'Déconnexion des appareils', confirmLabel: 'Déconnecter', confirmClass: 'btn-danger' });
           });
         }
 
@@ -1769,43 +1878,41 @@
       }
 
       function editIdentityInfo() {
-        const newPhone = prompt('Telephone', dashboardState.profile.phone || dashboardState.settings.phoneOtp);
-        if (!newPhone) return;
-        const cleanPhone = newPhone.trim();
-        if (!/^\+?\d[\d\s]{7,}$/.test(cleanPhone)) {
-          alert('Numero invalide. Exemple: +225 07 01 23 45 67');
-          return;
-        }
-        const newAddress = prompt('Adresse', dashboardState.profile.address || 'N/A');
-        if (newAddress === null) return;
-
-        dashboardState.profile.phone = cleanPhone;
-        dashboardState.settings.phoneOtp = cleanPhone;
-        dashboardState.profile.address = newAddress.trim() || 'N/A';
-        saveDashboardState();
-        renderProfileData();
-        syncSettingsUI();
-        renderDashboardOverview();
-        addNotification('success', 'Profil mis a jour', 'Telephone et adresse mis a jour.');
+        uiFormModal('Modifier mes informations', [
+          { key: 'phone', label: 'Téléphone', value: dashboardState.profile.phone || dashboardState.settings.phoneOtp, type: 'tel' },
+          { key: 'address', label: 'Adresse', value: dashboardState.profile.address || '' }
+        ], (values) => {
+          if (!values.phone) { showToast('Le téléphone est obligatoire.', 'warning'); return; }
+          if (!/^\+?\d[\d\s]{7,}$/.test(values.phone)) { showToast('Numéro invalide. Exemple: +225 07 01 23 45 67', 'warning'); return; }
+          dashboardState.profile.phone = values.phone;
+          dashboardState.settings.phoneOtp = values.phone;
+          dashboardState.profile.address = values.address || 'N/A';
+          saveDashboardState();
+          renderProfileData();
+          syncSettingsUI();
+          renderDashboardOverview();
+          addNotification('success', 'Profil mis a jour', 'Téléphone et adresse mis à jour.');
+        });
       }
 
       function editMedicalInfo() {
-        alert('Les donnees medicales sont modifiees uniquement par un professionnel de sante.');
+        showToast('Les données médicales sont modifiées uniquement par un professionnel de santé.', 'info');
       }
 
       function editEmergencyInfo() {
-        const name = prompt('Nom du contact urgence', dashboardState.profile.emergencyName);
-        if (!name) return;
-        const phone = prompt('Telephone du contact urgence', dashboardState.profile.emergencyPhone);
-        if (!phone) return;
-
-        dashboardState.profile.emergencyName = name.trim();
-        dashboardState.profile.emergencyPhone = phone.trim();
-        saveDashboardState();
-        renderProfileData();
-        renderDashboardOverview();
-        renderEmergencySnapshot();
-        addNotification('success', 'Contact urgence mis a jour', 'Le contact d urgence a ete mis a jour.');
+        uiFormModal('Contact d\'urgence', [
+          { key: 'name', label: 'Nom du contact', value: dashboardState.profile.emergencyName || '' },
+          { key: 'phone', label: 'Téléphone du contact', value: dashboardState.profile.emergencyPhone || '', type: 'tel' }
+        ], (values) => {
+          if (!values.name || !values.phone) { showToast('Nom et téléphone sont obligatoires.', 'warning'); return; }
+          dashboardState.profile.emergencyName = values.name;
+          dashboardState.profile.emergencyPhone = values.phone;
+          saveDashboardState();
+          renderProfileData();
+          renderDashboardOverview();
+          renderEmergencySnapshot();
+          addNotification('success', 'Contact urgence mis a jour', 'Le contact d\'urgence a été mis à jour.');
+        });
       }
 
       function toggleConsultationsFilter() {
@@ -1832,7 +1939,7 @@
         if (!consultation) {
           return;
         }
-        alert(`${consultation.date}\n${consultation.place} - ${consultation.doctor}\nDiagnostic: ${consultation.title}`);
+        uiInfo(`Date : ${consultation.date}\nLieu : ${consultation.place}\nMédecin : ${consultation.doctor}\nDiagnostic : ${consultation.title}`, { title: 'Détail consultation' });
       }
 
       function downloadExamResult(examId) {
@@ -1857,7 +1964,7 @@
           return;
         }
         if (file.size > 2 * 1024 * 1024) {
-          alert('Fichier trop volumineux. Limite prototype: 2 Mo.');
+          showToast('Fichier trop volumineux. Limite : 2 Mo.', 'warning');
           event.target.value = '';
           return;
         }
@@ -1895,7 +2002,7 @@
           link.click();
           link.remove();
         } else {
-          alert(`Telechargement de ${doc.name} (simulation).`);
+          showToast(`Téléchargement de ${doc.name} (simulation).`, 'info');
         }
       }
 
@@ -1905,15 +2012,14 @@
           return;
         }
         const doc = dashboardState.documents[index];
-        if (!confirm(`Supprimer le document "${doc.name}" ?`)) {
-          return;
-        }
-        dashboardState.documents.splice(index, 1);
-        dashboardState.settings.lastSyncAt = Date.now();
-        saveDashboardState();
-        renderDocumentsList();
-        syncSettingsUI();
-        addNotification('warning', 'Document supprime', `${doc.name} a ete supprime de votre espace.`);
+        uiConfirm(`Supprimer le document "<strong>${doc.name}</strong>" ?`, () => {
+          dashboardState.documents.splice(index, 1);
+          dashboardState.settings.lastSyncAt = Date.now();
+          saveDashboardState();
+          renderDocumentsList();
+          syncSettingsUI();
+          addNotification('warning', 'Document supprime', `${doc.name} a ete supprime de votre espace.`);
+        }, { title: 'Supprimer le document', confirmLabel: 'Supprimer', confirmClass: 'btn-danger' });
       }
 
       function getDocumentCategory(doc) {
@@ -1925,25 +2031,25 @@
       }
 
       function editOtpPhone() {
-        const phone = prompt('Nouveau numero OTP', dashboardState.settings.phoneOtp);
-        if (!phone) return;
-        const cleanPhone = phone.trim();
-        if (!/^\+?\d[\d\s]{7,}$/.test(cleanPhone)) {
-          alert('Numero invalide. Exemple attendu: +225 07 01 23 45 67');
-          return;
-        }
-        dashboardState.settings.phoneOtp = cleanPhone;
-        dashboardState.profile.phone = cleanPhone;
-        saveDashboardState();
-        syncSettingsUI();
-        renderProfileData();
-        renderDashboardOverview();
-        addNotification('success', 'Numero OTP mis a jour', `Nouveau numero: ${cleanPhone}`);
+        uiPrompt('Nouveau numéro OTP', dashboardState.settings.phoneOtp, (phone) => {
+          if (!phone) return;
+          if (!/^\+?\d[\d\s]{7,}$/.test(phone)) {
+            showToast('Numéro invalide. Exemple: +225 07 01 23 45 67', 'warning');
+            return;
+          }
+          dashboardState.settings.phoneOtp = phone;
+          dashboardState.profile.phone = phone;
+          saveDashboardState();
+          syncSettingsUI();
+          renderProfileData();
+          renderDashboardOverview();
+          addNotification('success', 'Numero OTP mis a jour', `Nouveau numero: ${phone}`);
+        }, { title: 'Modifier le numéro OTP' });
       }
 
       function playTutorial(title) {
         addNotification('info', 'Tutoriel lance', title);
-        alert(`Lecture du tutoriel: ${title} (simulation).`);
+        showToast(`Tutoriel : ${title} (simulation).`, 'info');
       }
 
       function submitSupportIssue() {
@@ -1951,7 +2057,7 @@
         if (!textarea) return;
         const message = textarea.value.trim();
         if (message.length < 10) {
-          alert('Veuillez decrire le probleme avec au moins 10 caracteres.');
+          showToast('Veuillez décrire le problème avec au moins 10 caractères.', 'warning');
           return;
         }
 

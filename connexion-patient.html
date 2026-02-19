@@ -148,6 +148,36 @@
       }
       .activation-steps li i { color: #2ecc71; font-size: 18px; }
 
+      /* Bloc OTP mode dev */
+      .dev-otp-banner {
+        background: linear-gradient(135deg, #fff3cd, #fff8e1);
+        border: 2px dashed #ffc107;
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        text-align: center;
+      }
+      .dev-otp-banner .dev-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #856404;
+        margin-bottom: 4px;
+      }
+      .dev-otp-code {
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: 8px;
+        color: #333;
+        font-family: monospace;
+      }
+      .dev-otp-hint {
+        font-size: 11px;
+        color: #856404;
+        margin-top: 4px;
+      }
+
       /* OTP expiry info */
       .otp-expiry-info {
         font-size: 12px;
@@ -245,6 +275,13 @@
                 <div class="alert alert-info mb-3">
                   <i class="bi bi-info-circle me-2"></i>
                   Code envoyé au <strong id="phoneDisplay"></strong>
+                </div>
+
+                <!-- MODE DEV : affichage du code OTP local -->
+                <div class="dev-otp-banner" id="devOtpBanner" style="display:none;">
+                  <div class="dev-label"><i class="bi bi-cpu me-1"></i>Mode Dev — Code OTP simulé</div>
+                  <div class="dev-otp-code" id="devOtpCode">------</div>
+                  <div class="dev-otp-hint">Ce code ne sera pas affiché en production (envoyé par SMS)</div>
                 </div>
 
                 <form id="verifyOtpForm">
