@@ -187,27 +187,27 @@
                   <i class="bi bi-person-heart fs-1"></i>
                 </div>
                 <h2 class="mb-2">Espace Patient</h2>
-                <p class="text-muted">Connectez-vous avec votre numéro CMU</p>
+                <p class="text-muted">Connectez-vous avec CMU, téléphone ou identifiant provisoire</p>
               </div>
 
               <!-- Step 1: Request OTP -->
               <div id="requestOtpSection">
                 <form id="requestOtpForm">
 
-                  <!-- CMU / ID Provisoire Input -->
+                  <!-- CMU / Telephone / ID Provisoire Input -->
                   <div class="mb-3">
-                    <label for="cmuNumber" class="form-label fw-semibold">Numéro CMU ou Identifiant</label>
+                    <label for="cmuNumber" class="form-label fw-semibold">CMU, Téléphone ou Identifiant</label>
                     <input
                       type="text"
                       class="form-control form-control-lg"
                       id="cmuNumber"
-                      placeholder="Ex: 1234567890 ou PROV-ABJ001"
+                      placeholder="Ex: 1234567890, 0701234567 ou PROV-ABJ001"
                       required
-                      maxlength="16"
+                      maxlength="24"
                       autocomplete="off"
                     >
                     <small class="text-muted">
-                      CMU (10 chiffres) ou ID provisoire remis par votre centre de santé
+                      Entrez votre CMU, votre téléphone OTP ou l'ID provisoire remis par le centre
                     </small>
                   </div>
 

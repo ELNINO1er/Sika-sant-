@@ -469,9 +469,16 @@
           persisted = null;
         }
 
+        const sourceIdentifier = patientProfile.patientId || patientProfile.cmu || patientProfile.temporaryId || userContext.cmuNumber;
+        if (persisted && persisted.patientIdentifier && sourceIdentifier && persisted.patientIdentifier !== sourceIdentifier) {
+          persisted = null;
+        }
+
         if (persisted) {
           dashboardState = persisted;
+          dashboardState.patientIdentifier = dashboardState.patientIdentifier || sourceIdentifier;
           ensureDashboardStateDefaults();
+          hydrateStateFromProfessionalData();
           saveDashboardState();
           return;
         }
@@ -559,6 +566,7 @@
             fullName: 'Jean KOUASSI',
             birthDate: '15 Janvier 1985 (40 ans)',
             phone: '+225 07 01 23 45 67',
+            address: 'Cocody, Abidjan',
             bloodGroup: 'O+',
             allergies: 'Penicilline',
             chronicDiseases: 'Aucune',
@@ -590,10 +598,12 @@
           },
           loginHistory: [],
           devices: [],
+          patientIdentifier: sourceIdentifier,
           supportReports: []
         };
 
         ensureDashboardStateDefaults();
+        hydrateStateFromProfessionalData();
         saveDashboardState();
       }
 
@@ -618,6 +628,7 @@
             fullName: userContext.name || 'Patient',
             birthDate: 'N/A',
             phone: '+225 07 00 00 00 00',
+            address: 'N/A',
             bloodGroup: 'N/A',
             allergies: 'Aucune',
             chronicDiseases: 'Aucune',
@@ -629,6 +640,7 @@
         dashboardState.profile.fullName = dashboardState.profile.fullName || userContext.name || 'Patient';
         dashboardState.profile.birthDate = dashboardState.profile.birthDate || 'N/A';
         dashboardState.profile.phone = dashboardState.profile.phone || '+225 07 00 00 00 00';
+        dashboardState.profile.address = dashboardState.profile.address || 'N/A';
         dashboardState.profile.bloodGroup = dashboardState.profile.bloodGroup || 'N/A';
         dashboardState.profile.allergies = dashboardState.profile.allergies || 'Aucune';
         dashboardState.profile.chronicDiseases = dashboardState.profile.chronicDiseases || 'Aucune';
@@ -708,6 +720,94 @@
         }
         if (!Array.isArray(dashboardState.supportReports)) {
           dashboardState.supportReports = [];
+        }
+      }
+
+      function formatBirthDate(dateIso) {
+        if (!dateIso) {
+          return 'N/A';
+        }
+        const parsed = new Date(dateIso);
+        if (Number.isNaN(parsed.getTime())) {
+          return dateIso;
+        }
+        const ageMs = Date.now() - parsed.getTime();
+        const age = Math.abs(new Date(ageMs).getUTCFullYear() - 1970);
+        return `${parsed.toLocaleDateString('fr-FR')} (${age} ans)`;
+      }
+
+      function mapPrescriptionStatus(status) {
+        if (!status) return 'Active';
+        const value = String(status).toUpperCase();
+        if (value === 'ACTIVE') return 'Active';
+        if (value === 'PARTIAL' || value === 'PARTIELLE') return 'Partielle';
+        if (value === 'DISPENSED' || value === 'DELIVERED') return 'Delivree';
+        if (value === 'EXPIRED') return 'Expiree';
+        return 'Active';
+      }
+
+      function hydrateStateFromProfessionalData() {
+        if (!patientProfile || Object.keys(patientProfile).length === 0) {
+          return;
+        }
+
+        const fullName = `${patientProfile.firstName || ''} ${patientProfile.lastName || ''}`.trim();
+        if (fullName) dashboardState.profile.fullName = fullName;
+        if (patientProfile.dateOfBirth) dashboardState.profile.birthDate = formatBirthDate(patientProfile.dateOfBirth);
+        if (patientProfile.phone) {
+          dashboardState.profile.phone = patientProfile.phone;
+          dashboardState.settings.phoneOtp = patientProfile.phone;
+        }
+        if (patientProfile.address) dashboardState.profile.address = patientProfile.address;
+        if (patientProfile.emergencyContact) {
+          dashboardState.profile.emergencyName = patientProfile.emergencyContact.name || dashboardState.profile.emergencyName;
+          dashboardState.profile.emergencyPhone = patientProfile.emergencyContact.phone || dashboardState.profile.emergencyPhone;
+        }
+
+        if (!patientMedical || Object.keys(patientMedical).length === 0) {
+          return;
+        }
+
+        if (patientMedical.bloodType) dashboardState.profile.bloodGroup = patientMedical.bloodType;
+        if (Array.isArray(patientMedical.allergies)) {
+          const allergiesText = patientMedical.allergies
+            .map((item) => (typeof item === 'string' ? item : `${item.label || ''}${item.status ? ` (${String(item.status).toLowerCase()})` : ''}`))
+            .filter(Boolean)
+            .join(', ');
+          if (allergiesText) dashboardState.profile.allergies = allergiesText;
+        }
+        if (patientMedical.chronicDiseases) dashboardState.profile.chronicDiseases = patientMedical.chronicDiseases;
+        if (patientMedical.antecedents) dashboardState.profile.specialConditions = patientMedical.antecedents;
+
+        if (Array.isArray(patientMedical.treatments) && patientMedical.treatments.length) {
+          dashboardState.medications = patientMedical.treatments.map((item, index) => ({
+            id: `med-reg-${index + 1}`,
+            name: item,
+            taken: false,
+            lastTakenAt: null
+          }));
+        }
+
+        if (Array.isArray(patientMedical.consultations) && patientMedical.consultations.length) {
+          dashboardState.consultations = patientMedical.consultations.map((consultation, index) => ({
+            id: consultation.id || `c-reg-${index + 1}`,
+            title: consultation.diagnosis || consultation.symptoms || 'Consultation',
+            place: consultation.center || 'Centre de sante',
+            doctor: consultation.doctor || 'Professionnel',
+            date: consultation.date || 'N/A',
+            type: consultation.specialty || 'General'
+          }));
+        }
+
+        if (Array.isArray(patientMedical.prescriptions) && patientMedical.prescriptions.length) {
+          dashboardState.prescriptions = patientMedical.prescriptions.map((prescription, index) => ({
+            id: prescription.id || `ORD-REG-${index + 1}`,
+            issuedAt: prescription.date || 'N/A',
+            doctor: prescription.doctor || 'Professionnel',
+            details: Array.isArray(prescription.items) ? prescription.items.join(', ') : String(prescription.items || ''),
+            status: mapPrescriptionStatus(prescription.status),
+            dispenses: prescription.status === 'DISPENSED' ? [{ at: Date.now() - 86400000, pharmacy: 'Pharmacie Centrale' }] : []
+          }));
         }
       }
 
@@ -1402,6 +1502,9 @@
         }
         if (editMedicalBtn) {
           editMedicalBtn.addEventListener('click', editMedicalInfo);
+          editMedicalBtn.classList.remove('btn-outline-primary');
+          editMedicalBtn.classList.add('btn-outline-secondary');
+          editMedicalBtn.innerHTML = '<i class="bi bi-lock me-1"></i> Modifie par un soignant';
         }
         if (editEmergencyBtn) {
           editEmergencyBtn.addEventListener('click', editEmergencyInfo);
@@ -1554,6 +1657,7 @@
         setText('profileFullName', profile.fullName);
         setText('profileBirthDate', profile.birthDate);
         setText('profilePhone', profile.phone);
+        setText('profileAddress', profile.address || 'N/A');
         setText('profileBloodGroup', profile.bloodGroup);
         setText('profileAllergies', profile.allergies);
         setText('profileChronicDiseases', profile.chronicDiseases);
@@ -1665,59 +1769,28 @@
       }
 
       function editIdentityInfo() {
-        const newName = prompt('Nom complet', dashboardState.profile.fullName);
-        if (!newName) return;
-        const newBirthDate = prompt('Date de naissance', dashboardState.profile.birthDate);
-        if (!newBirthDate) return;
-        const nameValue = newName.trim();
-        const birthDateValue = newBirthDate.trim();
-        if (nameValue.length < 3) {
-          alert('Nom complet invalide.');
+        const newPhone = prompt('Telephone', dashboardState.profile.phone || dashboardState.settings.phoneOtp);
+        if (!newPhone) return;
+        const cleanPhone = newPhone.trim();
+        if (!/^\+?\d[\d\s]{7,}$/.test(cleanPhone)) {
+          alert('Numero invalide. Exemple: +225 07 01 23 45 67');
           return;
         }
-        dashboardState.profile.fullName = nameValue;
-        dashboardState.profile.birthDate = birthDateValue;
-        dashboardState.profile.phone = dashboardState.profile.phone || dashboardState.settings.phoneOtp;
-        userContext.name = nameValue;
-        let currentUserData = {};
-        try {
-          currentUserData = JSON.parse(localStorage.getItem(USER_KEY) || '{}');
-        } catch (error) {
-          currentUserData = {};
-        }
-        currentUserData.name = nameValue;
-        localStorage.setItem(USER_KEY, JSON.stringify(currentUserData));
+        const newAddress = prompt('Adresse', dashboardState.profile.address || 'N/A');
+        if (newAddress === null) return;
+
+        dashboardState.profile.phone = cleanPhone;
+        dashboardState.settings.phoneOtp = cleanPhone;
+        dashboardState.profile.address = newAddress.trim() || 'N/A';
         saveDashboardState();
-        applyUserContext();
         renderProfileData();
+        syncSettingsUI();
         renderDashboardOverview();
-        addNotification('success', 'Profil mis a jour', 'Informations d identite mises a jour.');
+        addNotification('success', 'Profil mis a jour', 'Telephone et adresse mis a jour.');
       }
 
       function editMedicalInfo() {
-        const blood = prompt('Groupe sanguin', dashboardState.profile.bloodGroup);
-        if (!blood) return;
-        const allergies = prompt('Allergies', dashboardState.profile.allergies);
-        if (allergies === null) return;
-        const chronic = prompt('Maladies chroniques', dashboardState.profile.chronicDiseases);
-        if (chronic === null) return;
-        const special = prompt('Conditions particulieres', dashboardState.profile.specialConditions);
-        if (special === null) return;
-
-        const bloodGroup = blood.trim().toUpperCase();
-        if (bloodGroup.length < 2) {
-          alert('Groupe sanguin invalide.');
-          return;
-        }
-        dashboardState.profile.bloodGroup = bloodGroup;
-        dashboardState.profile.allergies = allergies.trim() || 'Aucune';
-        dashboardState.profile.chronicDiseases = chronic.trim() || 'Aucune';
-        dashboardState.profile.specialConditions = special.trim() || 'Aucune';
-        saveDashboardState();
-        renderProfileData();
-        renderDashboardOverview();
-        renderEmergencySnapshot();
-        addNotification('success', 'Profil medical mis a jour', 'Informations medicales enregistrees.');
+        alert('Les donnees medicales sont modifiees uniquement par un professionnel de sante.');
       }
 
       function editEmergencyInfo() {
@@ -2372,6 +2445,10 @@
             <div class="col-md-6 mb-3">
               <label class="text-muted small">Téléphone</label>
               <p class="mb-0"><strong id="profilePhone">+225 07 01 23 45 67</strong></p>
+            </div>
+            <div class="col-md-12 mb-3">
+              <label class="text-muted small">Adresse</label>
+              <p class="mb-0"><strong id="profileAddress">Cocody, Abidjan</strong></p>
             </div>
 
             <!-- Centre de création -->

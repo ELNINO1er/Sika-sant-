@@ -387,220 +387,628 @@
     </style>
 
     <script>
-      let currentUser = {};
-      let currentPatient = null;
+  const TOKEN_KEY = 'sika_access_token';
+  const ROLE_KEY = 'sika_user_role';
+  const USER_KEY = 'sika_user_data';
+  const PERMISSIONS_KEY = 'sika_user_permissions';
+  const PATIENT_REGISTRY_KEY = 'sika_patient_registry_v1';
+  const PROFESSIONAL_AUDIT_KEY = 'sika_professional_audit_v1';
 
-      // Vérification authentification
-      document.addEventListener('DOMContentLoaded', function() {
-        const token = localStorage.getItem('sika_access_token');
-        const userRole = localStorage.getItem('sika_user_role');
-        const userData = JSON.parse(localStorage.getItem('sika_user_data') || '{}');
-        const permissions = JSON.parse(localStorage.getItem('sika_user_permissions') || '[]');
+  let currentUser = {};
+  let currentPatient = null;
+  let patientRegistry = [];
 
-        if (!token || !['DOCTOR', 'NURSE', 'PHARMACIST', 'ER'].includes(userRole)) {
-          window.location.href = 'connexion-professionnel.html';
-          return;
-        }
+  function safeParse(value, fallback) {
+    try { return JSON.parse(value); } catch (_) { return fallback; }
+  }
 
-        currentUser = userData;
+  function readArrayStorage(key) {
+    const parsed = safeParse(localStorage.getItem(key) || '[]', []);
+    return Array.isArray(parsed) ? parsed : [];
+  }
 
-        // Afficher infos utilisateur
-        document.getElementById('userName').textContent = userData.name || 'Professionnel';
-        document.getElementById('userRole').textContent = getRoleDisplayName(userData.role);
-        document.getElementById('userInitials').textContent = getInitials(userData.name);
+  function savePatientRegistry() {
+    localStorage.setItem(PATIENT_REGISTRY_KEY, JSON.stringify(patientRegistry));
+  }
 
-        // Afficher dans sidebar
-        document.getElementById('userNameSidebar').textContent = userData.name || 'Professionnel';
-        document.getElementById('userRoleSidebar').textContent = getRoleDisplayName(userData.role);
+  function addAuditEntry(action, details) {
+    const entries = readArrayStorage(PROFESSIONAL_AUDIT_KEY);
+    entries.unshift({
+      id: `audit-${Date.now()}`,
+      at: Date.now(),
+      actor: currentUser.name || 'Professionnel',
+      role: currentUser.role || 'PRO',
+      action,
+      details
+    });
+    localStorage.setItem(PROFESSIONAL_AUDIT_KEY, JSON.stringify(entries.slice(0, 200)));
+  }
 
-        // Gestion permissions (RBAC)
-        applyRolePermissions(userData.role, permissions);
+  document.addEventListener('DOMContentLoaded', function () {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const userRole = localStorage.getItem(ROLE_KEY);
+    const userData = safeParse(localStorage.getItem(USER_KEY) || '{}', {});
+    const permissions = safeParse(localStorage.getItem(PERMISSIONS_KEY) || '[]', []);
 
-        // Détection offline
-        updateConnectionStatus();
-        window.addEventListener('offline', updateConnectionStatus);
-        window.addEventListener('online', updateConnectionStatus);
+    if (!token || !['DOCTOR', 'NURSE', 'PHARMACIST', 'ER'].includes(userRole)) {
+      window.location.href = 'connexion-professionnel.html';
+      return;
+    }
 
-        // Mettre à jour l'heure
-        updateClock();
-        setInterval(updateClock, 1000);
+    currentUser = userData;
+
+    setText('userName', userData.name || 'Professionnel');
+    setText('userRole', getRoleDisplayName(userData.role));
+    setText('userInitials', getInitials(userData.name));
+    setText('userNameSidebar', userData.name || 'Professionnel');
+    setText('userRoleSidebar', getRoleDisplayName(userData.role));
+
+    applyRolePermissions(userData.role, permissions);
+
+    updateConnectionStatus();
+    window.addEventListener('offline', updateConnectionStatus);
+    window.addEventListener('online', updateConnectionStatus);
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    initProfessionalWorkspace();
+  });
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function getRoleDisplayName(role) {
+    const roles = {
+      DOCTOR: 'Medecin',
+      NURSE: 'Infirmier(ere)',
+      PHARMACIST: 'Pharmacien(ne)',
+      ER: 'Urgentiste'
+    };
+    return roles[role] || role || 'Professionnel';
+  }
+
+  function getInitials(name) {
+    if (!name) return 'PR';
+    return name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  function applyRolePermissions(role) {
+    if (role === 'PHARMACIST' || role === 'NURSE') {
+      document.querySelectorAll('[data-permission="prescribe"]').forEach((el) => {
+        el.classList.add('permission-disabled');
       });
+    }
+  }
 
-      function getRoleDisplayName(role) {
-        const roles = {
-          'DOCTOR': 'Médecin',
-          'NURSE': 'Infirmier(ère)',
-          'PHARMACIST': 'Pharmacien(ne)',
-          'ER': 'Urgentiste'
-        };
-        return roles[role] || role;
+  function updateConnectionStatus() {
+    const indicator = document.getElementById('statusIndicator');
+    const text = document.getElementById('statusText');
+    if (!indicator || !text) return;
+
+    if (navigator.onLine) {
+      indicator.className = 'status-indicator online';
+      text.textContent = 'En ligne';
+    } else {
+      indicator.className = 'status-indicator offline';
+      text.textContent = 'Hors ligne - Mode Offline Actif';
+    }
+  }
+
+  function updateClock() {
+    const now = new Date();
+    setText('currentTime', now.toLocaleTimeString('fr-FR'));
+  }
+
+  function showSection(sectionId, linkElement) {
+    document.querySelectorAll('.page-section').forEach((s) => s.classList.remove('active'));
+    const section = document.getElementById(sectionId);
+    if (section) section.classList.add('active');
+
+    document.querySelectorAll('.sidebar-menu a').forEach((a) => a.classList.remove('active'));
+    const activeLink = linkElement || document.querySelector(`.sidebar-menu a[onclick*="${sectionId}"]`);
+    if (activeLink) activeLink.classList.add('active');
+
+    if (window.innerWidth < 992) {
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) sidebar.classList.remove('show');
+    }
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) sidebar.classList.toggle('show');
+  }
+
+  function logout() {
+    if (!confirm('Etes-vous sur de vouloir vous deconnecter ?')) return;
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(ROLE_KEY);
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(PERMISSIONS_KEY);
+    localStorage.removeItem('sika_refresh_token');
+    window.location.href = 'index.html';
+  }
+
+  function initProfessionalWorkspace() {
+    patientRegistry = readArrayStorage(PATIENT_REGISTRY_KEY);
+    bindCreatePatientActions();
+    renderPatientsList();
+  }
+
+  function normalizePhone(phone) {
+    return (phone || '').replace(/[^\d]/g, '');
+  }
+
+  function normalizeIdentifier(value) {
+    return (value || '').trim();
+  }
+
+  function calculateAge(dateIso) {
+    if (!dateIso) return '';
+    const birth = new Date(dateIso);
+    if (Number.isNaN(birth.getTime())) return '';
+    const diff = Date.now() - birth.getTime();
+    const ageDate = new Date(diff);
+    return Math.abs(ageDate.getUTCFullYear() - 1970).toString();
+  }
+
+  function findPatientByIdentifier(identifier) {
+    const id = normalizeIdentifier(identifier);
+    if (!id) return null;
+    const upper = id.toUpperCase();
+    const phone = normalizePhone(id);
+    return patientRegistry.find((record) => {
+      const p = record.profile || {};
+      return (
+        (p.cmu && p.cmu === id) ||
+        (p.temporaryId && p.temporaryId.toUpperCase() === upper) ||
+        (p.patientId && p.patientId.toUpperCase() === upper) ||
+        (normalizePhone(p.phone) === phone)
+      );
+    }) || null;
+  }
+
+  function renderPatientsList(searchTerm) {
+    const container = document.getElementById('patientsRecentList');
+    if (!container) return;
+
+    const term = (searchTerm || '').trim().toLowerCase();
+    const rows = patientRegistry.filter((record) => {
+      if (!term) return true;
+      const p = record.profile || {};
+      const fullName = `${p.firstName || ''} ${p.lastName || ''}`.trim().toLowerCase();
+      return fullName.includes(term) ||
+        (p.cmu || '').toLowerCase().includes(term) ||
+        normalizePhone(p.phone || '').includes(normalizePhone(term));
+    });
+
+    if (!rows.length) {
+      container.innerHTML = '<p class="text-muted mb-0">Aucun patient. Creez un dossier patient.</p>';
+      return;
+    }
+
+    container.innerHTML = rows.map((record) => {
+      const p = record.profile || {};
+      const m = record.medical || {};
+      const name = `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Patient';
+      const id = p.cmu || p.temporaryId || p.patientId;
+      const age = calculateAge(p.dateOfBirth);
+      const lastConsult = (m.consultations && m.consultations[0] && m.consultations[0].date) || 'N/A';
+      return `
+        <div class="patient-card" onclick="loadPatient('${id}')">
+          <strong>${name}</strong> <span class="text-muted">(ID: ${id})</span><br>
+          <small class="text-muted">${age ? `${age} ans` : 'Age N/A'} - Derniere consultation: ${lastConsult}</small>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openCreatePatient() {
+    showSection('section-create-patient');
+  }
+
+  function bindCreatePatientActions() {
+    const sendBtn = document.getElementById('createPatientSendOtpBtn');
+    const printBtn = document.getElementById('createPatientPrintQrBtn');
+    if (sendBtn) sendBtn.addEventListener('click', () => createPatientRecord('otp'));
+    if (printBtn) printBtn.addEventListener('click', () => createPatientRecord('print'));
+  }
+
+  function generatePatientId() {
+    return `PAT-${Date.now().toString().slice(-8)}`;
+  }
+
+  function generateTemporaryId() {
+    return `PROV-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  }
+
+  function simpleChecksum(input) {
+    let hash = 0;
+    for (let i = 0; i < input.length; i += 1) {
+      hash = ((hash << 5) - hash) + input.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).toUpperCase().slice(0, 8);
+  }
+
+  function buildPatientQrPayload(patientId) {
+    const raw = `PID:${patientId}|TS:${Date.now()}`;
+    return `${raw}|SIG:${simpleChecksum(raw)}`;
+  }
+
+  function createPatientRecord(mode) {
+    const firstName = (document.getElementById('newPatientFirstName')?.value || '').trim();
+    const lastName = (document.getElementById('newPatientLastName')?.value || '').trim();
+    const phone = (document.getElementById('newPatientPhone')?.value || '').trim();
+    const cmu = (document.getElementById('newPatientCmu')?.value || '').trim();
+    const dateOfBirth = (document.getElementById('newPatientDob')?.value || '').trim();
+    const sex = (document.getElementById('newPatientSex')?.value || '').trim();
+    const address = (document.getElementById('newPatientAddress')?.value || '').trim();
+    const emergencyName = (document.getElementById('newPatientEmergencyName')?.value || '').trim();
+    const emergencyPhone = (document.getElementById('newPatientEmergencyPhone')?.value || '').trim();
+
+    const bloodGroup = (document.getElementById('newPatientBloodGroup')?.value || '').trim();
+    const bloodGroupStatus = (document.getElementById('newPatientBloodStatus')?.value || 'DECLARED').trim();
+    const allergiesRaw = (document.getElementById('newPatientAllergies')?.value || '').trim();
+    const allergiesStatus = (document.getElementById('newPatientAllergiesStatus')?.value || 'DECLARED').trim();
+    const chronicDiseases = (document.getElementById('newPatientChronic')?.value || '').trim();
+    const antecedents = (document.getElementById('newPatientAntecedents')?.value || '').trim();
+    const treatments = (document.getElementById('newPatientTreatments')?.value || '').trim();
+    const vaccines = (document.getElementById('newPatientVaccines')?.value || '').trim();
+    const notes = (document.getElementById('newPatientMedicalNotes')?.value || '').trim();
+
+    if (!firstName || !lastName || !phone) {
+      alert('Nom, prenom et telephone OTP sont obligatoires.');
+      return;
+    }
+
+    const phoneNorm = normalizePhone(phone);
+    if (phoneNorm.length < 8) {
+      alert('Numero de telephone invalide.');
+      return;
+    }
+
+    if (cmu && !/^\d{10}$/.test(cmu)) {
+      alert('Le numero CMU doit contenir 10 chiffres.');
+      return;
+    }
+
+    const duplicate = patientRegistry.find((record) => {
+      const p = record.profile || {};
+      return (cmu && p.cmu === cmu) || normalizePhone(p.phone) === phoneNorm;
+    });
+    if (duplicate) {
+      alert('Un patient existe deja avec ce CMU ou ce telephone.');
+      return;
+    }
+
+    const patientId = generatePatientId();
+    const temporaryId = cmu ? null : generateTemporaryId();
+    const identifier = cmu || temporaryId || phoneNorm;
+    const qrPayload = buildPatientQrPayload(patientId);
+    const nowIso = new Date().toISOString();
+
+    const record = {
+      patientId,
+      profile: {
+        patientId,
+        cmu: cmu || null,
+        temporaryId,
+        firstName,
+        lastName,
+        phone,
+        dateOfBirth: dateOfBirth || null,
+        sex: sex || null,
+        address: address || '',
+        emergencyContact: {
+          name: emergencyName || '',
+          phone: emergencyPhone || ''
+        },
+        createdByCenter: 'CHU de Cocody',
+        createdByProfessional: currentUser.name || 'Professionnel',
+        createdAt: nowIso,
+        accountStatus: 'PENDING_ACTIVATION',
+        activatedAt: null
+      },
+      medical: {
+        bloodType: bloodGroup || null,
+        bloodTypeStatus: bloodGroup ? bloodGroupStatus : null,
+        allergies: allergiesRaw
+          ? allergiesRaw.split(',').map((item) => ({ label: item.trim(), status: allergiesStatus })).filter((item) => !!item.label)
+          : [],
+        chronicDiseases: chronicDiseases || '',
+        antecedents: antecedents || '',
+        treatments: treatments ? treatments.split(',').map((item) => item.trim()).filter(Boolean) : [],
+        vaccines: vaccines ? vaccines.split(',').map((item) => item.trim()).filter(Boolean) : [],
+        notes: notes || '',
+        consultations: [],
+        prescriptions: [],
+        exams: [],
+        updatedAt: nowIso,
+        updatedBy: currentUser.name || 'Professionnel'
+      },
+      consent: {
+        pendingRequests: [],
+        granted: [],
+        history: []
+      },
+      account: {
+        identifier,
+        otpPhone: phone,
+        status: 'PENDING_ACTIVATION',
+        createdByRole: currentUser.role || 'PRO'
+      },
+      qr: {
+        payload: qrPayload,
+        generatedAt: nowIso
       }
+    };
 
-      function getInitials(name) {
-        if (!name) return 'PR';
-        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    patientRegistry.unshift(record);
+    savePatientRegistry();
+    addAuditEntry('CREATE_PATIENT', `Patient ${firstName} ${lastName} (${identifier}) cree`);
+    renderPatientsList();
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    if (mode === 'otp') {
+      alert(`Patient cree: ${firstName} ${lastName}\nID: ${identifier}\nOTP activation (mock SMS): ${otp}`);
+    } else {
+      alert(`Patient cree: ${firstName} ${lastName}\nQR payload: ${qrPayload}`);
+    }
+
+    const form = document.getElementById('createPatientForm');
+    if (form) form.reset();
+    showSection('section-patients');
+  }
+
+  function openScanner() {
+    document.getElementById('scannerModal').classList.add('show');
+  }
+
+  function closeScanner() {
+    document.getElementById('scannerModal').classList.remove('show');
+  }
+
+  function simulateScan() {
+    const identifier = prompt('Entrez CMU, ID provisoire ou telephone du patient:', '');
+    if (!identifier) return;
+    loadPatient(identifier);
+    closeScanner();
+  }
+
+  function searchPatient() {
+    const query = document.getElementById('searchCMU')?.value || '';
+    if (!query) {
+      renderPatientsList();
+      return;
+    }
+    const exact = findPatientByIdentifier(query);
+    if (exact) {
+      loadPatient(query);
+    } else {
+      renderPatientsList(query);
+    }
+  }
+
+  function loadPatient(identifier) {
+    const record = findPatientByIdentifier(identifier);
+    if (!record) {
+      alert('Patient introuvable. Creez d abord son dossier.');
+      return;
+    }
+
+    currentPatient = record;
+    const isEmergency = confirm('Est-ce une situation d URGENCE ?\n\nOui = Mode urgence (sans consentement)\nNon = Consultation normale (consentement requis)');
+    if (isEmergency) {
+      showEmergencyMode();
+    } else {
+      requestConsent();
+    }
+  }
+
+  function showEmergencyMode() {
+    if (!currentPatient) return;
+    const p = currentPatient.profile || {};
+    const name = `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Patient';
+    const id = p.cmu || p.temporaryId || p.patientId;
+    alert('MODE URGENCE ACTIVE. Acces immediat journalise.');
+    showSection('section-emergency-view');
+    setText('emergencyPatientName', name);
+    setText('emergencyPatientCMU', id || '-');
+    addAuditEntry('EMERGENCY_ACCESS', `Acces urgence ${name} (${id})`);
+  }
+
+  function requestConsent() {
+    if (!currentPatient) return;
+    const otp = prompt('Demandez au patient son code de consentement OTP :');
+    if (!otp) return;
+    alert('Consentement valide. Acces autorise au dossier.');
+    addAuditEntry('CONSENT_VALIDATED', `Consentement patient ${currentPatient.patientId}`);
+    showSection('section-patient-file');
+    loadPatientFile();
+  }
+
+  function loadPatientFile() {
+    if (!currentPatient) return;
+    const p = currentPatient.profile || {};
+    const m = currentPatient.medical || {};
+    const name = `${p.firstName || ''} ${p.lastName || ''}`.trim();
+    const id = p.cmu || p.temporaryId || p.patientId;
+    const age = calculateAge(p.dateOfBirth);
+
+    setText('patientFileName', name || 'Patient');
+    setText('patientFileCMU', id || '-');
+    setText('consultationCurrentPatient', `${name || 'Patient'} (${id || '-'})`);
+
+    const subtitle = document.querySelector('#section-patient-file p.text-muted');
+    if (subtitle) subtitle.textContent = `ID: ${id} - ${age ? `${age} ans` : 'Age N/A'} - ${p.sex || 'Sexe N/A'}`;
+
+    const vitalCard = document.querySelector('#section-patient-file .section-card');
+    if (vitalCard) {
+      const allergies = (m.allergies || []).map((a) => `${a.label} (${a.status === 'CONFIRMED' ? 'confirmee' : 'declaree'})`).join(', ') || 'Aucune';
+      vitalCard.innerHTML = `
+        <h4>Informations Vitales</h4>
+        <div class="row">
+          <div class="col-md-3">
+            <label class="text-muted small">Groupe Sanguin</label>
+            <p><strong>${m.bloodType || 'N/A'}</strong></p>
+          </div>
+          <div class="col-md-4">
+            <label class="text-muted small">Allergies</label>
+            <p><strong class="text-danger">${allergies}</strong></p>
+          </div>
+          <div class="col-md-5">
+            <label class="text-muted small">Maladies Chroniques</label>
+            <p><strong>${m.chronicDiseases || 'Aucune'}</strong></p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function updateCurrentPatientRecord(mutator) {
+    if (!currentPatient || !currentPatient.patientId) return false;
+    const idx = patientRegistry.findIndex((record) => record.patientId === currentPatient.patientId);
+    if (idx < 0) return false;
+    mutator(patientRegistry[idx]);
+    currentPatient = patientRegistry[idx];
+    savePatientRegistry();
+    renderPatientsList();
+    return true;
+  }
+
+  function saveConsultation() {
+    if (!currentPatient) {
+      alert('Chargez d abord un patient.');
+      return;
+    }
+
+    const symptoms = (document.getElementById('symptoms')?.value || '').trim();
+    const diagnosis = (document.getElementById('diagnosis')?.value || '').trim();
+    if (!symptoms || !diagnosis) {
+      alert('Veuillez remplir tous les champs obligatoires.');
+      return;
+    }
+
+    updateCurrentPatientRecord((record) => {
+      const medical = record.medical || {};
+      medical.consultations = Array.isArray(medical.consultations) ? medical.consultations : [];
+      medical.consultations.unshift({
+        id: `CONS-${Date.now()}`,
+        date: new Date().toLocaleDateString('fr-FR'),
+        doctor: currentUser.name || 'Professionnel',
+        center: 'CHU de Cocody',
+        specialty: getRoleDisplayName(currentUser.role || 'DOCTOR'),
+        symptoms,
+        diagnosis
+      });
+      medical.updatedAt = new Date().toISOString();
+      medical.updatedBy = currentUser.name || 'Professionnel';
+      record.medical = medical;
+    });
+
+    addAuditEntry('ADD_CONSULTATION', `Consultation ajoutee pour ${currentPatient.patientId}`);
+    if (!navigator.onLine) {
+      alert('Hors ligne : la consultation sera synchronisee des le retour de connexion.');
+    } else {
+      alert('Consultation enregistree avec succes.');
+    }
+    showSection('section-dashboard');
+  }
+
+  function generatePrescription() {
+    if (!currentPatient) {
+      alert('Chargez d abord un patient.');
+      return;
+    }
+
+    if (!currentUser.role || currentUser.role === 'NURSE') {
+      alert('Vous n avez pas la permission de prescrire.');
+      return;
+    }
+
+    updateCurrentPatientRecord((record) => {
+      const medical = record.medical || {};
+      medical.prescriptions = Array.isArray(medical.prescriptions) ? medical.prescriptions : [];
+      const ref = `ORD-${Date.now().toString().slice(-6)}`;
+      medical.prescriptions.unshift({
+        id: ref,
+        date: new Date().toLocaleDateString('fr-FR'),
+        doctor: currentUser.name || 'Professionnel',
+        items: ['Paracetamol 500mg - 3x/j'],
+        status: 'ACTIVE',
+        qrCode: `QR-${ref}`
+      });
+      medical.updatedAt = new Date().toISOString();
+      medical.updatedBy = currentUser.name || 'Professionnel';
+      record.medical = medical;
+    });
+
+    addAuditEntry('ADD_PRESCRIPTION', `Ordonnance creee pour ${currentPatient.patientId}`);
+    alert('Ordonnance electronique creee.');
+    showSection('section-ordonnances');
+  }
+
+  function addMockExam() {
+    if (!currentPatient) {
+      alert('Chargez d abord un patient.');
+      return;
+    }
+    const examName = prompt('Nom de l examen', 'Bilan sanguin complet');
+    if (!examName) return;
+
+    updateCurrentPatientRecord((record) => {
+      const medical = record.medical || {};
+      medical.exams = Array.isArray(medical.exams) ? medical.exams : [];
+      medical.exams.unshift({
+        id: `EXAM-${Date.now()}`,
+        name: examName,
+        date: new Date().toLocaleDateString('fr-FR'),
+        lab: 'Laboratoire SIKA (mock)',
+        result: 'En attente'
+      });
+      medical.updatedAt = new Date().toISOString();
+      medical.updatedBy = currentUser.name || 'Professionnel';
+      record.medical = medical;
+    });
+
+    addAuditEntry('ADD_EXAM', `Examen prescrit pour ${currentPatient.patientId}`);
+    alert(`Examen prescrit: ${examName}`);
+    showSection('section-examens');
+  }
+
+  function updatePatientMedicalInfo() {
+    if (!currentPatient) {
+      alert('Chargez d abord un patient.');
+      return;
+    }
+
+    const allergyValue = prompt('Allergie a ajouter (laisser vide si aucune)');
+    if (allergyValue === null) return;
+    const allergyStatus = confirm('Allergie confirmee cliniquement ?') ? 'CONFIRMED' : 'DECLARED';
+    const chronic = prompt('Maladies chroniques (texte libre)', (currentPatient.medical && currentPatient.medical.chronicDiseases) || '');
+    if (chronic === null) return;
+
+    updateCurrentPatientRecord((record) => {
+      const medical = record.medical || {};
+      medical.allergies = Array.isArray(medical.allergies) ? medical.allergies : [];
+      if (allergyValue.trim()) {
+        medical.allergies.unshift({ label: allergyValue.trim(), status: allergyStatus });
       }
+      medical.chronicDiseases = chronic.trim();
+      medical.updatedAt = new Date().toISOString();
+      medical.updatedBy = currentUser.name || 'Professionnel';
+      record.medical = medical;
+    });
 
-      function applyRolePermissions(role, permissions) {
-        // Exemple: cacher certaines sections selon le rôle
-        if (role === 'PHARMACIST') {
-          // Pharmacien : accès uniquement aux ordonnances
-          document.querySelectorAll('[data-permission="prescribe"]').forEach(el => {
-            el.classList.add('permission-disabled');
-          });
-        }
-
-        if (role === 'NURSE') {
-          // Infirmier : pas de prescription
-          document.querySelectorAll('[data-permission="prescribe"]').forEach(el => {
-            el.classList.add('permission-disabled');
-          });
-        }
-      }
-
-      function updateConnectionStatus() {
-        const isOnline = navigator.onLine;
-        const indicator = document.getElementById('statusIndicator');
-        const text = document.getElementById('statusText');
-
-        if (isOnline) {
-          indicator.className = 'status-indicator online';
-          text.textContent = 'En ligne';
-        } else {
-          indicator.className = 'status-indicator offline';
-          text.textContent = 'Hors ligne - Mode Offline Actif';
-        }
-      }
-
-      function updateClock() {
-        const now = new Date();
-        const time = now.toLocaleTimeString('fr-FR');
-        document.getElementById('currentTime').textContent = time;
-      }
-
-      // Navigation
-      function showSection(sectionId) {
-        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
-
-        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-        event.target.closest('a').classList.add('active');
-
-        if (window.innerWidth < 992) {
-          document.querySelector('.sidebar').classList.remove('show');
-        }
-      }
-
-      function toggleSidebar() {
-        document.querySelector('.sidebar').classList.toggle('show');
-      }
-
-      function logout() {
-        if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-          localStorage.clear();
-          window.location.href = 'index.html';
-        }
-      }
-
-      // Scanner Patient
-      function openScanner() {
-        document.getElementById('scannerModal').classList.add('show');
-      }
-
-      function closeScanner() {
-        document.getElementById('scannerModal').classList.remove('show');
-      }
-
-      function simulateScan() {
-        // Simulation scan QR
-        const patientCMU = prompt('Entrez le numéro CMU du patient (simulation):', '1234567890');
-        if (patientCMU) {
-          loadPatient(patientCMU);
-          closeScanner();
-        }
-      }
-
-      function searchPatient() {
-        const cmuInput = document.getElementById('searchCMU').value;
-        if (cmuInput) {
-          loadPatient(cmuInput);
-        }
-      }
-
-      function loadPatient(cmu) {
-        // Simulation chargement patient
-        currentPatient = {
-          cmu: cmu,
-          name: 'KOUASSI Jean',
-          age: 40,
-          bloodType: 'O+',
-          allergies: 'Pénicilline',
-          chronicDiseases: 'Aucune',
-          emergencyContact: '+225 07 01 23 45 68'
-        };
-
-        // Demander consentement (sauf urgence)
-        const isEmergency = confirm('Est-ce une situation d\'URGENCE ?\n\nOui = Mode urgence (pas de consentement)\nNon = Consultation normale (consentement requis)');
-
-        if (isEmergency) {
-          showEmergencyMode();
-        } else {
-          requestConsent();
-        }
-      }
-
-      function showEmergencyMode() {
-        alert('🚨 MODE URGENCE ACTIVÉ\n\nAccès immédiat aux informations vitales.\nCet accès est automatiquement journalisé.');
-        showSection('section-emergency-view');
-
-        // Remplir les données
-        document.getElementById('emergencyPatientName').textContent = currentPatient.name;
-        document.getElementById('emergencyPatientCMU').textContent = currentPatient.cmu;
-      }
-
-      function requestConsent() {
-        const otp = prompt('Demandez au patient son code de consentement OTP :');
-        if (otp) {
-          // Simulation validation OTP
-          alert('✅ Consentement validé. Accès autorisé au dossier.');
-          showSection('section-patient-file');
-          loadPatientFile();
-        }
-      }
-
-      function loadPatientFile() {
-        document.getElementById('patientFileName').textContent = currentPatient.name;
-        document.getElementById('patientFileCMU').textContent = currentPatient.cmu;
-      }
-
-      // Nouvelle consultation
-      function saveConsultation() {
-        const symptoms = document.getElementById('symptoms').value;
-        const diagnosis = document.getElementById('diagnosis').value;
-
-        if (!symptoms || !diagnosis) {
-          alert('Veuillez remplir tous les champs obligatoires');
-          return;
-        }
-
-        if (!navigator.onLine) {
-          alert('⚠️ Hors ligne : La consultation sera synchronisée dès le retour de connexion.');
-        }
-
-        alert('✅ Consultation enregistrée avec succès');
-        showSection('section-dashboard');
-      }
-
-      function generatePrescription() {
-        if (!currentUser.role || currentUser.role === 'NURSE') {
-          alert('❌ Vous n\'avez pas la permission de prescrire');
-          return;
-        }
-
-        alert('📄 Génération de l\'ordonnance électronique...');
-        showSection('section-ordonnances');
-      }
-    </script>
+    addAuditEntry('UPDATE_MEDICAL_QUALITY', `Mise a jour allergies/chroniques pour ${currentPatient.patientId}`);
+    loadPatientFile();
+    alert('Dossier medical mis a jour.');
+  }
+</script>
   </head>
   <body>
 
@@ -648,7 +1056,7 @@
       </div>
 
       <ul class="sidebar-menu">
-        <li><a href="#" onclick="showSection('section-dashboard')" class="active">
+        <li><a href="#" onclick="showSection('section-dashboard', this); return false;" class="active">
           <i class="bi bi-grid"></i>
           <span>Tableau de Bord</span>
         </a></li>
@@ -658,37 +1066,42 @@
           <span>Scanner un Patient</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-patients')">
+        <li><a href="#" onclick="showSection('section-create-patient', this); return false;">
+          <i class="bi bi-person-plus"></i>
+          <span>Creer un Patient</span>
+        </a></li>
+
+        <li><a href="#" onclick="showSection('section-patients', this); return false;">
           <i class="bi bi-people"></i>
           <span>Dossiers Patients</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-consultation')" data-permission="consult">
+        <li><a href="#" onclick="showSection('section-consultation', this); return false;" data-permission="consult">
           <i class="bi bi-clipboard-plus"></i>
           <span>Nouvelle Consultation</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-ordonnances')" data-permission="prescribe">
+        <li><a href="#" onclick="showSection('section-ordonnances', this); return false;" data-permission="prescribe">
           <i class="bi bi-prescription2"></i>
           <span>Ordonnances</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-examens')">
+        <li><a href="#" onclick="showSection('section-examens', this); return false;">
           <i class="bi bi-file-earmark-medical"></i>
           <span>Examens & Résultats</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-historique')">
+        <li><a href="#" onclick="showSection('section-historique', this); return false;">
           <i class="bi bi-clock-history"></i>
           <span>Historique & Traçabilité</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-alertes')">
+        <li><a href="#" onclick="showSection('section-alertes', this); return false;">
           <i class="bi bi-exclamation-triangle"></i>
           <span>Messages / Alertes</span>
         </a></li>
 
-        <li><a href="#" onclick="showSection('section-parametres')">
+        <li><a href="#" onclick="showSection('section-parametres', this); return false;">
           <i class="bi bi-gear"></i>
           <span>Paramètres</span>
         </a></li>
@@ -771,7 +1184,7 @@
         </div>
 
         <div class="alert-critical">
-          <i class="bi bi="bi bi-capsule fs-3 text-warning"></i>
+          <i class="bi bi-capsule fs-3 text-warning"></i>
           <div class="flex-grow-1">
             <strong>Interaction médicamenteuse possible - Patient TRAORÉ Ibrahim</strong><br>
             <small>Warfarine + Aspirine - À vérifier</small>
@@ -892,8 +1305,121 @@
               <p><strong>Aucune</strong></p>
             </div>
           </div>
+          <button class="btn btn-sm btn-outline-primary mt-2" onclick="updatePatientMedicalInfo()">
+            <i class="bi bi-pencil-square me-1"></i>Mettre a jour allergies / chroniques
+          </button>
         </div>
 
+      </div>
+
+      <!-- ====== SECTION: CREER PATIENT ====== -->
+      <div id="section-create-patient" class="page-section">
+        <h3 class="mb-4">Creer un Patient</h3>
+
+        <form id="createPatientForm">
+          <div class="section-card">
+            <h4><i class="bi bi-person-vcard"></i> Etape 1 - Identite</h4>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Prenom *</label>
+                <input type="text" class="form-control" id="newPatientFirstName" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nom *</label>
+                <input type="text" class="form-control" id="newPatientLastName" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Telephone OTP *</label>
+                <input type="tel" class="form-control" id="newPatientPhone" placeholder="+225 07 00 00 00 00" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Numero CMU (option)</label>
+                <input type="text" class="form-control" id="newPatientCmu" placeholder="1234567890">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Date de naissance</label>
+                <input type="date" class="form-control" id="newPatientDob">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Sexe</label>
+                <select class="form-select" id="newPatientSex">
+                  <option value="">Non precise</option>
+                  <option value="M">Homme</option>
+                  <option value="F">Femme</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Adresse</label>
+                <input type="text" class="form-control" id="newPatientAddress" placeholder="Commune / Quartier">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Contact urgence - Nom</label>
+                <input type="text" class="form-control" id="newPatientEmergencyName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Contact urgence - Telephone</label>
+                <input type="tel" class="form-control" id="newPatientEmergencyPhone">
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <h4><i class="bi bi-heart-pulse"></i> Etape 2 - Informations medicales initiales</h4>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Groupe sanguin</label>
+                <input type="text" class="form-control" id="newPatientBloodGroup" placeholder="Ex: O+">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Statut groupe sanguin</label>
+                <select class="form-select" id="newPatientBloodStatus">
+                  <option value="DECLARED">Declare</option>
+                  <option value="CONFIRMED">Confirme</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Statut allergies</label>
+                <select class="form-select" id="newPatientAllergiesStatus">
+                  <option value="DECLARED">Declare</option>
+                  <option value="CONFIRMED">Confirme</option>
+                </select>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label">Allergies (separees par virgules)</label>
+                <textarea class="form-control" id="newPatientAllergies" rows="2" placeholder="Penicilline, Arachide"></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label">Maladies chroniques</label>
+                <textarea class="form-control" id="newPatientChronic" rows="2"></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label">Antecedents importants</label>
+                <textarea class="form-control" id="newPatientAntecedents" rows="2"></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label">Traitements en cours (virgules)</label>
+                <textarea class="form-control" id="newPatientTreatments" rows="2"></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label">Vaccins connus (virgules)</label>
+                <textarea class="form-control" id="newPatientVaccines" rows="2"></textarea>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label">Notes medicales</label>
+                <textarea class="form-control" id="newPatientMedicalNotes" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary btn-lg" id="createPatientSendOtpBtn">
+              <i class="bi bi-send me-2"></i>Creer + envoyer OTP
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-lg" id="createPatientPrintQrBtn">
+              <i class="bi bi-qr-code me-2"></i>Creer + imprimer QR
+            </button>
+          </div>
+        </form>
       </div>
 
       <!-- ====== SECTION: NOUVELLE CONSULTATION ====== -->
@@ -902,7 +1428,7 @@
 
         <div class="alert alert-info">
           <i class="bi bi-info-circle me-2"></i>
-          Patient : <strong>KOUASSI Jean</strong> (CMU: 1234567890)
+          Patient : <strong id="consultationCurrentPatient">Aucun patient charge</strong>
         </div>
 
         <div class="section-card">
@@ -961,7 +1487,7 @@
       <div id="section-ordonnances" class="page-section">
         <h3 class="mb-4">E-Ordonnances</h3>
 
-        <button class="btn btn-primary mb-4" data-permission="prescribe">
+        <button class="btn btn-primary mb-4" data-permission="prescribe" onclick="generatePrescription()">
           <i class="bi bi-plus-circle me-2"></i>
           Créer une Ordonnance
         </button>
@@ -991,7 +1517,7 @@
       <div id="section-examens" class="page-section">
         <h3 class="mb-4">Examens & Résultats</h3>
 
-        <button class="btn btn-primary mb-4">
+        <button class="btn btn-primary mb-4" onclick="addMockExam()">
           <i class="bi bi-plus-circle me-2"></i>
           Prescrire un Examen
         </button>
@@ -1092,13 +1618,18 @@
         </div>
       </div>
 
-      <!-- ====== SECTION: DOSSIERS PATIENTS ====== -->
+            <!-- ====== SECTION: DOSSIERS PATIENTS ====== -->
       <div id="section-patients" class="page-section">
         <h3 class="mb-4">Dossiers Patients</h3>
 
         <div class="section-card">
+          <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary" onclick="openCreatePatient()">
+              <i class="bi bi-person-plus me-2"></i>Creer un patient
+            </button>
+          </div>
           <div class="input-group mb-3">
-            <input type="text" class="form-control" id="searchCMU" placeholder="Rechercher par CMU, nom...">
+            <input type="text" class="form-control" id="searchCMU" placeholder="Rechercher par CMU, telephone, nom...">
             <button class="btn btn-primary" onclick="searchPatient()">
               <i class="bi bi-search"></i> Rechercher
             </button>
@@ -1106,19 +1637,12 @@
         </div>
 
         <div class="section-card">
-          <h4>Patients Récents</h4>
-          <div class="patient-card" onclick="loadPatient('1234567890')">
-            <strong>KOUASSI Jean</strong> <span class="text-muted">(CMU: 1234567890)</span><br>
-            <small class="text-muted">40 ans - Dernière consultation: 25 Jan 2025</small>
-          </div>
-          <div class="patient-card" onclick="loadPatient('0987654321')">
-            <strong>KONÉ Marie</strong> <span class="text-muted">(CMU: 0987654321)</span><br>
-            <small class="text-muted">35 ans - Dernière consultation: 10 Déc 2024</small>
-          </div>
+          <h4>Patients Recents</h4>
+          <div id="patientsRecentList"></div>
         </div>
       </div>
 
-      <!-- ====== SECTION: PARAMÈTRES ====== -->
+      <!-- ====== SECTION: PARAMETRES ====== -->
       <div id="section-parametres" class="page-section">
         <h3 class="mb-4">Paramètres</h3>
 
