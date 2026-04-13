@@ -1,0 +1,97 @@
+openapi: 3.0.3
+info:
+  title: Sika-Santé API
+  description: API sécurisée pour la plateforme Sika-Santé
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /auth/login:
+    post:
+      summary: Authentifier un professionnel ou une institution
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                loginType:
+                  type: string
+                  enum: [professional, institution]
+                email:
+                  type: string
+                institutionId:
+                  type: string
+                password:
+                  type: string
+              required: [loginType, password]
+      responses:
+        '200':
+          description: MFA demandé
+        '401':
+          description: Identifiants invalides
+  /auth/request-otp:
+    post:
+      summary: Demande OTP patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cmuNumber:
+                  type: string
+              required: [cmuNumber]
+      responses:
+        '200':
+          description: OTP généré
+  /auth/verify-otp:
+    post:
+      summary: Vérifie OTP patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otpRequestId:
+                  type: integer
+                otpCode:
+                  type: string
+              required: [otpRequestId, otpCode]
+      responses:
+        '200':
+          description: Token JWT renvoyé
+  /auth/refresh:
+    post:
+      summary: Rafraîchit le token d'accès
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required: [refreshToken]
+      responses:
+        '200':
+          description: Nouveau token d'accès
+  /user/profile:
+    get:
+      summary: Récupère le profil utilisateur
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profil renvoyé
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
