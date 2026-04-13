@@ -72,8 +72,7 @@ async function handleRequestOtp(e) {
   requestOtpBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi en cours...';
 
   try {
-    // Simulation API call
-    const response = await simulateRequestOtp(cmuNumber);
+    const response = await requestOtp(cmuNumber);
 
     if (response.success) {
       appState.otpRequestId = response.otpRequestId;
@@ -135,12 +134,12 @@ async function handleVerifyOtp(e) {
   verifyOtpBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification...';
 
   try {
-    // Simulation API call
-    const response = await simulateVerifyOtp(appState.otpRequestId, otpCode);
+    const response = await verifyOtp(appState.otpRequestId, otpCode);
 
     if (response.success) {
-      // Stocker le token
+      // Stocker les tokens
       localStorage.setItem('sika_access_token', response.accessToken);
+      localStorage.setItem('sika_refresh_token', response.refreshToken);
       localStorage.setItem('sika_user_role', 'PATIENT');
       localStorage.setItem('sika_user_data', JSON.stringify(response.userData));
 
@@ -181,7 +180,7 @@ async function handleResendOtp() {
   resendOtpBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi...';
 
   try {
-    const response = await simulateRequestOtp(appState.cmuNumber);
+    const response = await requestOtp(appState.cmuNumber);
 
     if (response.success) {
       appState.otpRequestId = response.otpRequestId;
@@ -300,78 +299,3 @@ function hideMessages() {
   successMessage.style.display = 'none';
 }
 
-/**
- * Simulations API
- */
-async function simulateRequestOtp(cmuNumber) {
-  // Simuler délai réseau
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  // Simuler base de données de patients
-  const mockDatabase = {
-    '1234567890': { name: 'KOUASSI Jean', phone: '0701234567' },
-    '0987654321': { name: 'KONÉ Marie', phone: '0709876543' },
-    '1111111111': { name: 'TRAORÉ Ibrahim', phone: '0701111111' }
-  };
-
-  if (mockDatabase[cmuNumber]) {
-    // Générer un OTP (en réalité, envoyé par SMS)
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`[SIMULATION] OTP généré pour ${cmuNumber}: ${otp}`);
-
-    // Stocker temporairement (en réalité, stocké côté serveur)
-    sessionStorage.setItem('temp_otp', otp);
-    sessionStorage.setItem('temp_otp_time', Date.now().toString());
-
-    return {
-      success: true,
-      otpRequestId: `OTP-${Date.now()}`,
-      phoneNumber: mockDatabase[cmuNumber].phone,
-      message: 'Code envoyé avec succès'
-    };
-  } else {
-    return {
-      success: false,
-      message: 'Numéro CMU non trouvé dans la base de données'
-    };
-  }
-}
-
-async function simulateVerifyOtp(otpRequestId, otpCode) {
-  // Simuler délai réseau
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  const storedOtp = sessionStorage.getItem('temp_otp');
-  const storedTime = parseInt(sessionStorage.getItem('temp_otp_time'));
-
-  // Vérifier expiration (5 minutes)
-  if (Date.now() - storedTime > appState.otpExpirationTime) {
-    return {
-      success: false,
-      message: 'Le code a expiré. Veuillez en demander un nouveau.'
-    };
-  }
-
-  // Vérifier le code
-  if (otpCode === storedOtp) {
-    // Nettoyer
-    sessionStorage.removeItem('temp_otp');
-    sessionStorage.removeItem('temp_otp_time');
-
-    return {
-      success: true,
-      accessToken: 'jwt_token_' + Date.now(),
-      refreshToken: 'refresh_' + Date.now(),
-      userData: {
-        role: 'PATIENT',
-        cmuNumber: appState.cmuNumber,
-        name: 'Jean KOUASSI'
-      }
-    };
-  } else {
-    return {
-      success: false,
-      message: 'Code incorrect'
-    };
-  }
-}

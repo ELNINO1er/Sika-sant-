@@ -90,8 +90,7 @@ async function handleLogin(e) {
   loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connexion...';
 
   try {
-    // Simulation API call
-    const response = await simulateLogin(email, password);
+    const response = await loginUser('professional', { email, password });
 
     if (response.success) {
       appState.mfaRequestId = response.mfaRequestId;
@@ -167,8 +166,7 @@ async function handleVerifyMfa(e) {
   verifyMfaBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification...';
 
   try {
-    // Simulation API call
-    const response = await simulateVerifyMfa(appState.mfaRequestId, mfaCode);
+    const response = await verifyMfa(appState.mfaRequestId, mfaCode);
 
     if (response.success) {
       // Stocker les tokens et informations
@@ -217,7 +215,7 @@ async function handleResendMfa() {
   resendMfaBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi...';
 
   try {
-    const response = await simulateResendMfa(appState.mfaRequestId);
+    const response = await resendMfa(appState.mfaRequestId);
 
     if (response.success) {
       appState.mfaRequestId = response.mfaRequestId;
@@ -382,122 +380,6 @@ function hideMessages() {
 /**
  * Simulations API
  */
-async function simulateLogin(email, password) {
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  // Base de données mock
-  const mockUsers = {
-    'dr.kouassi@chu-abidjan.ci': {
-      password: 'Password123!',
-      role: 'DOCTOR',
-      name: 'Dr. Jean KOUASSI',
-      phone: '0701234567',
-      speciality: 'Cardiologie'
-    },
-    'inf.kone@chu-treichville.ci': {
-      password: 'Nurse2024!',
-      role: 'NURSE',
-      name: 'Marie KONÉ',
-      phone: '0709876543',
-      service: 'Urgences'
-    },
-    'pharm.traore@pharmacie-ci.ci': {
-      password: 'Pharma456!',
-      role: 'PHARMACIST',
-      name: 'Ibrahim TRAORÉ',
-      phone: '0701111111',
-      pharmacy: 'Pharmacie Centrale'
-    }
-  };
-
-  const user = mockUsers[email];
-
-  if (user && user.password === password) {
-    // Générer MFA code
-    const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`[SIMULATION] Code MFA pour ${email}: ${mfaCode}`);
-
-    // Stocker temporairement
-    sessionStorage.setItem('temp_mfa', mfaCode);
-    sessionStorage.setItem('temp_mfa_time', Date.now().toString());
-    sessionStorage.setItem('temp_user_data', JSON.stringify(user));
-
-    return {
-      success: true,
-      mfaRequestId: `MFA-${Date.now()}`,
-      role: user.role,
-      mfaContact: user.phone,
-      message: 'Code MFA envoyé'
-    };
-  } else {
-    return {
-      success: false,
-      message: 'Identifiant ou mot de passe incorrect'
-    };
-  }
-}
-
-async function simulateVerifyMfa(mfaRequestId, mfaCode) {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  const storedMfa = sessionStorage.getItem('temp_mfa');
-  const storedTime = parseInt(sessionStorage.getItem('temp_mfa_time'));
-  const userData = JSON.parse(sessionStorage.getItem('temp_user_data'));
-
-  // Vérifier expiration
-  if (Date.now() - storedTime > appState.mfaExpirationTime) {
-    return {
-      success: false,
-      message: 'Le code a expiré. Veuillez en demander un nouveau.'
-    };
-  }
-
-  // Vérifier le code
-  if (mfaCode === storedMfa) {
-    // Nettoyer
-    sessionStorage.removeItem('temp_mfa');
-    sessionStorage.removeItem('temp_mfa_time');
-    sessionStorage.removeItem('temp_user_data');
-
-    // Permissions selon rôle
-    const permissions = getPermissionsByRole(userData.role);
-
-    return {
-      success: true,
-      accessToken: 'jwt_pro_' + Date.now(),
-      refreshToken: 'refresh_pro_' + Date.now(),
-      role: userData.role,
-      permissions: permissions,
-      userData: {
-        id: 'PRO-' + Date.now(),
-        email: appState.userEmail,
-        name: userData.name,
-        role: userData.role,
-        ...userData
-      }
-    };
-  } else {
-    return {
-      success: false,
-      message: 'Code MFA incorrect'
-    };
-  }
-}
-
-async function simulateResendMfa(mfaRequestId) {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-  console.log(`[SIMULATION] Nouveau code MFA: ${mfaCode}`);
-
-  sessionStorage.setItem('temp_mfa', mfaCode);
-  sessionStorage.setItem('temp_mfa_time', Date.now().toString());
-
-  return {
-    success: true,
-    mfaRequestId: `MFA-${Date.now()}`
-  };
-}
 
 function getPermissionsByRole(role) {
   const permissions = {

@@ -114,8 +114,7 @@ async function handleLogin(e) {
   loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification sécurisée...';
 
   try {
-    // Simulation API call
-    const response = await simulateLogin(institution, institutionId, password);
+    const response = await loginUser('institution', { institutionId, password });
 
     if (response.success) {
       appState.mfaRequestId = response.mfaRequestId;
@@ -196,8 +195,7 @@ async function handleVerifyMfa(e) {
   verifyMfaBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification sécurisée...';
 
   try {
-    // Simulation API call
-    const response = await simulateVerifyMfa(appState.mfaRequestId, mfaCode);
+    const response = await verifyMfa(appState.mfaRequestId, mfaCode);
 
     if (response.success) {
       // Stocker les tokens et informations
@@ -250,7 +248,7 @@ async function handleResendMfa() {
   resendMfaBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi sécurisé...';
 
   try {
-    const response = await simulateResendMfa(appState.mfaRequestId);
+    const response = await resendMfa(appState.mfaRequestId);
 
     if (response.success) {
       appState.mfaRequestId = response.mfaRequestId;
@@ -459,127 +457,3 @@ function hideMessages() {
   successMessage.style.display = 'none';
 }
 
-/**
- * Simulations API
- */
-async function simulateLogin(institution, institutionId, password) {
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
-  // Base de données mock (institutions autorisées)
-  const mockInstitutions = {
-    'GOV-MSANTE-1001': {
-      institution: 'ministere-sante',
-      password: 'SecureGov2024!@#',
-      contact: 'securite@msante.gouv.ci',
-      phone: '0727000001',
-      level: 'FULL_ACCESS'
-    },
-    'GOV-ARTCI-2001': {
-      institution: 'artci',
-      password: 'ArtciSecure2024!',
-      contact: 'admin@artci.ci',
-      phone: '0727000002',
-      level: 'REGULATORY'
-    },
-    'GOV-CNAM-3001': {
-      institution: 'cnam',
-      password: 'CnamSecure2024!',
-      contact: 'support@cnam.ci',
-      phone: '0727000003',
-      level: 'INSURANCE'
-    }
-  };
-
-  const instData = mockInstitutions[institutionId];
-
-  if (instData && instData.institution === institution && instData.password === password) {
-    // Générer MFA code
-    const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`[SIMULATION INSTITUTION] Code MFA pour ${institutionId}: ${mfaCode}`);
-
-    // Stocker temporairement
-    sessionStorage.setItem('temp_gov_mfa', mfaCode);
-    sessionStorage.setItem('temp_gov_mfa_time', Date.now().toString());
-    sessionStorage.setItem('temp_gov_data', JSON.stringify(instData));
-
-    return {
-      success: true,
-      mfaRequestId: `GOV-MFA-${Date.now()}`,
-      mfaContact: instData.phone,
-      message: 'Code de validation envoyé'
-    };
-  } else {
-    return {
-      success: false,
-      message: 'Identifiants institutionnels incorrects ou accès non autorisé'
-    };
-  }
-}
-
-async function simulateVerifyMfa(mfaRequestId, mfaCode) {
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  const storedMfa = sessionStorage.getItem('temp_gov_mfa');
-  const storedTime = parseInt(sessionStorage.getItem('temp_gov_mfa_time'));
-  const instData = JSON.parse(sessionStorage.getItem('temp_gov_data'));
-
-  // Vérifier expiration
-  if (Date.now() - storedTime > appState.mfaExpirationTime) {
-    return {
-      success: false,
-      message: 'Le code a expiré pour des raisons de sécurité. Veuillez en demander un nouveau.'
-    };
-  }
-
-  // Vérifier le code
-  if (mfaCode === storedMfa) {
-    // Nettoyer
-    sessionStorage.removeItem('temp_gov_mfa');
-    sessionStorage.removeItem('temp_gov_mfa_time');
-    sessionStorage.removeItem('temp_gov_data');
-
-    // Permissions institutionnelles (accès données anonymisées uniquement)
-    const permissions = [
-      'view_anonymized_data',
-      'generate_reports',
-      'view_statistics',
-      'epidemio_dashboard',
-      'health_alerts'
-    ];
-
-    return {
-      success: true,
-      accessToken: 'jwt_gov_' + Date.now(),
-      refreshToken: 'refresh_gov_' + Date.now(),
-      permissions: permissions,
-      userData: {
-        id: appState.institutionId,
-        institution: appState.institution,
-        institutionId: appState.institutionId,
-        institutionName: getInstitutionName(appState.institution),
-        accessLevel: instData.level,
-        type: 'GOVERNMENT'
-      }
-    };
-  } else {
-    return {
-      success: false,
-      message: 'Code de validation incorrect'
-    };
-  }
-}
-
-async function simulateResendMfa(mfaRequestId) {
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-  console.log(`[SIMULATION INSTITUTION] Nouveau code MFA: ${mfaCode}`);
-
-  sessionStorage.setItem('temp_gov_mfa', mfaCode);
-  sessionStorage.setItem('temp_gov_mfa_time', Date.now().toString());
-
-  return {
-    success: true,
-    mfaRequestId: `GOV-MFA-${Date.now()}`
-  };
-}

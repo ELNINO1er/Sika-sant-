@@ -120,8 +120,7 @@ async function handleLogin(e) {
   loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connexion...';
 
   try {
-    // Simulation API call
-    const response = await simulateLogin(pharmacyName, license, email, password);
+    const response = await loginUser('professional', { email, password, pharmacyName, license });
 
     if (response.success) {
       appState.mfaRequestId = response.mfaRequestId;
@@ -150,61 +149,6 @@ async function handleLogin(e) {
     loginBtn.disabled = false;
     loginBtn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Continuer';
   }
-}
-
-/**
- * Simulation de l'API de login pharmacie
- */
-async function simulateLogin(pharmacyName, license, email, password) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Compte de test
-      const validCredentials = {
-        license: 'PH-CI-2025',
-        email: 'pharmacie.moderne@sika-sante.ci',
-        password: 'Pharma2025!',
-        pharmacyName: 'pharmacie-moderne'
-      };
-
-      if (
-        license === validCredentials.license &&
-        email === validCredentials.email &&
-        password === validCredentials.password &&
-        pharmacyName === validCredentials.pharmacyName
-      ) {
-        // Générer un code MFA simulé
-        const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-        // Stocker temporairement dans sessionStorage
-        sessionStorage.setItem('temp_mfa_code', mfaCode);
-        sessionStorage.setItem('temp_mfa_time', Date.now().toString());
-
-        console.log('═══════════════════════════════════════════════════════');
-        console.log('🔐 CODE MFA PHARMACIE (SIMULATION)');
-        console.log('═══════════════════════════════════════════════════════');
-        console.log(`Code à 6 chiffres : ${mfaCode}`);
-        console.log(`Pharmacie : ${pharmacyName}`);
-        console.log(`Licence : ${license}`);
-        console.log(`Validité : 5 minutes`);
-        console.log('═══════════════════════════════════════════════════════');
-        console.log('⚠️  Ce code est affiché dans la console pour les tests.');
-        console.log('   En production, il serait envoyé par SMS/Email.');
-        console.log('═══════════════════════════════════════════════════════');
-
-        resolve({
-          success: true,
-          mfaRequestId: `MFA-PHARMA-${Date.now()}`,
-          role: 'PHARMACIEN',
-          message: 'Code MFA envoyé'
-        });
-      } else {
-        resolve({
-          success: false,
-          message: 'Identifiants invalides'
-        });
-      }
-    }, 800);
-  });
 }
 
 /**
@@ -278,18 +222,24 @@ async function handleVerifyMfa(e) {
   verifyMfaBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification...';
 
   try {
-    // Simulation API call
-    const response = await simulateVerifyMfa(appState.mfaRequestId, otpCode);
+    const response = await verifyMfa(appState.mfaRequestId, otpCode);
 
     if (response.success) {
       showSuccess('Authentification réussie ! Redirection...');
 
       // Enregistrer les informations d'authentification
       localStorage.setItem('sika_access_token', response.accessToken);
-      localStorage.setItem('sika_user_role', appState.userRole);
+      localStorage.setItem('sika_refresh_token', response.refreshToken);
+      localStorage.setItem('sika_user_role', response.role || appState.userRole);
+      localStorage.setItem('sika_user_permissions', JSON.stringify(response.permissions || []));
       localStorage.setItem('sika_pharmacy_license', appState.pharmacyLicense);
       localStorage.setItem('sika_pharmacy_name', appState.pharmacyName);
       localStorage.setItem('sika_user_email', appState.pharmacistEmail);
+      localStorage.setItem('sika_user_data', JSON.stringify(response.userData || {
+        id: appState.pharmacyLicense,
+        email: appState.pharmacistEmail,
+        role: appState.userRole
+      }));
 
       // Log d'audit
       logPharmacyAccess();
@@ -329,41 +279,6 @@ async function handleVerifyMfa(e) {
 /**
  * Simulation de la vérification MFA
  */
-async function simulateVerifyMfa(mfaRequestId, otpCode) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const storedCode = sessionStorage.getItem('temp_mfa_code');
-      const storedTime = parseInt(sessionStorage.getItem('temp_mfa_time'));
-
-      // Vérifier expiration
-      if (Date.now() - storedTime > appState.mfaExpirationTime) {
-        resolve({
-          success: false,
-          message: 'Le code a expiré'
-        });
-        return;
-      }
-
-      // Vérifier le code
-      if (otpCode === storedCode) {
-        // Nettoyer le code temporaire
-        sessionStorage.removeItem('temp_mfa_code');
-        sessionStorage.removeItem('temp_mfa_time');
-
-        resolve({
-          success: true,
-          accessToken: `jwt_token_pharmacy_${Date.now()}`,
-          message: 'MFA validé'
-        });
-      } else {
-        resolve({
-          success: false,
-          message: 'Code incorrect'
-        });
-      }
-    }, 500);
-  });
-}
 
 /**
  * Log d'accès pharmacie (audit trail)
@@ -396,8 +311,7 @@ async function handleResendMfa() {
   resendMfaBtn.disabled = true;
 
   try {
-    // Simuler le renvoi
-    const response = await simulateResendMfa(appState.mfaRequestId);
+    const response = await resendMfa(appState.mfaRequestId);
 
     if (response.success) {
       showSuccess('Nouveau code envoyé !');
@@ -410,7 +324,7 @@ async function handleResendMfa() {
       // Redémarrer le compte à rebours
       startResendCountdown();
     } else {
-      showError(response.message);
+      showError(response.message || 'Impossible de renvoyer le code');
     }
 
   } catch (error) {
@@ -419,10 +333,6 @@ async function handleResendMfa() {
   }
 }
 
-/**
- * Simulation du renvoi MFA
- */
-async function simulateResendMfa(mfaRequestId) {
   return new Promise((resolve) => {
     setTimeout(() => {
       // Générer un nouveau code
