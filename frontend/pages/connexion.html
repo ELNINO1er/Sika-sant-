@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion | Sika-Santé</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <main class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="text-center mb-5">
+          <h1 class="mb-3">Connectez-vous à Sika-Santé</h1>
+          <p class="text-muted">Choisissez votre profil et suivez le flux d’authentification adapté à votre rôle.</p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-6 col-xl-3">
+            <a href="connexion-patient.html" class="card card-surface h-100 text-decoration-none text-reset p-4 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white mb-4" style="width:60px;height:60px;"><i class="bi bi-person-heart fs-4"></i></div>
+                <h3 class="h5">Patient</h3>
+                <p class="text-muted mb-0">Connexion sécurisée par OTP via CMU.</p>
+              </div>
+              <span class="badge bg-primary mt-3">Service patient</span>
+            </a>
+          </div>
+
+          <div class="col-md-6 col-xl-3">
+            <a href="connexion-professionnel.html" class="card card-surface h-100 text-decoration-none text-reset p-4 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success text-white mb-4" style="width:60px;height:60px;"><i class="bi bi-stethoscope fs-4"></i></div>
+                <h3 class="h5">Professionnel</h3>
+                <p class="text-muted mb-0">Accès aux patients, consultations et prescriptions.</p>
+              </div>
+              <span class="badge bg-success mt-3">MFA requis</span>
+            </a>
+          </div>
+
+          <div class="col-md-6 col-xl-3">
+            <a href="connexion-pharmacie.html" class="card card-surface h-100 text-decoration-none text-reset p-4 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-info text-white mb-4" style="width:60px;height:60px;"><i class="bi bi-capsule fs-4"></i></div>
+                <h3 class="h5">Pharmacie</h3>
+                <p class="text-muted mb-0">Validation e-ordonnances et délivrance sécurisée.</p>
+              </div>
+              <span class="badge bg-info text-dark mt-3">Licence pro</span>
+            </a>
+          </div>
+
+          <div class="col-md-6 col-xl-3">
+            <a href="connexion-institution.html" class="card card-surface h-100 text-decoration-none text-reset p-4 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary text-white mb-4" style="width:60px;height:60px;"><i class="bi bi-building fs-4"></i></div>
+                <h3 class="h5">Institution</h3>
+                <p class="text-muted mb-0">Données anonymisées et tableaux de bord stratégiques.</p>
+              </div>
+              <span class="badge bg-secondary text-dark mt-3">Accès renforcé</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

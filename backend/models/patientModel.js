@@ -15,7 +15,27 @@ async function findPatientByUserId(userId) {
   return rows[0] || null;
 }
 
+async function getAllPatients() {
+  const [rows] = await db.query(
+    `SELECT u.id, u.name, u.email, u.phone, p.cmu_number AS cmuNumber, u.created_at
+     FROM patients p
+     JOIN users u ON u.id = p.user_id
+     ORDER BY u.created_at DESC`
+  );
+  return rows;
+}
+
+async function savePatientRecord(userId, cmuNumber) {
+  const [result] = await db.query(
+    'INSERT INTO patients (user_id, cmu_number) VALUES (?, ?)',
+    [userId, cmuNumber]
+  );
+  return { id: result.insertId, userId, cmuNumber };
+}
+
 module.exports = {
   findPatientByCmu,
-  findPatientByUserId
+  findPatientByUserId,
+  getAllPatients,
+  savePatientRecord
 };

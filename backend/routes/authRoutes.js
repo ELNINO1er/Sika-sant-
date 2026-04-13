@@ -1,12 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const { validateRequest } = require('../middlewares/validateMiddleware');
+const {
+  requestOtpSchema,
+  verifyOtpSchema,
+  loginSchema,
+  verifyMfaSchema,
+  resendMfaSchema,
+  refreshTokenSchema
+} = require('../validation/authValidation');
 
-router.post('/request-otp', authController.requestOtp);
-router.post('/verify-otp', authController.verifyOtp);
-router.post('/login', authController.login);
-router.post('/verify-mfa', authController.verifyMfa);
-router.post('/resend-mfa', authController.resendMfa);
-router.post('/refresh', authController.refreshToken);
+router.post('/request-otp', validateRequest(requestOtpSchema), authController.requestOtp);
+router.post('/verify-otp', validateRequest(verifyOtpSchema), authController.verifyOtp);
+router.post('/login', validateRequest(loginSchema), authController.login);
+router.post('/verify-mfa', validateRequest(verifyMfaSchema), authController.verifyMfa);
+router.post('/resend-mfa', validateRequest(resendMfaSchema), authController.resendMfa);
+router.post('/refresh', validateRequest(refreshTokenSchema), authController.refreshToken);
 
 module.exports = router;

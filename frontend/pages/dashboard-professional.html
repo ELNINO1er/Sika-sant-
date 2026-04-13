@@ -104,10 +104,13 @@
   <script type="module">
     import { renderSidebar } from '../components/sidebar.js';
     import { renderNavbar, bindNavbarActions } from '../components/navbar.js';
-    import { authGuard, loadUserProfile } from '../services/auth.js';
-    import { toggleDarkMode } from '../utils/helpers.js';
+    import { apiGet } from '../services/api.js';
+    import { authGuard, roleGuard } from '../utils/guards.js';
+    import { toggleDarkMode, formatDate, showToast } from '../utils/helpers.js';
 
-    authGuard();
+    await authGuard();
+    roleGuard('PROFESSIONAL');
+
     document.getElementById('appSidebar').innerHTML = renderSidebar();
     document.getElementById('appNavbar').innerHTML = renderNavbar();
     bindNavbarActions();
@@ -115,7 +118,34 @@
     const darkMode = localStorage.getItem('sika_dark_mode') === 'true';
     toggleDarkMode(darkMode);
 
-    loadUserProfile().catch(() => {});
+    const patientTableBody = document.querySelector('tbody');
+    const statsPatients = document.querySelectorAll('.stat-card h3')[0];
+    const statsPrescriptions = document.querySelectorAll('.stat-card h3')[1];
+
+    try {
+      const response = await apiGet('/patients');
+      const patients = response.data || [];
+      statsPatients.textContent = patients.length;
+      statsPrescriptions.textContent = Math.max(1, Math.round(patients.length * 0.35));
+
+      if (patients.length === 0) {
+        patientTableBody.innerHTML = `
+          <tr><td colspan="4" class="text-center py-4 text-muted">Aucun patient trouvé pour le moment.</td></tr>
+        `;
+      } else {
+        patientTableBody.innerHTML = patients.slice(0, 6).map(patient => `
+          <tr>
+            <td>${patient.name}</td>
+            <td>${patient.cmuNumber || 'N/A'}</td>
+            <td><span class="badge bg-success">Suivi</span></td>
+            <td><button class="btn btn-sm btn-outline-primary">Voir</button></td>
+          </tr>
+        `).join('');
+      }
+    } catch (error) {
+      showToast(error.message, 'danger');
+      patientTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-danger">Impossible de charger les patients.</td></tr>`;
+    }
 
     document.getElementById('consultationForm').addEventListener('submit', event => {
       event.preventDefault();
@@ -123,7 +153,7 @@
       document.getElementById('patientName').value = '';
       document.getElementById('consultationReason').value = '';
       document.getElementById('consultationSummary').value = '';
-      alert(`Consultation enregistrée pour ${name}`);
+      showToast(`Consultation enregistrée pour ${name}`, 'success');
     });
   </script>
 </body>

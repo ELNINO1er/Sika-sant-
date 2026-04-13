@@ -1,16 +1,18 @@
+const logger = require('../config/logger');
+const AppError = require('../utils/appError');
 const userService = require('../services/userService');
 
-async function getProfile(req, res) {
+async function getProfile(req, res, next) {
   try {
     const profile = await userService.getUserProfile(req.user.id);
     if (!profile) {
-      return res.status(404).json({ success: false, message: 'Utilisateur introuvable' });
+      return next(new AppError('Utilisateur introuvable', 404));
     }
 
-    res.json({ success: true, data: profile });
+    return res.formatResponse(profile, 'Profil utilisateur chargé');
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Impossible de récupérer le profil utilisateur' });
+    logger.error('getProfile error: %o', error);
+    return next(new AppError('Impossible de récupérer le profil utilisateur', 500));
   }
 }
 

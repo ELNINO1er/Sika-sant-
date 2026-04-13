@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const logger = require('../config/logger');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../config/jwt');
 const patientModel = require('../models/patientModel');
 const professionalModel = require('../models/professionalModel');
@@ -59,9 +60,10 @@ async function createOtpForUser(userId, purpose) {
   return { requestId, code };
 }
 
-async function requestPatientOtp(cmuNumber) {
+async function requestPatientOtp(cmuNumber, ip) {
   const user = await patientModel.findPatientByCmu(cmuNumber);
   if (!user) {
+    logger.warn('Patient OTP request failed for CMU %s from %s', cmuNumber, ip);
     return null;
   }
 
@@ -69,18 +71,21 @@ async function requestPatientOtp(cmuNumber) {
   await auditLogModel.createAuditLog({
     userId: user.id,
     action: 'REQUEST_PATIENT_OTP',
+    ip,
     metadata: { cmuNumber }
   });
 
+  logger.info('OTP request generated for patient %s', cmuNumber);
   return {
     requestId,
     maskedPhone: maskContact(user.phone || user.email || '******')
   };
 }
 
-async function verifyPatientOtp(otpRequestId, otpCode) {
+async function verifyPatientOtp(otpRequestId, otpCode, ip) {
   const otp = await otpModel.findValidOtpById(otpRequestId, otpCode);
   if (!otp) {
+    logger.warn('Invalid patient OTP verification attempt %s from %s', otpRequestId, ip);
     return null;
   }
 
@@ -90,7 +95,7 @@ async function verifyPatientOtp(otpRequestId, otpCode) {
   }
 
   await otpModel.markOtpUsed(otpRequestId);
-  await auditLogModel.createAuditLog({ userId: user.id, action: 'VERIFY_PATIENT_OTP' });
+  await auditLogModel.createAuditLog({ userId: user.id, action: 'VERIFY_PATIENT_OTP', ip });
 
   const payload = createTokenPayload(user);
   const accessToken = signAccessToken(payload);
@@ -106,7 +111,7 @@ async function verifyPatientOtp(otpRequestId, otpCode) {
   };
 }
 
-async function loginUser(loginType, credentials) {
+async function loginUser(loginType, credentials, ip) {
   const { email, password, institutionId } = credentials;
   let user;
 
@@ -121,11 +126,13 @@ async function loginUser(loginType, credentials) {
   }
 
   if (!user || !user.password_hash) {
+    logger.warn('Failed login attempt for %s from %s', loginType, ip);
     return null;
   }
 
   const passwordMatch = await bcrypt.compare(password, user.password_hash);
   if (!passwordMatch) {
+    logger.warn('Invalid password for %s from %s', loginType, ip);
     return null;
   }
 
@@ -135,9 +142,11 @@ async function loginUser(loginType, credentials) {
   await auditLogModel.createAuditLog({
     userId: user.id,
     action: loginType === 'professional' ? 'PROFESSIONAL_LOGIN_REQUEST' : 'INSTITUTION_LOGIN_REQUEST',
+    ip,
     metadata: { loginType, institutionId, email }
   });
 
+  logger.info('MFA requested for %s from %s', loginType, ip);
   return {
     success: true,
     mfaRequestId: requestId,
@@ -148,9 +157,10 @@ async function loginUser(loginType, credentials) {
   };
 }
 
-async function verifyMfaCode(mfaRequestId, mfaCode) {
+async function verifyMfaCode(mfaRequestId, mfaCode, ip) {
   const otp = await otpModel.findValidOtpById(mfaRequestId, mfaCode);
   if (!otp) {
+    logger.warn('Invalid MFA verification attempt %s from %s', mfaRequestId, ip);
     return null;
   }
 
@@ -160,7 +170,7 @@ async function verifyMfaCode(mfaRequestId, mfaCode) {
   }
 
   await otpModel.markOtpUsed(mfaRequestId);
-  await auditLogModel.createAuditLog({ userId: user.id, action: 'VERIFY_MFA' });
+  await auditLogModel.createAuditLog({ userId: user.id, action: 'VERIFY_MFA', ip });
 
   const payload = createTokenPayload(user);
   const accessToken = signAccessToken(payload);
@@ -177,9 +187,10 @@ async function verifyMfaCode(mfaRequestId, mfaCode) {
   };
 }
 
-async function resendMfaCode(mfaRequestId) {
+async function resendMfaCode(mfaRequestId, ip) {
   const otp = await otpModel.findOtpById(mfaRequestId);
   if (!otp) {
+    logger.warn('Invalid MFA resend attempt %s from %s', mfaRequestId, ip);
     return null;
   }
 
@@ -192,6 +203,7 @@ async function resendMfaCode(mfaRequestId) {
   await auditLogModel.createAuditLog({
     userId: user.id,
     action: 'RESEND_MFA',
+    ip,
     metadata: { mfaRequestId, purpose: otp.purpose }
   });
 
@@ -201,9 +213,10 @@ async function resendMfaCode(mfaRequestId) {
   };
 }
 
-async function refreshTokens(refreshToken) {
+async function refreshTokens(refreshToken, ip) {
   const saved = await refreshTokenModel.findRefreshToken(refreshToken);
   if (!saved) {
+    logger.warn('Invalid refresh token used from %s', ip);
     return null;
   }
 
@@ -217,12 +230,19 @@ async function refreshTokens(refreshToken) {
     await refreshTokenModel.revokeRefreshToken(refreshToken);
     await refreshTokenModel.saveRefreshToken(user.id, newRefreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
 
+    await auditLogModel.createAuditLog({
+      userId: user.id,
+      action: 'REFRESH_TOKEN_ROTATION',
+      ip
+    });
+
     return {
       success: true,
       accessToken,
       refreshToken: newRefreshToken
     };
   } catch (error) {
+    logger.error('refreshTokens error: %o', error);
     return null;
   }
 }

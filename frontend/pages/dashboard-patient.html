@@ -116,11 +116,13 @@
   <script type="module">
     import { renderSidebar } from '../components/sidebar.js';
     import { renderNavbar, bindNavbarActions } from '../components/navbar.js';
-    import { authGuard, loadUserProfile } from '../services/auth.js';
+    import { loadUserProfile } from '../services/auth.js';
     import { getUserData } from '../utils/storage.js';
-    import { toggleDarkMode } from '../utils/helpers.js';
+    import { authGuard, roleGuard } from '../utils/guards.js';
+    import { toggleDarkMode, formatDate } from '../utils/helpers.js';
 
-    authGuard();
+    await authGuard();
+    roleGuard('PATIENT');
 
     document.getElementById('appSidebar').innerHTML = renderSidebar();
     document.getElementById('appNavbar').innerHTML = renderNavbar();
@@ -129,13 +131,26 @@
     const darkMode = localStorage.getItem('sika_dark_mode') === 'true';
     toggleDarkMode(darkMode);
 
-    loadUserProfile().then(profile => {
-      const user = getUserData() || profile;
-      document.getElementById('profileName').textContent = user.name || 'Patient';
-      document.getElementById('profileRole').textContent = user.role;
-    }).catch(() => {
-      document.getElementById('profileName').textContent = 'Profil indisponible';
-    });
+    const data = await loadUserProfile();
+    const user = getUserData() || data;
+    document.getElementById('profileName').textContent = user.name || 'Patient';
+    document.getElementById('profileRole').textContent = user.role || 'PATIENT';
+
+    const historyRows = document.querySelector('tbody');
+    historyRows.innerHTML = `
+      <tr>
+        <td>${formatDate(new Date().toISOString())}</td>
+        <td>Consultation</td>
+        <td>Dr. Jean K.</td>
+        <td>Rappel de traitement et suivi tension.</td>
+      </tr>
+      <tr>
+        <td>${formatDate(new Date(Date.now() - 23 * 24 * 60 * 60 * 1000).toISOString())}</td>
+        <td>Biologie</td>
+        <td>Laboratoire central</td>
+        <td>Résultats normaux.</td>
+      </tr>
+    `;
   </script>
 </body>
 </html>

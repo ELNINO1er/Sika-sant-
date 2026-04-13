@@ -7,6 +7,18 @@ async function createAuditLog({ userId, action, ip, metadata }) {
   );
 }
 
+async function getAllAuditLogs() {
+  const [rows] = await db.query(
+    `SELECT a.id, a.action, a.ip, a.metadata, a.created_at, u.name AS userName, u.email AS userEmail, u.role AS userRole
+     FROM audit_logs a
+     LEFT JOIN users u ON u.id = a.user_id
+     ORDER BY a.created_at DESC
+     LIMIT 200`
+  );
+  return rows;
+}
+
 module.exports = {
-  createAuditLog
+  createAuditLog,
+  getAllAuditLogs
 };

@@ -28,10 +28,23 @@ async function saveNewUser(user) {
   return result.insertId;
 }
 
+async function getAllUsers() {
+  const [rows] = await db.query(
+    `SELECT u.id, u.name, u.role, u.email, u.phone, p.cmu_number AS cmuNumber, pr.specialty, pr.license, i.institution_id AS institutionId, i.type AS institutionType
+     FROM users u
+     LEFT JOIN patients p ON p.user_id = u.id
+     LEFT JOIN professionals pr ON pr.user_id = u.id
+     LEFT JOIN institutions i ON i.user_id = u.id
+     ORDER BY u.created_at DESC`
+  );
+  return rows;
+}
+
 module.exports = {
   findUserByEmail,
   findUserById,
   findUserByPhone,
   updateUserRefreshToken,
-  saveNewUser
+  saveNewUser,
+  getAllUsers
 };
