@@ -1,0 +1,17 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sikaGradient" x1="38" y1="34" x2="215" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5B9BFF"/>
+      <stop offset="0.58" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#4F7DE7"/>
+    </linearGradient>
+    <filter id="softShadow" x="8" y="10" width="240" height="236" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#2563EB" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <path d="M104 26H154V84H214V134H154V230H104C78.5949 230 58 209.405 58 184V162.5C58 149.521 68.5213 139 81.5 139H104V134H79C56.3563 134 38 115.644 38 93V84H104V26Z" fill="url(#sikaGradient)"/>
+    <path d="M83 125L139 98L117 154L107 132L83 125Z" fill="white"/>
+  </g>
+</svg>
