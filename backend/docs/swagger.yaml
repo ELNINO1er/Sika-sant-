@@ -1,38 +1,45 @@
 openapi: 3.0.3
 info:
-  title: Sika-Santé API
-  description: API sécurisée pour la plateforme Sika-Santé
-  version: 1.0.0
+  title: Sika-Sante API
+  description: API v1 securisee pour la plateforme healthcare SaaS Sika-Sante
+  version: 2.0.0
 servers:
   - url: /api/v1
+tags:
+  - name: Auth
+  - name: User
+  - name: Patients
+  - name: Admin
+  - name: Platform
 paths:
-  /auth/login:
-    post:
-      summary: Authentifier un professionnel ou une institution
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                loginType:
-                  type: string
-                  enum: [professional, institution]
-                email:
-                  type: string
-                institutionId:
-                  type: string
-                password:
-                  type: string
-              required: [loginType, password]
+  /csrf-token:
+    get:
+      tags: [Platform]
+      summary: Genere un token CSRF
       responses:
         '200':
-          description: MFA demandé
-        '401':
-          description: Identifiants invalides
+          description: Token CSRF genere
+  /health:
+    get:
+      tags: [Platform]
+      summary: Etat de sante du service
+      responses:
+        '200':
+          description: Service disponible
+  /metrics:
+    get:
+      tags: [Platform]
+      summary: Metriques techniques protegees
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Metriques applicatives
+        '403':
+          description: Acces refuse
   /auth/request-otp:
     post:
+      tags: [Auth]
       summary: Demande OTP patient
       requestBody:
         required: true
@@ -40,55 +47,284 @@ paths:
           application/json:
             schema:
               type: object
+              required: [cmuNumber]
               properties:
                 cmuNumber:
                   type: string
-              required: [cmuNumber]
+                  example: '1234567890'
       responses:
         '200':
-          description: OTP généré
+          description: OTP genere
+        '400':
+          description: Payload invalide
   /auth/verify-otp:
     post:
-      summary: Vérifie OTP patient
+      tags: [Auth]
+      summary: Verifie OTP patient et retourne les tokens
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [otpRequestId, otpCode]
               properties:
                 otpRequestId:
                   type: integer
                 otpCode:
                   type: string
-              required: [otpRequestId, otpCode]
+                  example: '123456'
       responses:
         '200':
-          description: Token JWT renvoyé
-  /auth/refresh:
+          description: OTP verifie
+        '401':
+          description: Code invalide
+  /auth/login:
     post:
-      summary: Rafraîchit le token d'accès
+      tags: [Auth]
+      summary: Initialise une authentification MFA
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [loginType, password]
+              properties:
+                loginType:
+                  type: string
+                  enum: [professional, admin, institution]
+                email:
+                  type: string
+                institutionId:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: MFA demandee
+        '401':
+          description: Identifiants invalides
+  /auth/verify-mfa:
+    post:
+      tags: [Auth]
+      summary: Verifie le code MFA et emet les tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mfaRequestId, mfaCode]
+              properties:
+                mfaRequestId:
+                  type: integer
+                mfaCode:
+                  type: string
+      responses:
+        '200':
+          description: MFA verifiee
+        '401':
+          description: Code invalide
+  /auth/resend-mfa:
+    post:
+      tags: [Auth]
+      summary: Renvoie un code MFA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mfaRequestId]
+              properties:
+                mfaRequestId:
+                  type: integer
+      responses:
+        '200':
+          description: Code renvoye
+        '404':
+          description: Requete MFA introuvable
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotation du refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
               properties:
                 refreshToken:
                   type: string
-              required: [refreshToken]
       responses:
         '200':
-          description: Nouveau token d'accès
+          description: Nouveaux tokens emmis
+        '401':
+          description: Refresh token invalide
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoque la session courante
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Session revoquee
   /user/profile:
     get:
-      summary: Récupère le profil utilisateur
+      tags: [User]
+      summary: Recupere le profil utilisateur courant
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Profil renvoyé
+          description: Profil charge
+        '401':
+          description: Non authentifie
+  /patients:
+    get:
+      tags: [Patients]
+      summary: Liste paginee des patients
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Liste patient
+        '403':
+          description: Permission manquante
+    post:
+      tags: [Patients]
+      summary: Cree un patient
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, cmuNumber, password]
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                cmuNumber:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Patient cree
+        '409':
+          description: Utilisateur deja existant
+  /patients/{patientUserId}/consultations:
+    get:
+      tags: [Patients]
+      summary: Liste les consultations d'un patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: patientUserId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Consultations chargees
+    post:
+      tags: [Patients]
+      summary: Cree une consultation pour un patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: patientUserId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, summary]
+              properties:
+                title:
+                  type: string
+                summary:
+                  type: string
+      responses:
+        '200':
+          description: Consultation creee
+  /users:
+    get:
+      tags: [Admin]
+      summary: Liste paginee des utilisateurs
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateurs charges
+        '403':
+          description: Reserve a l'admin
+  /audit-logs:
+    get:
+      tags: [Admin]
+      summary: Liste paginee des journaux d'audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Audit logs charges
+        '403':
+          description: Permission manquante
 components:
   securitySchemes:
     bearerAuth:

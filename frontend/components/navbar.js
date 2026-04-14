@@ -1,6 +1,6 @@
 import { getUserData, getDarkMode, setDarkMode } from '../utils/storage.js';
 import { logout } from '../services/auth.js';
-import { toggleDarkMode } from '../utils/helpers.js';
+import { toggleDarkMode, getRoleLabel } from '../utils/helpers.js';
 
 export function renderNavbar() {
   const user = getUserData() || { name: 'Utilisateur', role: 'PATIENT' };
@@ -9,8 +9,8 @@ export function renderNavbar() {
   return `
     <div class="topbar">
       <div>
-        <h1 class="page-title">Bonjour, ${user.name.split(' ')[0] || 'Utilisateur'}</h1>
-        <p class="text-muted mb-0">Rôle : ${user.role}</p>
+        <h1 class="page-title">Bonjour, ${user.name?.split(' ')[0] || 'Utilisateur'}</h1>
+        <p class="text-muted mb-0">Rôle : ${getRoleLabel(user.role)}</p>
       </div>
       <div class="toolbar align-items-center">
         <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary" type="button">

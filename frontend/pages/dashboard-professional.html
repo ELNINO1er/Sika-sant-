@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tableau de bord Pro | Sika-Santé</title>
+  <title>Dashboard Professionnel | Sika-Sante</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
@@ -15,146 +15,216 @@
       <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
 
-      <section class="mb-4">
-        <div class="row g-4">
-          <div class="col-md-6">
-            <div class="card card-surface p-4">
-              <h6 class="text-uppercase text-muted">Patients suivis</h6>
-              <h3 class="mt-3">24</h3>
-              <p class="text-muted">En consultation cette semaine</p>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card card-surface p-4">
-              <h6 class="text-uppercase text-muted">Nouvelles prescriptions</h6>
-              <h3 class="mt-3">8</h3>
-              <p class="text-muted">Ajoutées ces 7 derniers jours</p>
-            </div>
-          </div>
+      <section class="metric-strip mb-4">
+        <div class="metric-card">
+          <span class="metric-label">Patients</span>
+          <strong id="patientsCount">0</strong>
+          <span class="metric-helper">Dossiers accessibles</span>
         </div>
-      </section>
-
-      <section class="mb-4">
-        <div class="card card-surface p-4">
-          <h3 class="h5 mb-3">Patients récents</h3>
-          <div class="table-responsive">
-            <table class="table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Patient</th>
-                  <th>Dernière visite</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Sandrine K.</td>
-                  <td>11 avril 2026</td>
-                  <td><span class="badge bg-success">Suivi</span></td>
-                  <td><button class="btn btn-sm btn-outline-primary">Voir</button></td>
-                </tr>
-                <tr>
-                  <td>Yves T.</td>
-                  <td>9 avril 2026</td>
-                  <td><span class="badge bg-warning">Suivi</span></td>
-                  <td><button class="btn btn-sm btn-outline-primary">Voir</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="metric-card">
+          <span class="metric-label">Derniere synchro</span>
+          <strong id="lastRefresh">-</strong>
+          <span class="metric-helper">Donnees API</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Actions</span>
+          <strong id="consultationCount">0</strong>
+          <span class="metric-helper">Consultations visibles</span>
         </div>
       </section>
 
       <section class="row g-4">
-        <div class="col-xl-6">
+        <div class="col-12">
           <div class="card card-surface p-4">
-            <h3 class="h5 mb-3">Ajouter une consultation</h3>
-            <form id="consultationForm">
-              <div class="mb-3">
-                <label class="form-label">Patient</label>
-                <input type="text" class="form-control" id="patientName" placeholder="Nom du patient" required>
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+              <div>
+                <h2 class="h5 mb-1">Liste patients</h2>
+                <p class="text-muted mb-0">Recherche, consultation d'historique et ajout de notes cliniques.</p>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Motif</label>
-                <input type="text" class="form-control" id="consultationReason" placeholder="Motif de la consultation" required>
+              <div class="d-flex gap-2">
+                <input id="patientSearch" class="form-control" type="search" placeholder="Rechercher par nom ou CMU">
+                <button id="refreshPatients" class="btn btn-outline-secondary" type="button">Actualiser</button>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Résumé</label>
-                <textarea class="form-control" id="consultationSummary" rows="4" placeholder="Ajoutez un résumé"></textarea>
-              </div>
-              <button class="btn btn-primary" type="submit">Enregistrer</button>
-            </form>
+            </div>
+            <div id="patientsTable"></div>
           </div>
         </div>
-        <div class="col-xl-6">
+
+        <div class="col-12">
           <div class="card card-surface p-4">
-            <h3 class="h5 mb-3">Prescriptions récentes</h3>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">Amoxicilline - 500 mg</li>
-              <li class="list-group-item">Paracétamol - 1 g</li>
-              <li class="list-group-item">Huile essentielle - traitement complémentaire</li>
-            </ul>
+            <h2 class="h5 mb-3">Nouvelle consultation</h2>
+            <form id="consultationForm" class="row g-3" novalidate>
+              <div class="col-md-4">
+                <label for="patientSelect" class="form-label">Patient</label>
+                <select id="patientSelect" class="form-select" required></select>
+              </div>
+              <div class="col-md-4">
+                <label for="consultationTitle" class="form-label">Titre</label>
+                <input id="consultationTitle" class="form-control" type="text" placeholder="Consultation generale" required>
+              </div>
+              <div class="col-md-4">
+                <label for="consultationSummary" class="form-label">Resume</label>
+                <textarea id="consultationSummary" class="form-control" rows="2" placeholder="Minimum 10 caracteres" required></textarea>
+              </div>
+              <div class="col-12">
+                <button id="consultationSubmit" class="btn btn-primary" type="submit">Enregistrer la consultation</button>
+              </div>
+            </form>
           </div>
         </div>
       </section>
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    import { renderSidebar } from '../components/sidebar.js';
     import { renderNavbar, bindNavbarActions } from '../components/navbar.js';
-    import { apiGet } from '../services/api.js';
+    import { renderSidebar } from '../components/sidebar.js';
+    import { renderDataTable } from '../components/data-table.js';
+    import { bindAsyncForm } from '../components/form.js';
+    import { ensureModal, openModal } from '../components/modal.js';
+    import { createPatientConsultation, listPatientConsultations, listPatients } from '../services/patients.js';
     import { authGuard, roleGuard } from '../utils/guards.js';
-    import { toggleDarkMode, formatDate, showToast } from '../utils/helpers.js';
+    import { ROLES } from '../utils/access.js';
+    import { createLoadingMarkup, formatDateTime, showToast, toggleDarkMode } from '../utils/helpers.js';
+    import { getDarkMode } from '../utils/storage.js';
 
     await authGuard();
-    roleGuard('PROFESSIONAL');
+    roleGuard(ROLES.PROFESSIONAL);
 
     document.getElementById('appSidebar').innerHTML = renderSidebar();
     document.getElementById('appNavbar').innerHTML = renderNavbar();
     bindNavbarActions();
+    toggleDarkMode(getDarkMode());
 
-    const darkMode = localStorage.getItem('sika_dark_mode') === 'true';
-    toggleDarkMode(darkMode);
+    ensureModal({ id: 'consultationsModal', title: 'Historique patient' });
 
-    const patientTableBody = document.querySelector('tbody');
-    const statsPatients = document.querySelectorAll('.stat-card h3')[0];
-    const statsPrescriptions = document.querySelectorAll('.stat-card h3')[1];
+    const patientsTable = document.getElementById('patientsTable');
+    const patientSelect = document.getElementById('patientSelect');
+    const patientSearch = document.getElementById('patientSearch');
+    const refreshPatients = document.getElementById('refreshPatients');
+    const consultationForm = document.getElementById('consultationForm');
+    const consultationSubmit = document.getElementById('consultationSubmit');
+    const patientsCount = document.getElementById('patientsCount');
+    const consultationCount = document.getElementById('consultationCount');
+    const lastRefresh = document.getElementById('lastRefresh');
 
-    try {
-      const response = await apiGet('/patients');
-      const patients = response.data || [];
-      statsPatients.textContent = patients.length;
-      statsPrescriptions.textContent = Math.max(1, Math.round(patients.length * 0.35));
+    let cachedPatients = [];
 
-      if (patients.length === 0) {
-        patientTableBody.innerHTML = `
-          <tr><td colspan="4" class="text-center py-4 text-muted">Aucun patient trouvé pour le moment.</td></tr>
-        `;
-      } else {
-        patientTableBody.innerHTML = patients.slice(0, 6).map(patient => `
-          <tr>
-            <td>${patient.name}</td>
-            <td>${patient.cmuNumber || 'N/A'}</td>
-            <td><span class="badge bg-success">Suivi</span></td>
-            <td><button class="btn btn-sm btn-outline-primary">Voir</button></td>
-          </tr>
-        `).join('');
-      }
-    } catch (error) {
-      showToast(error.message, 'danger');
-      patientTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-danger">Impossible de charger les patients.</td></tr>`;
+    function fillPatientSelect(rows) {
+      patientSelect.innerHTML = rows.length
+        ? rows.map(row => `<option value="${row.id}">${row.name} - ${row.cmuNumber || 'CMU non renseigne'}</option>`).join('')
+        : '<option value="">Aucun patient disponible</option>';
     }
 
-    document.getElementById('consultationForm').addEventListener('submit', event => {
-      event.preventDefault();
-      const name = document.getElementById('patientName').value;
-      document.getElementById('patientName').value = '';
-      document.getElementById('consultationReason').value = '';
-      document.getElementById('consultationSummary').value = '';
-      showToast(`Consultation enregistrée pour ${name}`, 'success');
+    async function openHistory(patientUserId, patientName) {
+      const modal = document.querySelector('#consultationsModal .modal-body');
+      modal.innerHTML = createLoadingMarkup('Chargement de l historique...');
+      openModal('consultationsModal', modal.innerHTML);
+
+      try {
+        const response = await listPatientConsultations(patientUserId);
+        const rows = response.data || [];
+        const bodyHtml = rows.length
+          ? `
+            <div class="list-group list-group-flush">
+              ${rows.map(row => `
+                <div class="list-group-item px-0">
+                  <div class="d-flex justify-content-between gap-3">
+                    <strong>${row.title || 'Consultation'}</strong>
+                    <span class="text-muted">${formatDateTime(row.created_at)}</span>
+                  </div>
+                  <div class="text-muted small mb-2">${row.professionalName || 'Professionnel non renseigne'}</div>
+                  <p class="mb-0">${row.summary || 'Sans resume'}</p>
+                </div>
+              `).join('')}
+            </div>
+          `
+          : `<div class="empty-state"><h3 class="h6">Aucune consultation</h3><p class="text-muted mb-0">${patientName} n'a encore aucune consultation synchronisee.</p></div>`;
+        openModal('consultationsModal', bodyHtml);
+      } catch (error) {
+        openModal('consultationsModal', `<div class="alert alert-danger mb-0">${error.message}</div>`);
+      }
+    }
+
+    async function loadPatients(search = '') {
+      renderDataTable(patientsTable, { columns: [], rows: [], loading: true });
+      const response = await listPatients({ search, page: 1, pageSize: 20 });
+      const rows = response.data.items || [];
+
+      cachedPatients = rows;
+      fillPatientSelect(rows);
+      patientsCount.textContent = String(response.data.meta?.total || rows.length);
+      consultationCount.textContent = String(rows.filter(row => row.latestConsultationAt).length);
+      lastRefresh.textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+      renderDataTable(patientsTable, {
+        columns: [
+          { label: 'Patient', render: row => `<strong>${row.name}</strong>` },
+          { label: 'CMU', render: row => row.cmuNumber || 'Non renseigne' },
+          { label: 'Derniere consultation', render: row => row.latestConsultationAt ? formatDateTime(row.latestConsultationAt) : 'Aucune' },
+          { label: 'Titre recent', render: row => row.latestConsultationTitle || 'Aucun titre' },
+          {
+            label: 'Actions',
+            render: row => `
+              <button class="btn btn-sm btn-outline-primary" data-action="history" data-patient-id="${row.id}" data-patient-name="${row.name}">
+                Historique
+              </button>
+            `
+          }
+        ],
+        rows,
+        emptyTitle: 'Aucun patient',
+        emptyDescription: 'Aucun dossier patient ne correspond a la recherche.'
+      });
+    }
+
+    patientsTable.addEventListener('click', event => {
+      const button = event.target.closest('button[data-action="history"]');
+      if (!button) return;
+      openHistory(button.dataset.patientId, button.dataset.patientName);
     });
+
+    refreshPatients.addEventListener('click', () => {
+      loadPatients(patientSearch.value.trim()).catch(error => showToast(error.message, 'danger'));
+    });
+
+    patientSearch.addEventListener('input', event => {
+      loadPatients(event.target.value.trim()).catch(error => showToast(error.message, 'danger'));
+    });
+
+    bindAsyncForm({
+      form: consultationForm,
+      submitButton: consultationSubmit,
+      idleLabel: 'Enregistrer la consultation',
+      pendingLabel: 'Enregistrement...',
+      onSubmit: async () => {
+        const patientUserId = Number(patientSelect.value);
+        return createPatientConsultation(patientUserId, {
+          title: document.getElementById('consultationTitle').value.trim(),
+          summary: document.getElementById('consultationSummary').value.trim()
+        });
+      },
+      onSuccess: async () => {
+        consultationForm.reset();
+        fillPatientSelect(cachedPatients);
+        showToast('Consultation enregistree.', 'success');
+        await loadPatients(patientSearch.value.trim());
+      },
+      onError: error => showToast(error.message, 'danger')
+    });
+
+    try {
+      await loadPatients();
+    } catch (error) {
+      showToast(error.message, 'danger');
+      renderDataTable(patientsTable, {
+        columns: [],
+        rows: [],
+        emptyTitle: 'Chargement impossible',
+        emptyDescription: 'La liste patient n a pas pu etre recuperee.'
+      });
+    }
   </script>
 </body>
 </html>

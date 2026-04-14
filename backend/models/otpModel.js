@@ -7,21 +7,21 @@ async function invalidateExistingOtps(userId, purpose) {
   );
 }
 
-async function createOtpCode(userId, code, purpose, expiresAt) {
+async function createOtpCode(userId, codeHash, purpose, expiresAt) {
   const [result] = await db.query(
-    'INSERT INTO otp_codes (user_id, code, purpose, expires_at) VALUES (?, ?, ?, ?)',
-    [userId, code, purpose, expiresAt]
+    'INSERT INTO otp_codes (user_id, code_hash, purpose, expires_at) VALUES (?, ?, ?, ?)',
+    [userId, codeHash, purpose, expiresAt]
   );
   return result.insertId;
 }
 
-async function findValidOtpById(requestId, code) {
+async function findValidOtpById(requestId) {
   const [rows] = await db.query(
     `SELECT * FROM otp_codes
-     WHERE id = ? AND code = ?
+     WHERE id = ?
        AND expires_at >= NOW()
        AND used_at IS NULL`,
-    [requestId, code]
+    [requestId]
   );
   return rows[0] || null;
 }
@@ -39,5 +39,6 @@ module.exports = {
   invalidateExistingOtps,
   createOtpCode,
   findValidOtpById,
+  findOtpById,
   markOtpUsed
 };

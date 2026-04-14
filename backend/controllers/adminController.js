@@ -4,7 +4,7 @@ const adminService = require('../services/adminService');
 
 async function listUsers(req, res, next) {
   try {
-    const users = await adminService.getAllUsers();
+    const users = await adminService.getAllUsers(req.validated.query);
     return res.formatResponse(users, 'Liste des utilisateurs chargée');
   } catch (error) {
     logger.error('listUsers error: %o', error);
@@ -14,7 +14,7 @@ async function listUsers(req, res, next) {
 
 async function listAuditLogs(req, res, next) {
   try {
-    const logs = await adminService.getAuditLogs();
+    const logs = await adminService.getAuditLogs(req.validated.query);
     return res.formatResponse(logs, 'Audit logs chargés');
   } catch (error) {
     logger.error('listAuditLogs error: %o', error);

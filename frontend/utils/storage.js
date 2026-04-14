@@ -4,12 +4,30 @@ const USER_KEY = 'sika_user_data';
 const DARK_MODE_KEY = 'sika_dark_mode';
 const EXPIRATION_KEY = 'sika_token_expiration';
 
+function decodeTokenPayload(token) {
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) {
+      return null;
+    }
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(normalized));
+  } catch {
+    return null;
+  }
+}
+
 export function getAccessToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
 export function setAccessToken(token) {
   localStorage.setItem(TOKEN_KEY, token);
+  const payload = decodeTokenPayload(token);
+  if (payload?.exp) {
+    localStorage.setItem(EXPIRATION_KEY, String(payload.exp * 1000));
+  }
 }
 
 export function getRefreshToken() {

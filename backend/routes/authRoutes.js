@@ -8,7 +8,8 @@ const {
   loginSchema,
   verifyMfaSchema,
   resendMfaSchema,
-  refreshTokenSchema
+  refreshTokenSchema,
+  logoutSchema
 } = require('../validation/authValidation');
 
 router.post('/request-otp', validateRequest(requestOtpSchema), authController.requestOtp);
@@ -17,5 +18,6 @@ router.post('/login', validateRequest(loginSchema), authController.login);
 router.post('/verify-mfa', validateRequest(verifyMfaSchema), authController.verifyMfa);
 router.post('/resend-mfa', validateRequest(resendMfaSchema), authController.resendMfa);
 router.post('/refresh', validateRequest(refreshTokenSchema), authController.refreshToken);
+router.post('/logout', validateRequest(logoutSchema), authController.logout);
 
 module.exports = router;

@@ -1,9 +1,10 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const logger = require('../config/logger');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../config/jwt');
+const { ROLES, getPermissionsByRole } = require('../constants/access');
+const { hashToken } = require('../utils/security');
 const patientModel = require('../models/patientModel');
-const professionalModel = require('../models/professionalModel');
 const institutionModel = require('../models/institutionModel');
 const otpModel = require('../models/otpModel');
 const userModel = require('../models/userModel');
@@ -12,6 +13,7 @@ const refreshTokenModel = require('../models/refreshTokenModel');
 
 const DEFAULT_OTP_LENGTH = 6;
 const OTP_EXPIRATION_MINUTES = 5;
+const OTP_SALT_ROUNDS = 8;
 
 function generateNumericCode(length = DEFAULT_OTP_LENGTH) {
   return crypto.randomInt(0, 10 ** length).toString().padStart(length, '0');
@@ -34,29 +36,43 @@ function maskContact(contact) {
 function createTokenPayload(user) {
   return {
     id: user.id,
+    name: user.name,
     role: user.role,
-    email: user.email || null
+    email: user.email || null,
+    permissions: getPermissionsByRole(user.role)
   };
 }
 
-function getPermissionsByRole(role) {
-  const permissionsByRole = {
-    PATIENT: ['view_my_records', 'request_appointments', 'message_professional'],
-    DOCTOR: ['read_patient', 'write_consultation', 'prescribe', 'access_full_history'],
-    NURSE: ['read_patient', 'write_vitals', 'access_limited_history'],
-    PHARMACIST: ['read_prescription', 'validate_prescription', 'dispense'],
-    ER: ['read_patient', 'write_emergency', 'access_emergency_info'],
-    ADMIN: ['full_access'],
-    INSTITUTION: ['view_anonymized_data', 'generate_reports', 'view_statistics']
-  };
-  return permissionsByRole[role] || [];
+async function persistRefreshToken(userId, refreshToken, ip, replacedToken = null) {
+  const refreshTokenHash = hashToken(refreshToken);
+  const replacedByHash = replacedToken ? hashToken(refreshToken) : null;
+
+  if (replacedToken) {
+    await refreshTokenModel.revokeRefreshToken(hashToken(replacedToken), {
+      ip,
+      replacedByHash
+    });
+  }
+
+  await refreshTokenModel.saveRefreshToken(
+    userId,
+    refreshTokenHash,
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    { ip }
+  );
 }
 
 async function createOtpForUser(userId, purpose) {
   await otpModel.invalidateExistingOtps(userId, purpose);
   const code = generateNumericCode(DEFAULT_OTP_LENGTH);
+  const codeHash = await bcrypt.hash(code, OTP_SALT_ROUNDS);
   const expiresAt = new Date(Date.now() + OTP_EXPIRATION_MINUTES * 60 * 1000);
-  const requestId = await otpModel.createOtpCode(userId, code, purpose, expiresAt);
+  const requestId = await otpModel.createOtpCode(userId, codeHash, purpose, expiresAt);
+
+  if (process.env.NODE_ENV !== 'production') {
+    logger.info('DEV OTP generated for request %s: %s', requestId, code);
+  }
+
   return { requestId, code };
 }
 
@@ -67,7 +83,7 @@ async function requestPatientOtp(cmuNumber, ip) {
     return null;
   }
 
-  const { requestId, code } = await createOtpForUser(user.id, 'PATIENT_LOGIN');
+  const { requestId } = await createOtpForUser(user.id, 'PATIENT_LOGIN');
   await auditLogModel.createAuditLog({
     userId: user.id,
     action: 'REQUEST_PATIENT_OTP',
@@ -75,7 +91,6 @@ async function requestPatientOtp(cmuNumber, ip) {
     metadata: { cmuNumber }
   });
 
-  logger.info('OTP request generated for patient %s', cmuNumber);
   return {
     requestId,
     maskedPhone: maskContact(user.phone || user.email || '******')
@@ -83,9 +98,15 @@ async function requestPatientOtp(cmuNumber, ip) {
 }
 
 async function verifyPatientOtp(otpRequestId, otpCode, ip) {
-  const otp = await otpModel.findValidOtpById(otpRequestId, otpCode);
+  const otp = await otpModel.findValidOtpById(otpRequestId);
   if (!otp) {
     logger.warn('Invalid patient OTP verification attempt %s from %s', otpRequestId, ip);
+    return null;
+  }
+
+  const isValidCode = await bcrypt.compare(otpCode, otp.code_hash);
+  if (!isValidCode) {
+    logger.warn('Invalid patient OTP code for request %s from %s', otpRequestId, ip);
     return null;
   }
 
@@ -100,14 +121,14 @@ async function verifyPatientOtp(otpRequestId, otpCode, ip) {
   const payload = createTokenPayload(user);
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
-  await refreshTokenModel.saveRefreshToken(user.id, refreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+  await persistRefreshToken(user.id, refreshToken, ip);
 
   return {
     success: true,
     accessToken,
     refreshToken,
-    permissions: getPermissionsByRole(user.role),
-    userData: { id: user.id, role: user.role, email: user.email, phone: user.phone }
+    permissions: payload.permissions,
+    userData: { id: user.id, name: user.name, role: user.role, email: user.email, phone: user.phone }
   };
 }
 
@@ -116,10 +137,10 @@ async function loginUser(loginType, credentials, ip) {
   let user;
 
   if (loginType === 'professional') {
-    if (!email) return null;
-    user = await professionalModel.findProfessionalByEmail(email);
+    user = await userModel.findUserByEmailAndRole(email, ROLES.PROFESSIONAL);
+  } else if (loginType === 'admin') {
+    user = await userModel.findUserByEmailAndRole(email, ROLES.ADMIN);
   } else if (loginType === 'institution') {
-    if (!institutionId) return null;
     user = await institutionModel.findInstitutionByInstitutionId(institutionId);
   } else {
     return null;
@@ -136,31 +157,40 @@ async function loginUser(loginType, credentials, ip) {
     return null;
   }
 
-  const purpose = loginType === 'professional' ? 'PROFESSIONAL_MFA' : 'INSTITUTION_MFA';
-  const { requestId } = await createOtpForUser(user.id, purpose);
+  const purposeByLoginType = {
+    professional: 'PROFESSIONAL_MFA',
+    admin: 'ADMIN_MFA',
+    institution: 'INSTITUTION_MFA'
+  };
 
+  const { requestId } = await createOtpForUser(user.id, purposeByLoginType[loginType]);
   await auditLogModel.createAuditLog({
     userId: user.id,
-    action: loginType === 'professional' ? 'PROFESSIONAL_LOGIN_REQUEST' : 'INSTITUTION_LOGIN_REQUEST',
+    action: `${loginType.toUpperCase()}_LOGIN_REQUEST`,
     ip,
-    metadata: { loginType, institutionId, email }
+    metadata: { loginType, email: user.email || null, institutionId: institutionId || null }
   });
 
-  logger.info('MFA requested for %s from %s', loginType, ip);
   return {
     success: true,
     mfaRequestId: requestId,
     mfaContact: maskContact(user.phone || user.email || '******'),
     role: user.role,
     permissions: getPermissionsByRole(user.role),
-    userData: { id: user.id, role: user.role, email: user.email, phone: user.phone }
+    userData: { id: user.id, name: user.name, role: user.role, email: user.email, phone: user.phone }
   };
 }
 
 async function verifyMfaCode(mfaRequestId, mfaCode, ip) {
-  const otp = await otpModel.findValidOtpById(mfaRequestId, mfaCode);
+  const otp = await otpModel.findValidOtpById(mfaRequestId);
   if (!otp) {
     logger.warn('Invalid MFA verification attempt %s from %s', mfaRequestId, ip);
+    return null;
+  }
+
+  const isValidCode = await bcrypt.compare(mfaCode, otp.code_hash);
+  if (!isValidCode) {
+    logger.warn('Invalid MFA code for request %s from %s', mfaRequestId, ip);
     return null;
   }
 
@@ -175,15 +205,15 @@ async function verifyMfaCode(mfaRequestId, mfaCode, ip) {
   const payload = createTokenPayload(user);
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
-  await refreshTokenModel.saveRefreshToken(user.id, refreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+  await persistRefreshToken(user.id, refreshToken, ip);
 
   return {
     success: true,
     accessToken,
     refreshToken,
     role: user.role,
-    permissions: getPermissionsByRole(user.role),
-    userData: { id: user.id, role: user.role, email: user.email, phone: user.phone }
+    permissions: payload.permissions,
+    userData: { id: user.id, name: user.name, role: user.role, email: user.email, phone: user.phone }
   };
 }
 
@@ -204,7 +234,7 @@ async function resendMfaCode(mfaRequestId, ip) {
     userId: user.id,
     action: 'RESEND_MFA',
     ip,
-    metadata: { mfaRequestId, purpose: otp.purpose }
+    metadata: { previousRequestId: mfaRequestId, purpose: otp.purpose }
   });
 
   return {
@@ -214,7 +244,8 @@ async function resendMfaCode(mfaRequestId, ip) {
 }
 
 async function refreshTokens(refreshToken, ip) {
-  const saved = await refreshTokenModel.findRefreshToken(refreshToken);
+  const refreshTokenHash = hashToken(refreshToken);
+  const saved = await refreshTokenModel.findRefreshToken(refreshTokenHash);
   if (!saved) {
     logger.warn('Invalid refresh token used from %s', ip);
     return null;
@@ -225,10 +256,10 @@ async function refreshTokens(refreshToken, ip) {
     const user = await userModel.findUserById(decoded.id);
     if (!user) return null;
 
-    const accessToken = signAccessToken(createTokenPayload(user));
-    const newRefreshToken = signRefreshToken(createTokenPayload(user));
-    await refreshTokenModel.revokeRefreshToken(refreshToken);
-    await refreshTokenModel.saveRefreshToken(user.id, newRefreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+    const payload = createTokenPayload(user);
+    const accessToken = signAccessToken(payload);
+    const newRefreshToken = signRefreshToken(payload);
+    await persistRefreshToken(user.id, newRefreshToken, ip, refreshToken);
 
     await auditLogModel.createAuditLog({
       userId: user.id,
@@ -243,8 +274,14 @@ async function refreshTokens(refreshToken, ip) {
     };
   } catch (error) {
     logger.error('refreshTokens error: %o', error);
+    await refreshTokenModel.revokeRefreshToken(refreshTokenHash, { ip });
     return null;
   }
+}
+
+async function logout(refreshToken, ip) {
+  await refreshTokenModel.revokeRefreshToken(hashToken(refreshToken), { ip });
+  return { success: true };
 }
 
 module.exports = {
@@ -253,5 +290,6 @@ module.exports = {
   loginUser,
   verifyMfaCode,
   resendMfaCode,
-  refreshTokens
+  refreshTokens,
+  logout
 };

@@ -4,13 +4,16 @@ const authService = require('../services/authService');
 
 async function requestOtp(req, res, next) {
   try {
-    const { cmuNumber } = req.body;
+    const { cmuNumber } = req.validated.body;
     const otpResult = await authService.requestPatientOtp(cmuNumber, req.ip);
     if (!otpResult) {
       return next(new AppError('Patient introuvable. Inscription requise.', 404));
     }
 
-    return res.formatResponse({ otpRequestId: otpResult.requestId, phoneNumber: otpResult.maskedPhone }, 'Code OTP généré');
+    return res.formatResponse(
+      { otpRequestId: otpResult.requestId, phoneNumber: otpResult.maskedPhone },
+      'Code OTP généré'
+    );
   } catch (error) {
     logger.error('requestOtp error: %o', error);
     return next(new AppError('Impossible de générer le code OTP', 500));
@@ -19,7 +22,7 @@ async function requestOtp(req, res, next) {
 
 async function verifyOtp(req, res, next) {
   try {
-    const { otpRequestId, otpCode } = req.body;
+    const { otpRequestId, otpCode } = req.validated.body;
     const tokenResult = await authService.verifyPatientOtp(otpRequestId, otpCode, req.ip);
     if (!tokenResult) {
       return next(new AppError('Code invalide ou expiré', 401));
@@ -34,7 +37,7 @@ async function verifyOtp(req, res, next) {
 
 async function login(req, res, next) {
   try {
-    const { loginType, email, password, institutionId } = req.body;
+    const { loginType, email, password, institutionId } = req.validated.body;
     const loginResult = await authService.loginUser(loginType, { email, password, institutionId }, req.ip);
     if (!loginResult) {
       return next(new AppError('Identifiants invalides', 401));
@@ -49,7 +52,7 @@ async function login(req, res, next) {
 
 async function verifyMfa(req, res, next) {
   try {
-    const { mfaRequestId, mfaCode } = req.body;
+    const { mfaRequestId, mfaCode } = req.validated.body;
     const tokenResult = await authService.verifyMfaCode(mfaRequestId, mfaCode, req.ip);
     if (!tokenResult) {
       return next(new AppError('Code MFA invalide ou expiré', 401));
@@ -64,7 +67,7 @@ async function verifyMfa(req, res, next) {
 
 async function refreshToken(req, res, next) {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.validated.body;
     const result = await authService.refreshTokens(refreshToken, req.ip);
     if (!result) {
       return next(new AppError('Token de rafraîchissement invalide', 401));
@@ -79,16 +82,30 @@ async function refreshToken(req, res, next) {
 
 async function resendMfa(req, res, next) {
   try {
-    const { mfaRequestId } = req.body;
+    const { mfaRequestId } = req.validated.body;
     const result = await authService.resendMfaCode(mfaRequestId, req.ip);
     if (!result) {
       return next(new AppError('Requête MFA introuvable ou expirée', 404));
     }
 
-    return res.formatResponse({ mfaRequestId: result.requestId, mfaContact: result.maskedContact }, 'Code MFA renvoyé');
+    return res.formatResponse(
+      { mfaRequestId: result.requestId, mfaContact: result.maskedContact },
+      'Code MFA renvoyé'
+    );
   } catch (error) {
     logger.error('resendMfa error: %o', error);
     return next(new AppError('Impossible de renvoyer le code MFA', 500));
+  }
+}
+
+async function logout(req, res, next) {
+  try {
+    const { refreshToken } = req.validated.body;
+    const result = await authService.logout(refreshToken, req.ip);
+    return res.formatResponse(result, 'Session révoquée');
+  } catch (error) {
+    logger.error('logout error: %o', error);
+    return next(new AppError('Impossible de fermer la session', 500));
   }
 }
 
@@ -98,5 +115,6 @@ module.exports = {
   login,
   verifyMfa,
   refreshToken,
-  resendMfa
+  resendMfa,
+  logout
 };

@@ -1,5 +1,9 @@
-import { getAccessToken, getUserData, getRefreshToken, isTokenExpired, removeTokens, setAccessToken, setRefreshToken, setLogoutTimer } from './storage.js';
+import { getAccessToken, getRefreshToken, getUserData, isTokenExpired, removeTokens, setAccessToken, setRefreshToken } from './storage.js';
 import { apiPost } from '../services/api.js';
+
+function redirectToLogin() {
+  window.location.href = '/pages/connexion.html';
+}
 
 export async function authGuard() {
   const token = getAccessToken();
@@ -11,28 +15,29 @@ export async function authGuard() {
       const payload = await apiPost('/auth/refresh', { refreshToken });
       setAccessToken(payload.data.accessToken);
       setRefreshToken(payload.data.refreshToken);
-      setLogoutTimer(15 * 60);
       return true;
     } catch {
       removeTokens();
-      window.location.href = '/pages/connexion.html';
+      redirectToLogin();
       return false;
     }
   }
 
   if (!token || tokenExpired) {
     removeTokens();
-    window.location.href = '/pages/connexion.html';
+    redirectToLogin();
     return false;
   }
 
   return true;
 }
 
-export function roleGuard(role) {
+export function roleGuard(requiredRoles) {
   const user = getUserData();
-  if (!user || user.role !== role) {
-    window.location.href = '/pages/connexion.html';
+  const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
+  if (!user || !roles.includes(user.role)) {
+    removeTokens();
+    redirectToLogin();
     return false;
   }
   return true;

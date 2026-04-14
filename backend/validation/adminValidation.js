@@ -1,12 +1,19 @@
 const Joi = require('joi');
 
-const paginationSchema = Joi.object({
-  query: Joi.object({
-    page: Joi.number().integer().min(1).default(1),
-    pageSize: Joi.number().integer().min(5).max(100).default(20)
-  }).required()
+const paginationQuery = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  pageSize: Joi.number().integer().min(1).max(100).default(20)
 });
 
+const listUsersSchema = {
+  query: paginationQuery
+};
+
+const listAuditLogsSchema = {
+  query: paginationQuery
+};
+
 module.exports = {
-  paginationSchema
+  listUsersSchema,
+  listAuditLogsSchema
 };

@@ -1,233 +1,214 @@
-# 🏥 Sika-Santé — Carnet de Santé Numérique Universel
+# Sika-Sante
 
-> Plateforme nationale de santé numérique de Côte d'Ivoire
+Plateforme healthcare full-stack avec frontend modulaire unique, backend Node.js/Express/MySQL, authentification OTP/MFA, audit logs et API versionnee en `/api/v1`.
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.x-purple.svg)](https://getbootstrap.com/)
-[![Status](https://img.shields.io/badge/status-demo-orange.svg)](https://github.com)
+## Etat actuel
 
----
+Le projet est organise autour de deux blocs actifs :
 
-## 📋 Vue d'ensemble
+- `frontend/` : interface unique en HTML, Bootstrap 5 et JavaScript modulaire.
+- `backend/` : API REST Express, JWT courts, rotation des refresh tokens, validation Joi, audit logs, Swagger.
 
-**Sika-Santé** (Santé précieuse) est une plateforme de **carnet de santé numérique universel** conçue pour la Côte d'Ivoire. Le projet propose un **système d'authentification multi-profils sécurisé** avec trois niveaux d'accès :
+Le legacy frontend a la racine du projet est retire du chemin cible. Le backend sert directement `frontend/`.
 
-- 🩺 **Patient** — Connexion par OTP/SMS
-- 👨‍⚕️ **Professionnel de Santé** — Authentification + MFA (2FA)
-- 🏛️ **Institution / État** — Accès renforcé avec audit trail
+## Architecture cible
 
----
+### Roles
 
-## ✨ Fonctionnalités
+- `PATIENT`
+- `PROFESSIONAL`
+- `ADMIN`
+- `INSTITUTION`
 
-### 🔐 Authentification Sécurisée
-- ✅ OTP par SMS pour les patients (simulation)
-- ✅ Authentification à 2 facteurs (MFA) pour les professionnels
-- ✅ Accès institutionnel renforcé avec journalisation
-- ✅ Limitation des tentatives (3-5 selon profil)
-- ✅ Expiration des codes (5 minutes)
-- ✅ Masquage des données sensibles
+### Permissions
 
-### 🎨 Interface Utilisateur
-- ✅ Design moderne et responsive (Bootstrap 5)
-- ✅ Animations AOS (Animate On Scroll)
-- ✅ Inputs OTP avec auto-focus
-- ✅ Messages d'erreur clairs
-- ✅ Compte à rebours pour renvoi de code
+- `read_patient`
+- `write_patient`
+- `prescribe`
+- `view_audit_logs`
 
-### 🛡️ Sécurité
-- ✅ Validation côté client (format CMU, email, ID institutionnel)
-- ✅ Tentatives limitées par profil
-- ✅ Audit trail pour institutions
-- ✅ Alertes de sécurité automatiques
-- ✅ Tokens JWT (simulation)
+### Mapping role -> permissions
 
----
+- `PATIENT`: aucune permission metier
+- `PROFESSIONAL`: `read_patient`, `write_patient`, `prescribe`
+- `ADMIN`: `read_patient`, `write_patient`, `prescribe`, `view_audit_logs`
+- `INSTITUTION`: `view_audit_logs`
 
-## 🚀 Démarrage Rapide
+## Structure
 
-### 1. Cloner le Projet
-
-```bash
-git clone https://github.com/votre-repo/Sika-sant-.git
-cd Sika-sant-
-```
-
-### 2. Ouvrir dans un Navigateur
-
-```bash
-# Ouvrir index.html dans votre navigateur
-# OU utiliser Live Server (VS Code)
-```
-
-### 3. Tester la Connexion
-
-1. Cliquer sur **"Se connecter"** (en haut à droite)
-2. Choisir un profil : Patient, Professionnel ou Institution
-3. Utiliser les comptes de test (voir [COMPTES_TEST.md](COMPTES_TEST.md))
-4. Les codes OTP/MFA sont affichés dans la **console du navigateur** (F12)
-
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [**GUIDE_CONNEXION.md**](GUIDE_CONNEXION.md) | Guide utilisateur complet avec parcours détaillés |
-| [**COMPTES_TEST.md**](COMPTES_TEST.md) | Liste des comptes de test et scénarios |
-| [**IMPLEMENTATION_TECHNIQUE.md**](IMPLEMENTATION_TECHNIQUE.md) | Documentation technique pour développeurs |
-
----
-
-## 🔑 Comptes de Test Rapides
-
-### Patient (OTP)
-- CMU : `1234567890`
-- Code OTP : Voir console navigateur (F12)
-
-### Professionnel (Auth + MFA)
-- Email : `dr.kouassi@chu-abidjan.ci`
-- Mot de passe : `Password123!`
-- Code MFA : Voir console navigateur (F12)
-
-### Institution (Accès Renforcé)
-- Institution : Ministère de la Santé
-- ID : `GOV-MSANTE-1001`
-- Mot de passe : `SecureGov2024!@#`
-- Code MFA : Voir console navigateur (F12)
-
-**⚠️ Note** : Les codes sont affichés dans la console car il s'agit d'une **démo sans backend réel**.
-
----
-
-## 📁 Structure du Projet
-
-```
+```text
 Sika-sant-/
-├── index.html                          # Page d'accueil
-├── connexion.html                      # Sélection de profil
-├── connexion-patient.html              # Authentification patient
-├── connexion-professionnel.html        # Authentification professionnel
-├── connexion-institution.html          # Authentification institution
-│
-├── assets/
-│   ├── css/
-│   │   └── style.css                   # Styles personnalisés
-│   ├── js/
-│   │   ├── custom.js                   # Scripts généraux
-│   │   ├── auth-patient.js             # Logique auth patient
-│   │   ├── auth-professionnel.js       # Logique auth professionnel
-│   │   └── auth-institution.js         # Logique auth institution
-│   ├── images/                         # Images et logos
-│   └── vendors/                        # Bibliothèques externes
-│
-├── GUIDE_CONNEXION.md                  # Documentation utilisateur
-├── COMPTES_TEST.md                     # Comptes de test
-├── IMPLEMENTATION_TECHNIQUE.md         # Doc technique
-└── README.md                           # Ce fichier
+|-- backend/
+|   |-- app.js
+|   |-- server.js
+|   |-- config/
+|   |-- constants/
+|   |-- controllers/
+|   |-- docs/swagger.yaml
+|   |-- middlewares/
+|   |-- models/
+|   |-- routes/
+|   |-- services/
+|   |-- tests/
+|   |-- validation/
+|   |-- .env.example
+|   `-- Dockerfile
+|-- frontend/
+|   |-- index.html
+|   |-- assets/
+|   |-- components/
+|   |-- pages/
+|   |-- services/
+|   `-- utils/
+|-- scripts/
+|   `-- deploy-backend.ps1
+`-- README.md
 ```
 
----
+## Backend
 
-## 🛠️ Technologies
+### Endpoints principaux
 
-### Frontend
-- **Bootstrap 5** — Framework CSS responsive
-- **AOS** — Animations on scroll
-- **JavaScript Vanilla** — Logique d'authentification
-- **Bootstrap Icons** — Icônes
+- `GET /api/v1/health`
+- `GET /api/v1/csrf-token`
+- `POST /api/v1/auth/request-otp`
+- `POST /api/v1/auth/verify-otp`
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/verify-mfa`
+- `POST /api/v1/auth/resend-mfa`
+- `POST /api/v1/auth/refresh`
+- `POST /api/v1/auth/logout`
+- `GET /api/v1/user/profile`
+- `GET /api/v1/patients`
+- `POST /api/v1/patients`
+- `GET /api/v1/patients/:patientUserId/consultations`
+- `POST /api/v1/patients/:patientUserId/consultations`
+- `GET /api/v1/users`
+- `GET /api/v1/audit-logs`
+- `GET /api/v1/metrics`
 
-### Simulation
-- **sessionStorage** — Stockage temporaire OTP/MFA
-- **localStorage** — Stockage tokens après connexion
-- **Console logs** — Affichage codes de test
+### Format de reponse
 
----
+Toutes les reponses controllers suivent le format :
 
-## 🔧 Passer en Production
+```json
+{
+  "success": true,
+  "data": {},
+  "message": ""
+}
+```
 
-Cette version est une **démo frontend** avec simulations. Pour un déploiement réel :
+### Securite
 
-### Backend Requis
-1. **API REST** (Node.js, Python, PHP)
-2. **Base de données** (PostgreSQL + chiffrement)
-3. **SMS Gateway** (Twilio, AWS SNS)
-4. **JWT** avec refresh tokens
-5. **Rate limiting** (Redis)
-6. **Logs centralisés** (ELK Stack)
-7. **Monitoring** (Prometheus, Grafana)
+- CSRF avec header unique `x-xsrf-token`
+- JWT access token court
+- rotation des refresh tokens
+- hash des OTP
+- hash des refresh tokens en base
+- validation Joi sur les routes a payload/query
+- audit logs pour les evenements sensibles
+- variables d'environnement obligatoires
 
-### Sécurité Production
-- ✅ HTTPS obligatoire
-- ✅ Rate limiting par IP
-- ✅ Hashing mots de passe (bcrypt/argon2)
-- ✅ Validation backend stricte
-- ✅ Audit trail complet
-- ✅ Pentest + audit sécurité
-- ✅ Conformité RGPD + lois CI
+## Frontend
 
-Voir [IMPLEMENTATION_TECHNIQUE.md](IMPLEMENTATION_TECHNIQUE.md) pour les détails.
+Le frontend modulaire contient :
 
----
+- guards `authGuard()` et `roleGuard()`
+- client API unique `frontend/services/api.js`
+- dashboards relies a l'API reelle
+- composants reutilisables pour tables, formulaires, modals et notifications
 
-## 🧪 Tests
+### Pages principales
 
-### Scénarios de Test Disponibles
+- `/pages/connexion.html`
+- `/pages/connexion-patient.html`
+- `/pages/connexion-professionnel.html`
+- `/pages/connexion-admin.html`
+- `/pages/connexion-institution.html`
+- `/pages/dashboard-patient.html`
+- `/pages/dashboard-professional.html`
+- `/pages/dashboard-admin.html`
+- `/pages/dashboard-institution.html`
 
-1. ✅ Connexion Patient réussie
-2. ✅ Code OTP expiré
-3. ✅ Trop de tentatives (blocage)
-4. ✅ Professionnel avec MFA
-5. ✅ Institution bloquée après 3 échecs
-6. ✅ Renvoi de code OTP/MFA
-7. ✅ Validation format inputs
+## Installation locale
 
-Voir [COMPTES_TEST.md](COMPTES_TEST.md) pour tous les scénarios.
+### 1. Backend
 
----
+```bash
+cd backend
+cp .env.example .env
+npm install
+```
 
-## 📞 Support
+Renseigner ensuite :
 
-**Démo** : Les codes OTP/MFA sont dans la console du navigateur (F12)
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_NAME`
+- `JWT_ACCESS_SECRET`
+- `JWT_REFRESH_SECRET`
+- `CORS_ORIGINS`
 
-**Questions** : Consultez la documentation complète dans les fichiers `.md`
+### 2. Base de donnees
 
----
+Executer le schema :
 
-## 🤝 Contribution
+```bash
+mysql -u root -p < schema.sql
+```
 
-Ce projet est une démonstration. Pour contribuer :
+### 3. Demarrage
 
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/ma-fonctionnalite`)
-3. Commit (`git commit -m 'Ajout fonctionnalité'`)
-4. Push (`git push origin feature/ma-fonctionnalite`)
-5. Ouvrir une Pull Request
+```bash
+cd backend
+npm run dev
+```
 
----
+Application disponible sur `http://localhost:4000`.
 
-## 📄 Licence
+Le frontend est servi directement par Express sur la meme origine.
 
-- **Template Nova** : Copyright © [Freebiesbug](https://freebiesbug.com/) — [MIT License]
-- **Modifications Sika-Santé** : Tous droits réservés
+## Tests
 
----
+```bash
+cd backend
+npm test
+```
 
-## 🎉 Crédits
+Les tests couvrent :
 
-### Template Original
-- **Nova Template** par [ThemeWagon](https://themewagon.com)
-- Design : Freebiesbug
+- endpoint de sante
+- presence du CSRF
+- validation payload auth
 
-### Développement Sika-Santé
-- Système d'authentification multi-profils
-- Scripts JavaScript personnalisés
-- Documentation complète
+## Docker
 
----
+Build local :
 
-**Développé avec ❤️ pour la santé en Côte d'Ivoire**
+```bash
+docker build -t sika-sante-backend:latest backend
+```
 
-*Sika-Santé — Votre santé, accessible partout, en toute sécurité*
+Script PowerShell d'aide :
 
+```powershell
+./scripts/deploy-backend.ps1
+```
 
+## Documentation API
+
+Swagger UI :
+
+```text
+http://localhost:4000/api/v1/docs
+```
+
+## Notes de production
+
+- Remplacer tous les secrets d'exemple avant tout deploiement.
+- Brancher un vrai transport OTP/MFA au lieu du log console en environnement non-dev.
+- Ajouter une couche de monitoring externe sur `/api/v1/metrics`.
+- Prevoir rotation des secrets, sauvegardes et journalisation centralisee.

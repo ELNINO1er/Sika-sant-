@@ -1,26 +1,24 @@
 import { getUserData } from '../utils/storage.js';
+import { ROLES } from '../utils/access.js';
 
 const linksByRole = {
-  PATIENT: [
-    { href: 'dashboard-patient.html', label: 'Tableau de bord', icon: 'bi-person-lines-fill' },
-    { href: '#history', label: 'Dossiers médicaux', icon: 'bi-journal-medical' },
-    { href: '#appointments', label: 'Rendez-vous', icon: 'bi-calendar-check' }
+  [ROLES.PATIENT]: [
+    { href: 'dashboard-patient.html', label: 'Tableau de bord', icon: 'bi-person-lines-fill' }
   ],
-  DOCTOR: [
-    { href: 'dashboard-professional.html', label: 'Tableau de bord', icon: 'bi-person-badge' },
-    { href: '#patients', label: 'Patients', icon: 'bi-people' },
-    { href: '#consultations', label: 'Consultations', icon: 'bi-file-medical' }
+  [ROLES.PROFESSIONAL]: [
+    { href: 'dashboard-professional.html', label: 'Tableau de bord', icon: 'bi-person-badge' }
   ],
-  ADMIN: [
-    { href: 'dashboard-admin.html', label: 'Tableau de bord', icon: 'bi-speedometer2' },
-    { href: '#users', label: 'Utilisateurs', icon: 'bi-person-check' },
-    { href: '#audit', label: 'Audit logs', icon: 'bi-shield-lock' }
+  [ROLES.ADMIN]: [
+    { href: 'dashboard-admin.html', label: 'Administration', icon: 'bi-speedometer2' }
+  ],
+  [ROLES.INSTITUTION]: [
+    { href: 'dashboard-institution.html', label: 'Institution', icon: 'bi-building' }
   ]
 };
 
 export function renderSidebar() {
-  const user = getUserData() || { role: 'PATIENT', name: 'Utilisateur' };
-  const links = linksByRole[user.role] || linksByRole.PATIENT;
+  const user = getUserData() || { role: ROLES.PATIENT, name: 'Utilisateur' };
+  const links = linksByRole[user.role] || linksByRole[ROLES.PATIENT];
 
   return `
     <div class="sidebar p-0">

@@ -1,12 +1,19 @@
 import { API_BASE } from '../config.js';
-import { getAccessToken, getRefreshToken, removeTokens, setAccessToken, setRefreshToken, setLogoutTimer } from '../utils/storage.js';
-import { showToast } from '../utils/helpers.js';
+import { getAccessToken, getRefreshToken, removeTokens, setAccessToken, setRefreshToken } from '../utils/storage.js';
 
 let csrfToken = null;
 let isRefreshing = false;
 
-async function fetchCsrfToken() {
-  if (csrfToken) {
+async function parseJson(response) {
+  try {
+    return await response.json();
+  } catch {
+    throw new Error('Réponse serveur mal formée');
+  }
+}
+
+async function fetchCsrfToken(force = false) {
+  if (csrfToken && !force) {
     return csrfToken;
   }
 
@@ -14,7 +21,7 @@ async function fetchCsrfToken() {
     credentials: 'include',
     method: 'GET'
   });
-  const result = await response.json();
+  const result = await parseJson(response);
   csrfToken = result?.data?.csrfToken || null;
   return csrfToken;
 }
@@ -31,22 +38,24 @@ async function refreshAccessToken() {
 
   isRefreshing = true;
   try {
+    const xsrfToken = await fetchCsrfToken(true);
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-xsrf-token': xsrfToken || ''
       },
       body: JSON.stringify({ refreshToken })
     });
-    const result = await response.json();
+
+    const result = await parseJson(response);
     if (!response.ok) {
       return null;
     }
 
     setAccessToken(result.data.accessToken);
     setRefreshToken(result.data.refreshToken);
-    setLogoutTimer(15 * 60);
     return result.data.accessToken;
   } finally {
     isRefreshing = false;
@@ -55,8 +64,9 @@ async function refreshAccessToken() {
 
 async function request(path, options = {}, retry = true) {
   const token = getAccessToken();
+  const method = options.method || 'GET';
   const headers = {
-    'Content-Type': 'application/json',
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
     ...(options.headers || {})
   };
 
@@ -64,26 +74,21 @@ async function request(path, options = {}, retry = true) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  if (options.method && options.method.toUpperCase() !== 'GET') {
+  if (method.toUpperCase() !== 'GET') {
     const tokenValue = await fetchCsrfToken();
     if (tokenValue) {
-      headers['X-CSRF-Token'] = tokenValue;
+      headers['x-xsrf-token'] = tokenValue;
     }
   }
 
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
     ...options,
+    method,
     headers
   });
 
-  let payload;
-  try {
-    payload = await response.json();
-  } catch {
-    throw new Error('Réponse serveur mal formée');
-  }
-
+  const payload = await parseJson(response);
   if (!response.ok) {
     if (response.status === 401 && retry) {
       const newToken = await refreshAccessToken();
@@ -95,36 +100,35 @@ async function request(path, options = {}, retry = true) {
       throw new Error('Session expirée, veuillez vous reconnecter.');
     }
 
-    const message = payload?.message || 'Erreur serveur';
     if (response.status === 403) {
-      throw new Error(message || 'Accès refusé');
+      throw new Error(payload?.message || 'Accès refusé');
     }
+
     if (response.status >= 500) {
-      throw new Error('Erreur serveur, réessayez plus tard');
+      throw new Error('Erreur serveur, réessayez plus tard.');
     }
-    throw new Error(message);
+
+    throw new Error(payload?.message || 'Erreur de requête');
   }
 
   return payload;
 }
 
-export async function apiGet(path) {
+export function apiGet(path) {
   return request(path, { method: 'GET' });
 }
 
-export async function apiPost(path, body) {
+export function apiPost(path, body) {
   return request(path, { method: 'POST', body: JSON.stringify(body) });
 }
 
-export async function apiPut(path, body) {
+export function apiPut(path, body) {
   return request(path, { method: 'PUT', body: JSON.stringify(body) });
 }
 
-export async function apiDelete(path) {
-  return request(path, { method: 'DELETE' });
-}
-
-export function handleApiError(error) {
-  showToast(error.message || 'Une erreur est survenue', 'danger');
-  throw error;
+export function apiDelete(path, body = null) {
+  return request(path, {
+    method: 'DELETE',
+    ...(body ? { body: JSON.stringify(body) } : {})
+  });
 }

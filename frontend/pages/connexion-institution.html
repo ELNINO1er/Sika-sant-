@@ -3,100 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion Institution | Sika-Santé</title>
+  <title>Connexion Institution | Sika-Sante</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-  <main class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-6">
-        <div class="card card-surface p-4">
-          <div class="mb-4 text-center">
-            <h1 class="h4">Connexion Institution</h1>
-            <p class="text-muted">Accédez à votre espace institutionnel avec un identifiant et un mot de passe.</p>
+  <main class="auth-shell">
+    <section class="auth-panel">
+      <div class="auth-brand mb-4">
+        <i class="bi bi-building fs-3"></i>
+        <span>Sika-Sante</span>
+      </div>
+      <h1 class="display-6 fw-bold mb-3">Connexion institutionnelle</h1>
+      <p class="helper-text mb-4">Acces renforce pour les structures publiques et partenaires institutionnels.</p>
+
+      <div class="card card-surface p-4 login-card">
+        <div id="message" class="alert d-none" role="alert"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="mb-3">
+            <label for="institutionId" class="form-label">Identifiant institutionnel</label>
+            <input type="text" class="form-control" id="institutionId" placeholder="GOV-MSANTE-1001" required>
           </div>
-          <div id="message" class="alert d-none" role="alert"></div>
-
-          <form id="loginForm">
-            <div class="mb-3">
-              <label for="institutionId" class="form-label">ID Institutionnel</label>
-              <input type="text" class="form-control" id="institutionId" placeholder="GOV-MSANTE-1001" required>
-            </div>
-            <div class="mb-3">
-              <label for="password" class="form-label">Mot de passe</label>
-              <input type="password" class="form-control" id="password" placeholder="Mot de passe" required minlength="12">
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Demander le code MFA</button>
-          </form>
-
-          <form id="verifyMfaForm" class="mt-4 d-none">
-            <div class="mb-3">
-              <label for="mfaCode" class="form-label">Code MFA</label>
-              <input type="text" class="form-control" id="mfaCode" placeholder="000000" maxlength="6" required>
-            </div>
-            <button type="submit" class="btn btn-success w-100">Valider et accéder</button>
-          </form>
-
-          <div class="mt-4 text-center">
-            <a href="connexion.html" class="link-primary">Retour à la sélection de profil</a>
+          <div class="mb-3">
+            <label for="password" class="form-label">Mot de passe</label>
+            <input type="password" class="form-control" id="password" placeholder="Minimum 12 caracteres" minlength="12" required>
           </div>
+          <button id="loginButton" type="submit" class="btn btn-primary w-100">Demander le code MFA</button>
+        </form>
+
+        <form id="verifyMfaForm" class="mt-4 d-none" novalidate>
+          <div class="mb-3">
+            <label for="mfaCode" class="form-label">Code MFA</label>
+            <input type="text" class="form-control" id="mfaCode" placeholder="000000" maxlength="6" required>
+          </div>
+          <div class="d-grid gap-2">
+            <button id="verifyButton" type="submit" class="btn btn-success">Valider et acceder</button>
+            <button id="resendButton" type="button" class="btn btn-outline-secondary">Renvoyer le code</button>
+          </div>
+        </form>
+
+        <div class="mt-4 text-center">
+          <a href="connexion.html" class="link-primary">Retour a la selection de profil</a>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section class="auth-visual">
+      <div class="glass-card">
+        <h2 class="h4 mb-3">Controles institutionnels</h2>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item bg-transparent px-0">MFA obligatoire</li>
+          <li class="list-group-item bg-transparent px-0">Journalisation des acces</li>
+          <li class="list-group-item bg-transparent px-0">Acces lecture aux logs d'audit</li>
+        </ul>
+      </div>
+    </section>
   </main>
 
   <script type="module">
-    import { loginInstitution, verifyMfa } from '../services/auth.js';
-    import { setAccessToken, setRefreshToken, setUserData, setLogoutTimer } from '../utils/storage.js';
+    import { bindAsyncForm } from '../components/form.js';
+    import { loginInstitution, resendMfa, verifyMfa } from '../services/auth.js';
+    import { setAccessToken, setRefreshToken, setUserData } from '../utils/storage.js';
+    import { setAlertMessage, showToast } from '../utils/helpers.js';
 
     const loginForm = document.getElementById('loginForm');
     const verifyMfaForm = document.getElementById('verifyMfaForm');
     const message = document.getElementById('message');
+    const loginButton = document.getElementById('loginButton');
+    const verifyButton = document.getElementById('verifyButton');
+    const resendButton = document.getElementById('resendButton');
+
     let mfaRequestId = null;
 
-    function showMessage(text, type = 'success') {
-      message.textContent = text;
-      message.className = `alert alert-${type}`;
-      message.classList.remove('d-none');
-    }
-
-    function hideMessage() {
-      message.classList.add('d-none');
-    }
-
-    loginForm.addEventListener('submit', async event => {
-      event.preventDefault();
-      hideMessage();
-      const institutionId = document.getElementById('institutionId').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      try {
-        const response = await loginInstitution(institutionId, password);
+    bindAsyncForm({
+      form: loginForm,
+      submitButton: loginButton,
+      idleLabel: 'Demander le code MFA',
+      pendingLabel: 'Verification...',
+      onSubmit: () => loginInstitution(
+        document.getElementById('institutionId').value.trim(),
+        document.getElementById('password').value.trim()
+      ),
+      onSuccess: response => {
         mfaRequestId = response.data.mfaRequestId;
-        showMessage(`Code MFA envoyé à ${response.data.mfaContact}`);
+        setAlertMessage(message, `Code envoye vers ${response.data.mfaContact}.`, 'success');
         loginForm.classList.add('d-none');
         verifyMfaForm.classList.remove('d-none');
-      } catch (error) {
-        showMessage(error.message, 'danger');
-      }
+      },
+      onError: error => setAlertMessage(message, error.message, 'danger')
     });
 
-    verifyMfaForm.addEventListener('submit', async event => {
-      event.preventDefault();
-      hideMessage();
-      const mfaCode = document.getElementById('mfaCode').value.trim();
-
-      try {
-        const response = await verifyMfa(mfaRequestId, mfaCode);
+    bindAsyncForm({
+      form: verifyMfaForm,
+      submitButton: verifyButton,
+      idleLabel: 'Valider et acceder',
+      pendingLabel: 'Connexion...',
+      onSubmit: () => verifyMfa(mfaRequestId, document.getElementById('mfaCode').value.trim()),
+      onSuccess: response => {
         setAccessToken(response.data.accessToken);
         setRefreshToken(response.data.refreshToken);
         setUserData(response.data.userData);
-        setLogoutTimer(15 * 60);
-        window.location.href = 'dashboard-admin.html';
+        window.location.href = 'dashboard-institution.html';
+      },
+      onError: error => setAlertMessage(message, error.message, 'danger')
+    });
+
+    resendButton.addEventListener('click', async () => {
+      if (!mfaRequestId) return;
+      try {
+        const response = await resendMfa(mfaRequestId);
+        mfaRequestId = response.data.mfaRequestId;
+        setAlertMessage(message, `Nouveau code envoye vers ${response.data.mfaContact}.`, 'success');
       } catch (error) {
-        showMessage(error.message, 'danger');
+        showToast(error.message, 'danger');
       }
     });
   </script>

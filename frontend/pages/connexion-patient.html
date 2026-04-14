@@ -9,89 +9,82 @@
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-  <main class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-6">
-        <div class="card card-surface p-4">
-          <div class="mb-4 text-center">
-            <h1 class="h4">Connexion Patient</h1>
-            <p class="text-muted">Entrez votre numéro CMU pour recevoir un code OTP.</p>
-          </div>
-          <div id="message" class="alert d-none" role="alert"></div>
-          <form id="requestOtpForm">
-            <div class="mb-3">
-              <label for="cmuNumber" class="form-label">Numéro CMU</label>
-              <input type="text" class="form-control" id="cmuNumber" placeholder="1234567890" maxlength="10" required pattern="[0-9]{10}">
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Recevoir un code OTP</button>
-          </form>
-
-          <form id="verifyOtpForm" class="mt-4 d-none">
-            <div class="mb-3">
-              <label for="otpCode" class="form-label">Code OTP</label>
-              <input type="text" class="form-control" id="otpCode" placeholder="000000" maxlength="6" required>
-            </div>
-            <button type="submit" class="btn btn-success w-100">Vérifier et connecter</button>
-          </form>
-
-          <div class="mt-4 text-center">
-            <a href="connexion.html" class="link-primary">Retour à la sélection de profil</a>
-          </div>
-        </div>
+  <main class="auth-shell">
+    <section class="auth-panel">
+      <a href="connexion.html" class="text-decoration-none mb-4"><i class="bi bi-arrow-left me-2"></i>Retour</a>
+      <div class="card card-surface p-4 login-card">
+        <h1 class="h4 mb-2">Connexion patient</h1>
+        <p class="helper-text mb-4">Renseignez votre numéro CMU puis validez le code OTP reçu.</p>
+        <div id="message" class="alert d-none" role="alert"></div>
+        <form id="requestOtpForm" class="mb-3">
+          <label for="cmuNumber" class="form-label">Numéro CMU</label>
+          <input type="text" class="form-control mb-3" id="cmuNumber" placeholder="1234567890" maxlength="10" required pattern="[0-9]{10}">
+          <button id="requestButton" type="submit" class="btn btn-primary w-100">Recevoir un code OTP</button>
+        </form>
+        <form id="verifyOtpForm" class="d-none">
+          <label for="otpCode" class="form-label">Code OTP</label>
+          <input type="text" class="form-control mb-3" id="otpCode" placeholder="000000" maxlength="6" required>
+          <button id="verifyButton" type="submit" class="btn btn-success w-100">Vérifier et accéder</button>
+        </form>
       </div>
-    </div>
+    </section>
+    <section class="auth-visual">
+      <div class="glass-card">
+        <h2 class="h5 mb-3">Parcours sécurisé</h2>
+        <p class="mb-0">Le backend génère un OTP à durée de vie courte, stocké sous forme hashée, puis délivre un JWT d’accès et un refresh token rotatif.</p>
+      </div>
+    </section>
   </main>
 
   <script type="module">
     import { requestOtp, verifyOtp } from '../services/auth.js';
-    import { setAccessToken, setRefreshToken, setUserData, setLogoutTimer } from '../utils/storage.js';
-    import { showToast } from '../utils/helpers.js';
+    import { setAccessToken, setRefreshToken, setUserData } from '../utils/storage.js';
+    import { setAlertMessage } from '../utils/helpers.js';
 
     const requestForm = document.getElementById('requestOtpForm');
     const verifyForm = document.getElementById('verifyOtpForm');
     const message = document.getElementById('message');
+    const requestButton = document.getElementById('requestButton');
+    const verifyButton = document.getElementById('verifyButton');
     let activeRequestId = null;
-
-    function showMessage(text, type = 'success') {
-      message.textContent = text;
-      message.className = `alert alert-${type}`;
-      message.classList.remove('d-none');
-    }
-
-    function hideMessage() {
-      message.classList.add('d-none');
-    }
 
     requestForm.addEventListener('submit', async event => {
       event.preventDefault();
-      hideMessage();
+      requestButton.disabled = true;
+      requestButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi…';
+      setAlertMessage(message, '');
 
-      const cmuNumber = document.getElementById('cmuNumber').value.trim();
       try {
-        const response = await requestOtp(cmuNumber);
+        const response = await requestOtp(document.getElementById('cmuNumber').value.trim());
         activeRequestId = response.data.otpRequestId;
-        showMessage(`Code envoyé à ${response.data.phoneNumber}`);
+        setAlertMessage(message, `Code envoyé au contact masqué ${response.data.phoneNumber}`, 'success');
         requestForm.classList.add('d-none');
         verifyForm.classList.remove('d-none');
       } catch (error) {
-        showMessage(error.message, 'danger');
+        setAlertMessage(message, error.message, 'danger');
+      } finally {
+        requestButton.disabled = false;
+        requestButton.textContent = 'Recevoir un code OTP';
       }
     });
 
     verifyForm.addEventListener('submit', async event => {
       event.preventDefault();
-      hideMessage();
+      verifyButton.disabled = true;
+      verifyButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification…';
+      setAlertMessage(message, '');
 
-      const otpCode = document.getElementById('otpCode').value.trim();
       try {
-        const response = await verifyOtp(activeRequestId, otpCode);
+        const response = await verifyOtp(activeRequestId, document.getElementById('otpCode').value.trim());
         setAccessToken(response.data.accessToken);
         setRefreshToken(response.data.refreshToken);
         setUserData(response.data.userData);
-        setLogoutTimer(15 * 60);
         window.location.href = 'dashboard-patient.html';
       } catch (error) {
-        showMessage(error.message, 'danger');
+        setAlertMessage(message, error.message, 'danger');
+      } finally {
+        verifyButton.disabled = false;
+        verifyButton.textContent = 'Vérifier et accéder';
       }
     });
   </script>

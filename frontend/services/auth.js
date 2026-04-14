@@ -1,15 +1,23 @@
 import { apiGet, apiPost } from './api.js';
-import { getAccessToken, getRefreshToken, getUserData, getDarkMode, isTokenExpired, removeTokens, setAccessToken, setRefreshToken, setLogoutTimer, setUserData } from '../utils/storage.js';
-import { showToast } from '../utils/helpers.js';
+import { getAccessToken, getRefreshToken, getUserData, isTokenExpired, removeTokens, setAccessToken, setRefreshToken, setUserData } from '../utils/storage.js';
 
 export function isAuthenticated() {
   const token = getAccessToken();
   return Boolean(token && !isTokenExpired());
 }
 
-export function logout() {
-  removeTokens();
-  window.location.href = '/pages/connexion.html';
+export async function logout() {
+  const refreshToken = getRefreshToken();
+  try {
+    if (refreshToken) {
+      await apiPost('/auth/logout', { refreshToken });
+    }
+  } catch {
+    // Local cleanup is the fallback.
+  } finally {
+    removeTokens();
+    window.location.href = '/pages/connexion.html';
+  }
 }
 
 export async function authGuard() {
@@ -22,67 +30,65 @@ export async function authGuard() {
       const payload = await apiPost('/auth/refresh', { refreshToken });
       setAccessToken(payload.data.accessToken);
       setRefreshToken(payload.data.refreshToken);
-      setLogoutTimer(15 * 60);
       return true;
-    } catch (error) {
-      logout();
+    } catch {
+      await logout();
       return false;
     }
   }
 
   if (!isAuthenticated()) {
-    logout();
+    await logout();
     return false;
   }
 
   return true;
 }
 
-export function roleGuard(requiredRole) {
+export function roleGuard(requiredRoles) {
+  const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
   const user = getUserData();
-  if (!user || user.role !== requiredRole) {
-    logout();
+  if (!user || !roles.includes(user.role)) {
+    removeTokens();
+    window.location.href = '/pages/connexion.html';
     return false;
   }
   return true;
 }
 
 export async function loadUserProfile() {
-  try {
-    const response = await apiGet('/user/profile');
-    const { data } = response;
-    if (!data) {
-      throw new Error('Profil introuvable');
-    }
-    setUserData(data);
-    setLogoutTimer(15 * 60);
-    return data;
-  } catch (error) {
-    showToast(error.message, 'danger');
-    throw error;
+  const response = await apiGet('/user/profile');
+  if (!response.data) {
+    throw new Error('Profil introuvable');
   }
+  setUserData(response.data);
+  return response.data;
 }
 
-export async function requestOtp(cmuNumber) {
+export function requestOtp(cmuNumber) {
   return apiPost('/auth/request-otp', { cmuNumber });
 }
 
-export async function verifyOtp(otpRequestId, otpCode) {
+export function verifyOtp(otpRequestId, otpCode) {
   return apiPost('/auth/verify-otp', { otpRequestId, otpCode });
 }
 
-export async function loginProfessional(email, password) {
+export function loginProfessional(email, password) {
   return apiPost('/auth/login', { loginType: 'professional', email, password });
 }
 
-export async function loginInstitution(institutionId, password) {
+export function loginAdmin(email, password) {
+  return apiPost('/auth/login', { loginType: 'admin', email, password });
+}
+
+export function loginInstitution(institutionId, password) {
   return apiPost('/auth/login', { loginType: 'institution', institutionId, password });
 }
 
-export async function resendMfa(mfaRequestId) {
+export function resendMfa(mfaRequestId) {
   return apiPost('/auth/resend-mfa', { mfaRequestId });
 }
 
-export async function verifyMfa(mfaRequestId, mfaCode) {
+export function verifyMfa(mfaRequestId, mfaCode) {
   return apiPost('/auth/verify-mfa', { mfaRequestId, mfaCode });
 }

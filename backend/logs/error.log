@@ -1,0 +1,166 @@
+2026-04-13T16:57:06.916Z [error] : ErrorHandler: ForbiddenError: invalid csrf token
+    at csrf (C:\wamp64\www\Sika-sant-\backend\node_modules\csurf\index.js:112:19)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at next (C:\wamp64\www\Sika-sant-\backend\middlewares\responseFormatter.js:5:3)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-winston\index.js:429:9
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\xss-clean\src\index.js:13:5)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at cookieParser (C:\wamp64\www\Sika-sant-\backend\node_modules\cookie-parser\index.js:57:14)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at urlencodedParser (C:\wamp64\www\Sika-sant-\backend\node_modules\body-parser\lib\types\urlencoded.js:82:7)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\body-parser\lib\read.js:137:5
+    at AsyncResource.runInAsyncScope (node:async_hooks:228:14)
+    at invokeCallback (C:\wamp64\www\Sika-sant-\backend\node_modules\raw-body\index.js:238:16)
+    at done (C:\wamp64\www\Sika-sant-\backend\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (C:\wamp64\www\Sika-sant-\backend\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:508:28)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21) 
+2026-04-13T16:57:06.976Z [error] : ErrorHandler: Error: "cmuNumber" with value "invalid" fails to match the required pattern: /^[0-9]{10}$/
+    at C:\wamp64\www\Sika-sant-\backend\middlewares\validateMiddleware.js:22:21
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at router.handle (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:175:3)
+    at router (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:47:12)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:659:7
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:576:5 
+2026-04-13T16:57:07.013Z [error] : ErrorHandler: Error: "email" must be a valid email, "password" length must be at least 12 characters long
+    at C:\wamp64\www\Sika-sant-\backend\middlewares\validateMiddleware.js:22:21
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at router.handle (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:175:3)
+    at router (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:47:12)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:659:7
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:576:5 
+2026-04-13T16:58:39.400Z [error] : ErrorHandler: ForbiddenError: invalid csrf token
+    at csrf (C:\wamp64\www\Sika-sant-\backend\node_modules\csurf\index.js:112:19)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at next (C:\wamp64\www\Sika-sant-\backend\middlewares\responseFormatter.js:5:3)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-winston\index.js:429:9
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\xss-clean\src\index.js:13:5)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at cookieParser (C:\wamp64\www\Sika-sant-\backend\node_modules\cookie-parser\index.js:57:14)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at urlencodedParser (C:\wamp64\www\Sika-sant-\backend\node_modules\body-parser\lib\types\urlencoded.js:82:7)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\body-parser\lib\read.js:137:5
+    at AsyncResource.runInAsyncScope (node:async_hooks:228:14)
+    at invokeCallback (C:\wamp64\www\Sika-sant-\backend\node_modules\raw-body\index.js:238:16)
+    at done (C:\wamp64\www\Sika-sant-\backend\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (C:\wamp64\www\Sika-sant-\backend\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:508:28)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21) 
+2026-04-13T16:58:39.465Z [error] : ErrorHandler: Error: "cmuNumber" with value "invalid" fails to match the required pattern: /^[0-9]{10}$/
+    at C:\wamp64\www\Sika-sant-\backend\middlewares\validateMiddleware.js:22:21
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at router.handle (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:175:3)
+    at router (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:47:12)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:659:7
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:576:5 
+2026-04-13T16:58:39.497Z [error] : ErrorHandler: Error: "email" must be a valid email, "password" length must be at least 12 characters long
+    at C:\wamp64\www\Sika-sant-\backend\middlewares\validateMiddleware.js:22:21
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at router.handle (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:175:3)
+    at router (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:47:12)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:328:13)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:286:9
+    at router.process_params (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:280:10)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:659:7
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:576:5 

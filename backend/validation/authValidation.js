@@ -1,23 +1,23 @@
 const Joi = require('joi');
 
-const requestOtpSchema = Joi.object({
+const requestOtpSchema = {
   body: Joi.object({
     cmuNumber: Joi.string().trim().pattern(/^[0-9]{10}$/).required()
   }).required()
-});
+};
 
-const verifyOtpSchema = Joi.object({
+const verifyOtpSchema = {
   body: Joi.object({
     otpRequestId: Joi.number().integer().required(),
-    otpCode: Joi.string().trim().length(6).required()
+    otpCode: Joi.string().trim().pattern(/^[0-9]{6}$/).required()
   }).required()
-});
+};
 
-const loginSchema = Joi.object({
+const loginSchema = {
   body: Joi.object({
-    loginType: Joi.string().valid('professional', 'institution').required(),
+    loginType: Joi.string().valid('professional', 'admin', 'institution').required(),
     email: Joi.when('loginType', {
-      is: 'professional',
+      is: Joi.valid('professional', 'admin'),
       then: Joi.string().email().required(),
       otherwise: Joi.forbidden()
     }),
@@ -28,26 +28,32 @@ const loginSchema = Joi.object({
     }),
     password: Joi.string().min(12).required()
   }).required()
-});
+};
 
-const verifyMfaSchema = Joi.object({
+const verifyMfaSchema = {
   body: Joi.object({
     mfaRequestId: Joi.number().integer().required(),
-    mfaCode: Joi.string().trim().length(6).required()
+    mfaCode: Joi.string().trim().pattern(/^[0-9]{6}$/).required()
   }).required()
-});
+};
 
-const resendMfaSchema = Joi.object({
+const resendMfaSchema = {
   body: Joi.object({
     mfaRequestId: Joi.number().integer().required()
   }).required()
-});
+};
 
-const refreshTokenSchema = Joi.object({
+const refreshTokenSchema = {
   body: Joi.object({
     refreshToken: Joi.string().required()
   }).required()
-});
+};
+
+const logoutSchema = {
+  body: Joi.object({
+    refreshToken: Joi.string().required()
+  }).required()
+};
 
 module.exports = {
   requestOtpSchema,
@@ -55,5 +61,6 @@ module.exports = {
   loginSchema,
   verifyMfaSchema,
   resendMfaSchema,
-  refreshTokenSchema
+  refreshTokenSchema,
+  logoutSchema
 };

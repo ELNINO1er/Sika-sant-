@@ -1,6 +1,7 @@
 const app = require('./app');
+const env = require('./config/env');
+const logger = require('./config/logger');
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Sika-Santé backend running on http://localhost:${PORT}`);
+app.listen(env.port, () => {
+  logger.info('Sika-Santé backend listening on http://localhost:%s', env.port);
 });

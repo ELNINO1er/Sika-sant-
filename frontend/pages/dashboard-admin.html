@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard | Sika-Santé</title>
+  <title>Dashboard Admin | Sika-Sante</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
@@ -15,92 +15,45 @@
       <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
 
-      <section class="mb-4">
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card card-surface p-4">
-              <h6 class="text-uppercase text-muted">Utilisateurs actifs</h6>
-              <h3 id="activeUsersCount" class="mt-3">0</h3>
-              <p class="text-muted">Sur la plateforme ce mois-ci</p>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card card-surface p-4">
-              <h6 class="text-uppercase text-muted">Logs d’audit</h6>
-              <h3 id="auditLogsCount" class="mt-3">0</h3>
-              <p class="text-muted">Événements sécurisés</p>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card card-surface p-4">
-              <h6 class="text-uppercase text-muted">Équipes</h6>
-              <h3 class="mt-3">9</h3>
-              <p class="text-muted">Groupes et services</p>
-            </div>
-          </div>
+      <section class="metric-strip mb-4">
+        <div class="metric-card">
+          <span class="metric-label">Utilisateurs</span>
+          <strong id="usersCount">0</strong>
+          <span class="metric-helper">Comptes visibles</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Logs d'audit</span>
+          <strong id="logsCount">0</strong>
+          <span class="metric-helper">Evenements traces</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Profils</span>
+          <strong id="rolesCount">0</strong>
+          <span class="metric-helper">Roles actifs</span>
         </div>
       </section>
 
-      <section class="mb-4">
-        <div class="card card-surface p-4">
-          <h3 class="h5 mb-3">Gestion des utilisateurs</h3>
-          <div class="table-responsive">
-            <table id="usersTable" class="table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Nom</th>
-                  <th>Rôle</th>
-                  <th>Email / Téléphone</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Dr. Pascal N.</td>
-                  <td>DOCTOR</td>
-                  <td>dr.pascal@sika.ci</td>
-                  <td><span class="badge bg-success">Actif</span></td>
-                </tr>
-                <tr>
-                  <td>Marie C.</td>
-                  <td>PATIENT</td>
-                  <td>070 123 4567</td>
-                  <td><span class="badge bg-secondary">Inactif</span></td>
-                </tr>
-              </tbody>
-            </table>
+      <section class="row g-4">
+        <div class="col-12">
+          <div class="card card-surface p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h2 class="h5 mb-1">Utilisateurs</h2>
+                <p class="text-muted mb-0">Vue consolidee des comptes de la plateforme.</p>
+              </div>
+            </div>
+            <div id="usersTable"></div>
           </div>
         </div>
-      </section>
-
-      <section>
-        <div class="card card-surface p-4">
-          <h3 class="h5 mb-3">Audit logs récents</h3>
-          <div class="table-responsive">
-            <table id="auditTable" class="table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Heure</th>
-                  <th>Action</th>
-                  <th>Utilisateur</th>
-                  <th>Détails</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>13:24</td>
-                  <td>Connexion</td>
-                  <td>admin@sika.ci</td>
-                  <td>Accès tableau de bord</td>
-                </tr>
-                <tr>
-                  <td>12:50</td>
-                  <td>Modification</td>
-                  <td>Dr. Pascal N.</td>
-                  <td>Ajout d’un compte patient</td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="col-12">
+          <div class="card card-surface p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h2 class="h5 mb-1">Audit logs recents</h2>
+                <p class="text-muted mb-0">Evenements securite et operations critiques.</p>
+              </div>
+            </div>
+            <div id="auditTable"></div>
           </div>
         </div>
       </section>
@@ -108,55 +61,79 @@
   </div>
 
   <script type="module">
-    import { renderSidebar } from '../components/sidebar.js';
     import { renderNavbar, bindNavbarActions } from '../components/navbar.js';
-    import { apiGet } from '../services/api.js';
+    import { renderSidebar } from '../components/sidebar.js';
+    import { renderDataTable } from '../components/data-table.js';
+    import { listAuditLogs, listUsers } from '../services/admin.js';
     import { authGuard, roleGuard } from '../utils/guards.js';
-    import { toggleDarkMode, showToast } from '../utils/helpers.js';
+    import { ROLES } from '../utils/access.js';
+    import { formatDateTime, showToast, toggleDarkMode } from '../utils/helpers.js';
+    import { getDarkMode } from '../utils/storage.js';
 
     await authGuard();
-    roleGuard('INSTITUTION');
+    roleGuard(ROLES.ADMIN);
 
     document.getElementById('appSidebar').innerHTML = renderSidebar();
     document.getElementById('appNavbar').innerHTML = renderNavbar();
     bindNavbarActions();
+    toggleDarkMode(getDarkMode());
 
-    const darkMode = localStorage.getItem('sika_dark_mode') === 'true';
-    toggleDarkMode(darkMode);
+    const usersTable = document.getElementById('usersTable');
+    const auditTable = document.getElementById('auditTable');
 
-    const usersTableBody = document.querySelector('#usersTable tbody');
-    const auditTableBody = document.querySelector('#auditTable tbody');
-    const activeUsersStat = document.getElementById('activeUsersCount');
-    const auditLogsStat = document.getElementById('auditLogsCount');
+    renderDataTable(usersTable, { columns: [], rows: [], loading: true });
+    renderDataTable(auditTable, { columns: [], rows: [], loading: true });
 
     try {
-      const usersResponse = await apiGet('/users');
-      const users = usersResponse.data || [];
-      activeUsersStat.textContent = users.length;
-      usersTableBody.innerHTML = users.slice(0, 6).map(user => `
-        <tr>
-          <td>${user.name}</td>
-          <td>${user.role}</td>
-          <td>${user.email || user.phone || 'N/A'}</td>
-          <td><span class="badge bg-success">Actif</span></td>
-        </tr>
-      `).join('');
+      const [usersResponse, auditResponse] = await Promise.all([
+        listUsers({ page: 1, pageSize: 20 }),
+        listAuditLogs({ page: 1, pageSize: 20 })
+      ]);
 
-      const auditResponse = await apiGet('/audit-logs');
-      const audits = auditResponse.data || [];
-      auditLogsStat.textContent = audits.length;
-      auditTableBody.innerHTML = audits.slice(0, 6).map(log => `
-        <tr>
-          <td>${new Date(log.created_at).toLocaleString('fr-FR')}</td>
-          <td>${log.action}</td>
-          <td>${log.userName || log.userEmail || 'Système'}</td>
-          <td>${log.metadata ? JSON.stringify(log.metadata).slice(0, 50) : ''}</td>
-        </tr>
-      `).join('');
+      const users = usersResponse.data.items || [];
+      const logs = auditResponse.data.items || [];
+
+      document.getElementById('usersCount').textContent = String(usersResponse.data.meta?.total || users.length);
+      document.getElementById('logsCount').textContent = String(auditResponse.data.meta?.total || logs.length);
+      document.getElementById('rolesCount').textContent = String(new Set(users.map(user => user.role)).size);
+
+      renderDataTable(usersTable, {
+        columns: [
+          { label: 'Nom', render: row => `<strong>${row.name}</strong>` },
+          { label: 'Role', render: row => row.role },
+          { label: 'Contact', render: row => row.email || row.phone || 'Non renseigne' },
+          { label: 'Creation', render: row => formatDateTime(row.created_at) }
+        ],
+        rows: users,
+        emptyTitle: 'Aucun utilisateur',
+        emptyDescription: 'Aucun compte n est remonte par l API.'
+      });
+
+      renderDataTable(auditTable, {
+        columns: [
+          { label: 'Date', render: row => formatDateTime(row.created_at) },
+          { label: 'Action', render: row => row.action },
+          { label: 'Utilisateur', render: row => row.userName || row.userEmail || 'Systeme' },
+          { label: 'IP', render: row => row.ip || '-' }
+        ],
+        rows: logs,
+        emptyTitle: 'Aucun log',
+        emptyDescription: 'Le journal d audit est vide.'
+      });
     } catch (error) {
       showToast(error.message, 'danger');
-      usersTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-danger">Impossible de charger les utilisateurs.</td></tr>`;
-      auditTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-danger">Impossible de charger les journaux d'audit.</td></tr>`;
+      renderDataTable(usersTable, {
+        columns: [],
+        rows: [],
+        emptyTitle: 'Erreur utilisateur',
+        emptyDescription: 'Impossible de charger les utilisateurs.'
+      });
+      renderDataTable(auditTable, {
+        columns: [],
+        rows: [],
+        emptyTitle: 'Erreur audit',
+        emptyDescription: 'Impossible de charger les logs.'
+      });
     }
   </script>
 </body>

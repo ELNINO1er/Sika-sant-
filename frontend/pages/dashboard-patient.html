@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Patient | Sika-Santé</title>
+  <title>Dashboard Patient | Sika-Sante</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
@@ -14,99 +14,46 @@
     <main class="main-content">
       <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
-      <section class="mb-4">
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card card-surface stat-card p-4">
-              <h6 class="text-uppercase text-muted">Profil</h6>
-              <h3 id="profileName" class="mt-3">-</h3>
-              <p id="profileRole" class="text-muted mb-0"></p>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card card-surface stat-card p-4">
-              <h6 class="text-uppercase text-muted">Prochain rendez-vous</h6>
-              <p class="display-6 mt-3">14 avril 2026</p>
-              <small class="text-muted">Consultation générale</small>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card card-surface stat-card p-4">
-              <h6 class="text-uppercase text-muted">Statut santé</h6>
-              <span class="badge bg-success">Stable</span>
-              <p class="mt-3 text-muted">Aucun avis urgent. Continuez votre suivi.</p>
-            </div>
-          </div>
+
+      <section class="metric-strip mb-4">
+        <div class="metric-card">
+          <span class="metric-label">Patient</span>
+          <strong id="profileName">Chargement...</strong>
+          <span id="profileRole" class="metric-helper">Profil</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">CMU</span>
+          <strong id="cmuNumber">-</strong>
+          <span class="metric-helper">Identifiant sante</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Historique recent</span>
+          <strong id="historyCount">0</strong>
+          <span class="metric-helper">Consultations chargees</span>
         </div>
       </section>
 
-      <section class="mb-4">
-        <div class="card card-surface p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="h5 mb-0">Historique médical</h3>
-            <small class="text-muted">Dernières mises à jour</small>
-          </div>
-          <div class="table-responsive">
-            <table class="table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th>Professionnel</th>
-                  <th>Résumé</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>02 avr. 2026</td>
-                  <td>Consultation</td>
-                  <td>Dr. Jean K.</td>
-                  <td>Contrôle tension, suivi traitement.</td>
-                </tr>
-                <tr>
-                  <td>12 mars 2026</td>
-                  <td>Biologie</td>
-                  <td>Laboratoire central</td>
-                  <td>Analyse sanguine normale.</td>
-                </tr>
-              </tbody>
-            </table>
+      <section class="row g-4">
+        <div class="col-xl-4">
+          <div class="card card-surface p-4 h-100">
+            <h2 class="h5 mb-3">Coordonnees</h2>
+            <dl class="row mb-0">
+              <dt class="col-sm-5">Telephone</dt>
+              <dd class="col-sm-7" id="profilePhone">-</dd>
+              <dt class="col-sm-5">Email</dt>
+              <dd class="col-sm-7" id="profileEmail">-</dd>
+            </dl>
           </div>
         </div>
-      </section>
-
-      <section>
-        <div class="row g-4">
-          <div class="col-xl-7">
-            <div class="card card-surface p-4">
-              <h3 class="h5 mb-3">Mes rendez-vous</h3>
-              <div class="list-group">
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>14 avril 2026</strong>
-                    <div class="text-muted">Consultation cardiologie - Dr. KOUASSI</div>
-                  </div>
-                  <span class="badge bg-primary rounded-pill">Confirmé</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>22 avril 2026</strong>
-                    <div class="text-muted">Suivi nutritionnel</div>
-                  </div>
-                  <span class="badge bg-warning rounded-pill">À planifier</span>
-                </div>
+        <div class="col-xl-8">
+          <div class="card card-surface p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h2 class="h5 mb-1">Historique medical</h2>
+                <p class="text-muted mb-0">Flux alimente par l'API patient.</p>
               </div>
             </div>
-          </div>
-          <div class="col-xl-5">
-            <div class="card card-surface p-4">
-              <h3 class="h5 mb-3">Conseils santé</h3>
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item">Hydratez-vous régulièrement.</li>
-                <li class="list-group-item">Prenez vos médicaments à heure fixe.</li>
-                <li class="list-group-item">Faites 30 min de marche par jour.</li>
-              </ul>
-            </div>
+            <div id="historyTable"></div>
           </div>
         </div>
       </section>
@@ -114,43 +61,61 @@
   </div>
 
   <script type="module">
-    import { renderSidebar } from '../components/sidebar.js';
     import { renderNavbar, bindNavbarActions } from '../components/navbar.js';
+    import { renderSidebar } from '../components/sidebar.js';
+    import { renderDataTable } from '../components/data-table.js';
     import { loadUserProfile } from '../services/auth.js';
-    import { getUserData } from '../utils/storage.js';
     import { authGuard, roleGuard } from '../utils/guards.js';
-    import { toggleDarkMode, formatDate } from '../utils/helpers.js';
+    import { ROLES } from '../utils/access.js';
+    import { formatDateTime, getRoleLabel, showToast, toggleDarkMode } from '../utils/helpers.js';
+    import { getDarkMode } from '../utils/storage.js';
 
     await authGuard();
-    roleGuard('PATIENT');
+    roleGuard(ROLES.PATIENT);
 
     document.getElementById('appSidebar').innerHTML = renderSidebar();
     document.getElementById('appNavbar').innerHTML = renderNavbar();
     bindNavbarActions();
+    toggleDarkMode(getDarkMode());
 
-    const darkMode = localStorage.getItem('sika_dark_mode') === 'true';
-    toggleDarkMode(darkMode);
+    const historyTable = document.getElementById('historyTable');
+    renderDataTable(historyTable, {
+      columns: [],
+      rows: [],
+      loading: true
+    });
 
-    const data = await loadUserProfile();
-    const user = getUserData() || data;
-    document.getElementById('profileName').textContent = user.name || 'Patient';
-    document.getElementById('profileRole').textContent = user.role || 'PATIENT';
+    try {
+      const response = await loadUserProfile();
+      const history = response.recentHistory || [];
 
-    const historyRows = document.querySelector('tbody');
-    historyRows.innerHTML = `
-      <tr>
-        <td>${formatDate(new Date().toISOString())}</td>
-        <td>Consultation</td>
-        <td>Dr. Jean K.</td>
-        <td>Rappel de traitement et suivi tension.</td>
-      </tr>
-      <tr>
-        <td>${formatDate(new Date(Date.now() - 23 * 24 * 60 * 60 * 1000).toISOString())}</td>
-        <td>Biologie</td>
-        <td>Laboratoire central</td>
-        <td>Résultats normaux.</td>
-      </tr>
-    `;
+      document.getElementById('profileName').textContent = response.name || 'Patient';
+      document.getElementById('profileRole').textContent = getRoleLabel(response.role || ROLES.PATIENT);
+      document.getElementById('cmuNumber').textContent = response.cmuNumber || 'Non renseigne';
+      document.getElementById('profilePhone').textContent = response.phone || 'Non renseigne';
+      document.getElementById('profileEmail').textContent = response.email || 'Non renseigne';
+      document.getElementById('historyCount').textContent = String(history.length);
+
+      renderDataTable(historyTable, {
+        columns: [
+          { label: 'Date', render: row => formatDateTime(row.created_at) },
+          { label: 'Titre', render: row => row.title || 'Consultation' },
+          { label: 'Professionnel', render: row => row.professionalName || 'Non renseigne' },
+          { label: 'Resume', render: row => row.summary || 'Aucun resume disponible' }
+        ],
+        rows: history,
+        emptyTitle: 'Aucun historique',
+        emptyDescription: 'Les consultations apparaitront ici apres synchronisation.'
+      });
+    } catch (error) {
+      showToast(error.message, 'danger');
+      renderDataTable(historyTable, {
+        columns: [],
+        rows: [],
+        emptyTitle: 'Chargement impossible',
+        emptyDescription: 'Le profil patient n a pas pu etre recupere.'
+      });
+    }
   </script>
 </body>
 </html>

@@ -2,11 +2,45 @@ const express = require('express');
 const router = express.Router();
 const patientController = require('../controllers/patientController');
 const { verifyToken } = require('../middlewares/authMiddleware');
-const { authorizeRoles } = require('../middlewares/roleMiddleware');
+const { authorizeRoles, authorizePermissions } = require('../middlewares/roleMiddleware');
 const { validateRequest } = require('../middlewares/validateMiddleware');
-const { createPatientSchema } = require('../validation/patientValidation');
+const {
+  listPatientsSchema,
+  createPatientSchema,
+  patientIdParamsSchema,
+  createConsultationSchema
+} = require('../validation/patientValidation');
+const { ROLES, PERMISSIONS } = require('../constants/access');
 
-router.get('/', verifyToken, authorizeRoles('PROFESSIONAL', 'INSTITUTION'), patientController.listPatients);
-router.post('/', verifyToken, authorizeRoles('INSTITUTION'), validateRequest(createPatientSchema), patientController.createPatient);
+router.get(
+  '/',
+  verifyToken,
+  authorizePermissions(PERMISSIONS.READ_PATIENT),
+  validateRequest(listPatientsSchema),
+  patientController.listPatients
+);
+router.post(
+  '/',
+  verifyToken,
+  authorizeRoles(ROLES.ADMIN),
+  authorizePermissions(PERMISSIONS.WRITE_PATIENT),
+  validateRequest(createPatientSchema),
+  patientController.createPatient
+);
+router.get(
+  '/:patientUserId/consultations',
+  verifyToken,
+  authorizePermissions(PERMISSIONS.READ_PATIENT),
+  validateRequest(patientIdParamsSchema),
+  patientController.listConsultations
+);
+router.post(
+  '/:patientUserId/consultations',
+  verifyToken,
+  authorizeRoles(ROLES.PROFESSIONAL, ROLES.ADMIN),
+  authorizePermissions(PERMISSIONS.WRITE_PATIENT),
+  validateRequest(createConsultationSchema),
+  patientController.createConsultation
+);
 
 module.exports = router;

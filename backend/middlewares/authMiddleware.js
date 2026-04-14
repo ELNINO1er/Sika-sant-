@@ -1,6 +1,7 @@
 const logger = require('../config/logger');
 const AppError = require('../utils/appError');
 const { verifyAccessToken } = require('../config/jwt');
+const { getPermissionsByRole } = require('../constants/access');
 
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -12,7 +13,10 @@ function verifyToken(req, res, next) {
 
   try {
     const decoded = verifyAccessToken(token);
-    req.user = decoded;
+    req.user = {
+      ...decoded,
+      permissions: decoded.permissions || getPermissionsByRole(decoded.role)
+    };
     next();
   } catch (error) {
     logger.error('JWT error: %o', error);
