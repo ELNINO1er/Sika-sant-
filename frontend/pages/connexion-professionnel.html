@@ -10,54 +10,107 @@
 </head>
 <body>
   <main class="auth-shell">
-    <section class="auth-panel">
-      <div class="auth-brand mb-4">
-        <i class="bi bi-heart-pulse-fill fs-3"></i>
-        <span>Sika-Sante</span>
+    <section class="auth-story">
+      <div class="auth-brand">
+        <span class="auth-brand-badge"><i class="bi bi-stethoscope"></i></span>
+        <div>
+          <div>Sika-Sante</div>
+          <small class="text-muted">Espace professionnel</small>
+        </div>
       </div>
-      <h1 class="display-6 fw-bold mb-3">Connexion professionnel</h1>
-      <p class="helper-text mb-4">Acces par email professionnel puis validation MFA.</p>
 
-      <div class="card card-surface p-4 login-card">
-        <div id="message" class="alert d-none" role="alert"></div>
+      <div class="auth-copy">
+        <span class="saas-badge"><i class="bi bi-hospital"></i>Vue clinique unifiee</span>
+        <h1>Travaillez sur une lecture patient claire, rapide et orientee prise en charge</h1>
+        <p>Le tableau de bord professionnel rassemble la liste patients, l'historique des consultations et l'ajout de nouvelles notes cliniques dans un meme espace.</p>
+      </div>
 
-        <form id="loginForm" novalidate>
-          <div class="mb-3">
-            <label for="email" class="form-label">Email professionnel</label>
-            <input type="email" class="form-control" id="email" placeholder="medecin@structure.ci" required>
+      <div class="auth-bullet-list">
+        <div class="auth-bullet">
+          <i class="bi bi-search-heart"></i>
+          <div>
+            <strong>Recherche patient immediate</strong>
+            <div class="text-muted">Nom, CMU et historique recent restent accessibles dans une vue simple.</div>
           </div>
-          <div class="mb-3">
-            <label for="password" class="form-label">Mot de passe</label>
-            <input type="password" class="form-control" id="password" placeholder="Minimum 12 caracteres" minlength="12" required>
+        </div>
+        <div class="auth-bullet">
+          <i class="bi bi-journal-plus"></i>
+          <div>
+            <strong>Consultation documentee</strong>
+            <div class="text-muted">Ajoutez une note clinique sans sortir du flux principal du dashboard.</div>
           </div>
-          <button id="loginButton" type="submit" class="btn btn-primary w-100">Demander le code MFA</button>
-        </form>
+        </div>
+        <div class="auth-bullet">
+          <i class="bi bi-shield-check"></i>
+          <div>
+            <strong>Acces renforce</strong>
+            <div class="text-muted">Connexion par email professionnel puis verification MFA.</div>
+          </div>
+        </div>
+      </div>
 
-        <form id="verifyMfaForm" class="mt-4 d-none" novalidate>
-          <div class="mb-3">
-            <label for="mfaCode" class="form-label">Code MFA</label>
-            <input type="text" class="form-control" id="mfaCode" placeholder="000000" maxlength="6" required>
+      <div class="auth-preview">
+        <div class="section-header mb-3">
+          <div>
+            <strong>Vue soignante</strong>
+            <p>Des informations utiles au soin, sans surcharger la lecture.</p>
           </div>
-          <div class="d-grid gap-2">
-            <button id="verifyButton" type="submit" class="btn btn-success">Valider et acceder</button>
-            <button id="resendButton" type="button" class="btn btn-outline-secondary">Renvoyer le code</button>
+          <span class="status-badge success">MFA</span>
+        </div>
+        <div class="auth-preview-grid">
+          <div class="preview-stat">
+            <small class="text-muted">Patients</small>
+            <strong>Liste rapide</strong>
           </div>
-        </form>
-
-        <div class="mt-4 text-center">
-          <a href="connexion.html" class="link-primary">Retour a la selection de profil</a>
+          <div class="preview-stat">
+            <small class="text-muted">Consultations</small>
+            <strong>Ajout fluide</strong>
+          </div>
+          <div class="preview-stat">
+            <small class="text-muted">Recherche</small>
+            <strong>Nom ou CMU</strong>
+          </div>
+          <div class="preview-stat">
+            <small class="text-muted">Historique</small>
+            <strong>Detail immediat</strong>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="auth-visual">
-      <div class="glass-card">
-        <h2 class="h4 mb-3">Acces clinique</h2>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item bg-transparent px-0">Liste patients via API securisee</li>
-          <li class="list-group-item bg-transparent px-0">Consultations synchronisees</li>
-          <li class="list-group-item bg-transparent px-0">Permissions par role uniformisees</li>
-        </ul>
+    <section class="auth-form-wrap">
+      <div class="auth-form-shell">
+        <a href="connexion.html" class="auth-back-link"><i class="bi bi-arrow-left"></i>Retour aux espaces</a>
+
+        <div class="card-surface login-card">
+          <div class="form-stage">
+            <strong>Connexion professionnelle</strong>
+            <div class="text-muted">Utilisez votre email de travail et votre mot de passe pour demander le code MFA.</div>
+          </div>
+
+          <div id="message" class="alert d-none" role="alert"></div>
+
+          <form id="loginForm" novalidate>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email professionnel</label>
+              <input type="email" class="form-control" id="email" placeholder="medecin@structure.ci" required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Mot de passe</label>
+              <input type="password" class="form-control" id="password" placeholder="Minimum 12 caracteres" minlength="12" required>
+            </div>
+            <button id="loginButton" type="submit" class="btn btn-primary w-100">Demander le code MFA</button>
+          </form>
+
+          <form id="verifyMfaForm" class="mt-4 d-none" novalidate>
+            <label for="mfaCode" class="form-label">Code MFA</label>
+            <input type="text" class="form-control mb-3" id="mfaCode" placeholder="000000" maxlength="6" required>
+            <div class="d-grid gap-2">
+              <button id="verifyButton" type="submit" class="btn btn-primary">Valider et acceder</button>
+              <button id="resendButton" type="button" class="btn btn-outline-secondary">Renvoyer le code</button>
+            </div>
+          </form>
+        </div>
       </div>
     </section>
   </main>

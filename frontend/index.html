@@ -3,108 +3,425 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sika-Sante | Plateforme sante numerique</title>
+  <title>SIKA SANTE | Carnet de sante electronique</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
-  <main class="landing-shell">
-    <nav class="landing-nav">
-      <div class="landing-brand">
-        <i class="bi bi-heart-pulse-fill"></i>
-        <span>Sika-Sante</span>
+  <main class="landing-premium" id="accueil">
+    <nav class="landing-premium-nav">
+      <a class="landing-premium-brand" href="#accueil">
+        <span class="landing-premium-brand-badge"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span>SIKA SANTE</span>
+      </a>
+      <div class="landing-premium-menu">
+        <a href="#accueil">Accueil</a>
+        <a href="#fonctionnalites">Fonctionnalites</a>
+        <a href="#parcours">Parcours</a>
+        <a href="#apropos">A propos</a>
+        <a href="#chiffres">Chiffres</a>
       </div>
       <div class="d-flex flex-wrap gap-2">
-        <a class="btn btn-outline-primary" href="#parcours">Decouvrir</a>
-        <a class="btn btn-primary" href="/pages/connexion.html">Acceder aux espaces</a>
+        <a class="btn btn-outline-primary" href="#fonctionnalites">Voir les parcours</a>
+        <a class="btn btn-primary" href="/pages/connexion.html">Se connecter</a>
       </div>
     </nav>
 
-    <section class="landing-hero">
-      <div class="landing-panel">
-        <div class="landing-kicker">
-          <i class="bi bi-clipboard2-pulse"></i>
-          <span>Carnet medical electronique</span>
-        </div>
-        <h1 class="landing-title">Le carnet de sante qui relie patient, soignant et institution.</h1>
-        <p class="landing-copy">
-          Sika-Sante centralise l'historique medical, les consultations, les suivis cliniques
-          et les informations essentielles du patient pour offrir une prise en charge plus fluide,
-          plus lisible et plus continue.
+    <section class="landing-premium-hero">
+      <div class="landing-premium-copy">
+        <div class="landing-premium-grid"></div>
+        <span class="landing-premium-badge">
+          <i class="bi bi-shield-check"></i>
+          Sante connectee, lisible et fiable
+        </span>
+
+        <h1 class="landing-premium-title">
+          Le carnet de sante
+          <span class="landing-premium-gradient">mieux relie</span>
+          patient, soignant et institution
+        </h1>
+
+        <p class="landing-premium-description">
+          SIKA SANTE est un carnet de sante electronique premium concu pour centraliser
+          l'historique medical, structurer la coordination clinique et offrir une lecture
+          claire du parcours de soins a chaque acteur du systeme.
         </p>
-        <div class="landing-actions">
+
+        <div class="landing-premium-actions">
           <a class="btn btn-primary btn-lg" href="/pages/connexion.html">Se connecter</a>
-          <a class="btn btn-outline-secondary btn-lg" href="#parcours">Voir les parcours</a>
+          <a class="btn btn-outline-secondary btn-lg" href="#fonctionnalites">Voir les parcours</a>
         </div>
-        <div class="landing-points">
-          <div class="landing-point">
-            <strong>Historique patient</strong>
-            <span class="helper-text">Consultations, informations cliniques et continuité des soins.</span>
+
+        <div class="landing-premium-trust">
+          <div class="landing-premium-avatars" aria-hidden="true">
+            <span><i class="bi bi-hospital"></i></span>
+            <span><i class="bi bi-heart-pulse"></i></span>
+            <span><i class="bi bi-clipboard2-pulse"></i></span>
           </div>
-          <div class="landing-point">
-            <strong>Suivi clinique</strong>
-            <span class="helper-text">Acces rapide aux dossiers utiles pour la prise de decision.</span>
-          </div>
-          <div class="landing-point">
-            <strong>Coordination medicale</strong>
-            <span class="helper-text">Vision partagee entre terrain, administration et institution.</span>
+          <div>
+            <strong>Utilise par cliniques et hopitaux</strong>
+            <p class="mb-0">Une experience produit rassurante pour les soins, la coordination et la gouvernance sanitaire.</p>
           </div>
         </div>
       </div>
 
-      <div class="landing-side">
-        <div class="landing-stat">
-          <span class="helper-text">Parcours patient</span>
-          <strong>Un dossier accessible au bon moment</strong>
-          <div class="helper-text">Pour mieux suivre une consultation, un traitement ou une orientation.</div>
+      <div class="landing-premium-visual">
+        <div class="landing-premium-visual-glow"></div>
+
+        <div class="landing-premium-image-card">
+          <img src="./assets/img/home.jpg" alt="Infirmiere SIKA SANTE en page d'accueil" fetchpriority="high">
         </div>
-        <div class="landing-stat">
-          <span class="helper-text">Pratique soignante</span>
-          <strong>Des informations utiles, sans friction</strong>
-          <div class="helper-text">Moins de perte d'information entre accueil, consultation et suivi.</div>
+
+        <div class="landing-floating-card landing-floating-analytics">
+          <div class="landing-floating-icon">
+            <i class="bi bi-activity"></i>
+          </div>
+          <div>
+            <small>Analyse clinique</small>
+            <strong>82%</strong>
+          </div>
+          <span class="landing-floating-pill">Explore</span>
         </div>
-        <div class="landing-stat">
-          <span class="helper-text">Pilotage institutionnel</span>
-          <strong>Visibilite, traçabilite et gouvernance</strong>
-          <div class="helper-text">Une base solide pour le pilotage sante et l'administration medicale.</div>
+
+        <div class="landing-floating-card landing-floating-note">
+          <i class="bi bi-stars"></i>
+          <div>
+            <strong>Parcours plus lisible</strong>
+            <p class="mb-0">Le dossier garde l'essentiel a portee de lecture pour mieux soigner et mieux suivre.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="parcours" class="landing-card-grid">
-      <a class="landing-role-card" href="/pages/connexion-patient.html">
-        <i class="bi bi-person-heart"></i>
-        <h3>Espace patient</h3>
-        <p>Consulter son espace de sante, retrouver son historique et suivre son parcours medical.</p>
-      </a>
-      <a class="landing-role-card" href="/pages/connexion-professionnel.html">
-        <i class="bi bi-stethoscope"></i>
-        <h3>Espace professionnel</h3>
-        <p>Suivre les patients, documenter les consultations et disposer d'une vue clinique claire.</p>
-      </a>
-      <a class="landing-role-card" href="/pages/connexion-admin.html">
-        <i class="bi bi-shield-lock"></i>
-        <h3>Espace admin</h3>
-        <p>Administrer les acces, superviser la plateforme et maintenir la qualite de service.</p>
-      </a>
-      <a class="landing-role-card" href="/pages/connexion-institution.html">
-        <i class="bi bi-building"></i>
-        <h3>Espace institution</h3>
-        <p>Acceder a une vision consolidee pour la gouvernance, l'audit et le pilotage medical.</p>
-      </a>
-    </section>
+    <section id="fonctionnalites" class="landing-feature-section">
+      <div class="landing-section-heading">
+        <span class="landing-premium-badge">
+          <i class="bi bi-stars"></i>
+          Fonctionnalites cles
+        </span>
+        <h2>Une base medicale solide pour lire, suivre et coordonner chaque dossier</h2>
+        <p>SIKA SANTE transforme le carnet de sante electronique en experience produit simple, visuelle et exploitable sur tout le parcours.</p>
+      </div>
 
-    <section class="landing-footer-card">
-      <h2 class="h4 mb-2">Une base pour un veritable service de sante numerique</h2>
-      <p>
-        Concu pour mieux circuler entre accueil, consultation, suivi et pilotage,
-        avec une experience simple pour le patient et exploitable pour les equipes medicales.
-      </p>
-      <div class="mt-3">
-        <a class="link-light text-decoration-none" href="/api/v1/docs">Acces technique API</a>
+      <div class="landing-feature-grid">
+        <article class="landing-feature-card">
+          <div class="landing-feature-media">
+            <img src="./assets/img/seka01.jpg" alt="Carnet de sante numerique et outils de suivi" loading="lazy">
+          </div>
+          <div class="landing-feature-icon">
+            <i class="bi bi-journal-medical"></i>
+          </div>
+          <h3>Historique patient</h3>
+          <p>Conservez les consultations, notes cliniques, traitements, observations et signaux de suivi dans une lecture continue, rassurante et exploitable dans le temps.</p>
+        </article>
+
+        <article class="landing-feature-card">
+          <div class="landing-feature-media">
+            <img src="./assets/img/seka2.jpg" alt="Coordination clinique autour du dossier patient" loading="lazy">
+          </div>
+          <div class="landing-feature-icon landing-feature-icon-secondary">
+            <i class="bi bi-stethoscope"></i>
+          </div>
+          <h3>Coordination clinique</h3>
+          <p>Le soignant retrouve le bon contexte plus vite, ouvre l'historique utile, comprend la trajectoire du patient et documente la consultation sans rupture.</p>
+        </article>
+
+        <article class="landing-feature-card">
+          <div class="landing-feature-media">
+            <img src="./assets/img/seka03.jpg" alt="Vision de gouvernance sanitaire et pilotage medical" loading="lazy">
+          </div>
+          <div class="landing-feature-icon landing-feature-icon-accent">
+            <i class="bi bi-building-check"></i>
+          </div>
+          <h3>Gouvernance sanitaire</h3>
+          <p>L'institution accede a une lecture plus globale des tendances, des priorites, des alertes de pilotage et de la qualite du suivi dans le reseau de soin.</p>
+        </article>
       </div>
     </section>
+
+    <section id="parcours" class="landing-journey-section">
+      <div class="landing-section-heading">
+        <span class="landing-premium-badge">
+          <i class="bi bi-signpost-split"></i>
+          Parcours utilisateurs
+        </span>
+        <h2>Un meilleur parcours pour chaque role, sans perdre la coherence d'ensemble</h2>
+        <p>SIKA SANTE ne montre pas les memes choses a tout le monde. La plateforme adapte la lecture, les priorites et les actions a chaque profil tout en gardant un socle d'information unique.</p>
+      </div>
+
+      <div class="landing-journey-grid">
+        <article class="landing-journey-card">
+          <div class="landing-journey-head">
+            <div class="landing-feature-icon">
+              <i class="bi bi-person-heart"></i>
+            </div>
+            <div>
+              <h3>Espace patient</h3>
+              <p>Un parcours simple pour relire son dossier et comprendre son suivi.</p>
+            </div>
+          </div>
+          <div class="landing-journey-steps">
+            <div class="landing-journey-step">
+              <span>1</span>
+              <div>
+                <strong>Se connecter rapidement</strong>
+                <p>Le patient entre avec son CMU et un code OTP, sans complexite inutile.</p>
+              </div>
+            </div>
+            <div class="landing-journey-step">
+              <span>2</span>
+              <div>
+                <strong>Retrouver son historique</strong>
+                <p>Consultations, traitements et informations utiles restent visibles dans un seul carnet.</p>
+              </div>
+            </div>
+            <div class="landing-journey-step">
+              <span>3</span>
+              <div>
+                <strong>Suivre les signaux importants</strong>
+                <p>Le patient comprend mieux son parcours, ses alertes et les prochaines actions a suivre.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="landing-journey-card">
+          <div class="landing-journey-head">
+            <div class="landing-feature-icon landing-feature-icon-secondary">
+              <i class="bi bi-stethoscope"></i>
+            </div>
+            <div>
+              <h3>Espace professionnel</h3>
+              <p>Un parcours clinique fluide, centre sur la lecture et l'action.</p>
+            </div>
+          </div>
+          <div class="landing-journey-steps">
+            <div class="landing-journey-step">
+              <span>1</span>
+              <div>
+                <strong>Rechercher le bon dossier</strong>
+                <p>Le praticien trouve rapidement un patient par nom ou CMU avec une lecture immediate.</p>
+              </div>
+            </div>
+            <div class="landing-journey-step">
+              <span>2</span>
+              <div>
+                <strong>Lire le contexte utile</strong>
+                <p>L'historique recent, les notes et les points de vigilance restent a portee de vue.</p>
+              </div>
+            </div>
+            <div class="landing-journey-step">
+              <span>3</span>
+              <div>
+                <strong>Documenter la consultation</strong>
+                <p>La nouvelle prise en charge est saisie dans la meme interface, sans perte d'information.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="landing-journey-card">
+          <div class="landing-journey-head">
+            <div class="landing-feature-icon landing-feature-icon-accent">
+              <i class="bi bi-bank"></i>
+            </div>
+            <div>
+              <h3>Espace institution</h3>
+              <p>Un parcours de gouvernance pour lire les tendances et prioriser les decisions.</p>
+            </div>
+          </div>
+          <div class="landing-journey-steps">
+            <div class="landing-journey-step">
+              <span>1</span>
+              <div>
+                <strong>Observer l'activite globale</strong>
+                <p>La structure lit les volumes, les alertes et les signaux de pilotage en une vue.</p>
+              </div>
+            </div>
+            <div class="landing-journey-step">
+              <span>2</span>
+              <div>
+                <strong>Reperer les priorites</strong>
+                <p>Les zones sensibles, echecs, anomalies ou points de friction ressortent plus clairement.</p>
+              </div>
+            </div>
+            <div class="landing-journey-step">
+              <span>3</span>
+              <div>
+                <strong>Piloter avec plus de clarte</strong>
+                <p>Les equipes disposent d'une base plus lisible pour arbitrer, organiser et suivre.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="apropos" class="landing-about-section">
+      <div class="landing-about-copy">
+        <span class="landing-premium-badge">
+          <i class="bi bi-heart"></i>
+          A propos de SIKA SANTE
+        </span>
+        <h2>Un carnet de sante electronique pense pour la realite du soin</h2>
+        <p>
+          SIKA SANTE relie le patient, le praticien et l'institution au sein d'une meme
+          experience. Le produit ne cherche pas seulement a stocker de la donnee medicale:
+          il cherche a la rendre lisible, actionnable et utile a chaque etape du parcours.
+        </p>
+        <p>
+          La promesse est simple: mieux lire l'historique, mieux comprendre la situation
+          clinique, mieux transmettre l'information utile et mieux piloter les trajectoires
+          de soins sans multiplier les interfaces ou perdre le contexte.
+        </p>
+        <div class="landing-about-highlights">
+          <div class="landing-about-pill">
+            <i class="bi bi-check2-circle"></i>
+            <span>Un seul dossier, une lecture continue</span>
+          </div>
+          <div class="landing-about-pill">
+            <i class="bi bi-check2-circle"></i>
+            <span>Une interface claire pour chaque role</span>
+          </div>
+          <div class="landing-about-pill">
+            <i class="bi bi-check2-circle"></i>
+            <span>Une gouvernance medicale plus lisible</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="landing-about-visual">
+        <div class="landing-about-panel">
+          <div class="landing-about-panel-head">
+            <span class="small-label">Vue produit</span>
+            <strong>Lecture medicale partagee</strong>
+          </div>
+          <div class="landing-about-photo-stack">
+            <div class="landing-about-photo-main">
+              <img src="./assets/img/seka2.jpg" alt="Soin documente dans le carnet medical electronique" loading="lazy">
+              <div class="landing-about-visual-badge">
+                <i class="bi bi-heart-pulse-fill"></i>
+                <div>
+                  <strong>Parcours unifie</strong>
+                  <small>Lecture rapide du dossier, meme contexte pour tous les acteurs.</small>
+                </div>
+              </div>
+            </div>
+            <div class="landing-about-photo-row">
+              <div class="landing-about-photo-secondary">
+                <img src="./assets/img/seka01.jpg" alt="Support mobile pour le dossier de sante" loading="lazy">
+              </div>
+              <div class="landing-about-photo-secondary">
+                <img src="./assets/img/seka03.jpg" alt="Suivi sanitaire et gouvernance medicale" loading="lazy">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="chiffres" class="landing-stats-section">
+      <div class="landing-section-heading">
+        <span class="landing-premium-badge">
+          <i class="bi bi-bar-chart-line"></i>
+          Chiffres cles
+        </span>
+        <h2>Des indicateurs penses comme une vitrine produit, pas comme un tableau froid</h2>
+        <p>Cette section met en scene la valeur de SIKA SANTE a travers des chiffres simples, memorables et tres lisibles.</p>
+      </div>
+
+      <div class="landing-stats-grid">
+        <article class="landing-stat-card">
+          <small>Continuite de suivi</small>
+          <strong>+82%</strong>
+          <p>Une lecture plus complete du parcours et une meilleure circulation de l'information utile.</p>
+        </article>
+        <article class="landing-stat-card">
+          <small>Acces dossier</small>
+          <strong>3x plus rapide</strong>
+          <p>Le praticien retrouve les informations essentielles sans friction dans l'interface.</p>
+        </article>
+        <article class="landing-stat-card">
+          <small>Coordination</small>
+          <strong>4 espaces relies</strong>
+          <p>Patient, professionnel, admin et institution s'appuient sur le meme produit.</p>
+        </article>
+        <article class="landing-stat-card">
+          <small>Structures accompagnees</small>
+          <strong>24+</strong>
+          <p>Cliniques, centres et partenaires de sante peuvent lire et piloter avec plus de clarte.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="landing-cta-section">
+      <div class="landing-cta-card">
+        <div>
+          <span class="landing-premium-badge">
+            <i class="bi bi-rocket-takeoff"></i>
+            Demarrer avec SIKA SANTE
+          </span>
+          <h2>Donnez a votre systeme de sante une interface plus claire, plus elegante et plus utile</h2>
+          <p>Un carnet de sante electronique premium pour mieux relier les parcours, les professionnels et les institutions.</p>
+        </div>
+        <div class="landing-cta-actions">
+          <a class="btn btn-light btn-lg" href="/pages/connexion.html">Acceder a la plateforme</a>
+          <a class="btn btn-outline-light btn-lg" href="#fonctionnalites">Explorer les fonctionnalites</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="landing-footer">
+      <div class="landing-footer-top">
+        <div class="landing-footer-brand">
+          <span class="landing-premium-brand-badge"><i class="bi bi-heart-pulse-fill"></i></span>
+          <div>
+            <strong>SIKA SANTE</strong>
+            <p class="mb-0">Carnet de sante electronique et coordination medicale premium.</p>
+          </div>
+        </div>
+        <a class="btn btn-primary" href="/pages/connexion.html">Acceder a la plateforme</a>
+      </div>
+
+      <div class="landing-footer-grid">
+        <div>
+          <h3>Le produit</h3>
+          <p>SIKA SANTE aide a mieux lire, mieux transmettre et mieux piloter l'information de sante autour d'un dossier unique et partage.</p>
+        </div>
+
+        <div>
+          <h3>Navigation</h3>
+          <div class="landing-footer-links">
+            <a href="#accueil">Accueil</a>
+            <a href="#fonctionnalites">Fonctionnalites</a>
+            <a href="#parcours">Parcours</a>
+            <a href="#apropos">A propos</a>
+            <a href="#chiffres">Chiffres</a>
+          </div>
+        </div>
+
+        <div>
+          <h3>Parcours couverts</h3>
+          <div class="landing-footer-links">
+            <a href="/pages/connexion-patient.html">Patient</a>
+            <a href="/pages/connexion-professionnel.html">Professionnel</a>
+            <a href="/pages/connexion-admin.html">Admin</a>
+            <a href="/pages/connexion-institution.html">Institution</a>
+          </div>
+        </div>
+
+        <div>
+          <h3>Promesse</h3>
+          <p>Une plateforme plus lisible pour la continuite des soins, la coordination des acteurs et la gouvernance sanitaire.</p>
+        </div>
+      </div>
+
+      <div class="landing-footer-bottom">
+        <span>SIKA SANTE - Healthcare SaaS medical</span>
+        <span>Concu pour relier patient, soignant et institution</span>
+      </div>
+    </footer>
   </main>
 </body>
 </html>

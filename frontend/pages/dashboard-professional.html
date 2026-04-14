@@ -15,33 +15,90 @@
       <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
 
-      <section class="metric-strip mb-4">
-        <div class="metric-card">
-          <span class="metric-label">Patients</span>
-          <strong id="patientsCount">0</strong>
-          <span class="metric-helper">Dossiers accessibles</span>
+      <section id="overview" class="card-surface dashboard-hero">
+        <div class="hero-copy">
+          <span class="saas-badge"><i class="bi bi-stethoscope"></i>Espace professionnel</span>
+          <h2>Coordonnez vos consultations avec une lecture clinique directe</h2>
+          <p>Recherchez un patient, ouvrez son historique et enregistrez une nouvelle consultation dans une interface premium, simple et orientee terrain.</p>
+          <div class="hero-meta">
+            <div class="hero-meta-card">
+              <span>Patients accessibles</span>
+              <strong id="patientsCount">0</strong>
+            </div>
+            <div class="hero-meta-card">
+              <span>Consultations visibles</span>
+              <strong id="consultationCount">0</strong>
+            </div>
+            <div class="hero-meta-card">
+              <span>Derniere synchro</span>
+              <strong id="lastRefresh">-</strong>
+            </div>
+          </div>
         </div>
-        <div class="metric-card">
-          <span class="metric-label">Derniere synchro</span>
-          <strong id="lastRefresh">-</strong>
-          <span class="metric-helper">Donnees API</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Actions</span>
-          <strong id="consultationCount">0</strong>
-          <span class="metric-helper">Consultations visibles</span>
+        <div class="hero-visual">
+          <div class="hero-visual-card">
+            <div class="section-header mb-3">
+              <div>
+                <strong>Routine du jour</strong>
+                <p>Une meme vue pour lire, filtrer et documenter.</p>
+              </div>
+              <span class="status-badge success">Clinique</span>
+            </div>
+            <div class="timeline-list">
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-search"></i></div>
+                <div class="timeline-card">
+                  <strong>1. Rechercher</strong>
+                  <div class="text-muted">Nom ou CMU pour retrouver le bon dossier.</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-journal-medical"></i></div>
+                <div class="timeline-card">
+                  <strong>2. Lire l'historique</strong>
+                  <div class="text-muted">Le detail recent s'ouvre dans la meme experience.</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-plus-circle"></i></div>
+                <div class="timeline-card">
+                  <strong>3. Ajouter la note</strong>
+                  <div class="text-muted">La nouvelle consultation est enregistree sans rupture.</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="row g-4">
-        <div class="col-12">
-          <div class="card card-surface p-4">
-            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+      <section class="metric-strip">
+        <div class="metric-card">
+          <span class="metric-label">Dossiers actifs</span>
+          <strong id="patientsCountMirror">0</strong>
+          <span class="metric-helper">Patients disponibles dans votre vue</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Suivis documentes</span>
+          <strong id="consultationCountMirror">0</strong>
+          <span class="metric-helper">Patients avec historique recent</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Lecture terrain</span>
+          <strong>Recherche + detail</strong>
+          <span class="metric-helper">Le parcours clinique tient sur une seule page</span>
+        </div>
+      </section>
+
+      <section class="row g-4 mb-4" id="patients">
+        <div class="col-xl-8">
+          <div class="card-surface section-card h-100">
+            <div class="section-header">
               <div>
-                <h2 class="h5 mb-1">Liste patients</h2>
-                <p class="text-muted mb-0">Recherche, consultation d'historique et ajout de notes cliniques.</p>
+                <span class="small-label">Liste patients</span>
+                <h3 class="h4 mt-2">Rechercher un dossier et ouvrir l'historique</h3>
+                <p>Utilisez la recherche pour isoler rapidement un patient et consulter ses dernieres informations.</p>
               </div>
-              <div class="d-flex gap-2">
+              <div class="d-flex flex-column flex-md-row gap-2">
                 <input id="patientSearch" class="form-control" type="search" placeholder="Rechercher par nom ou CMU">
                 <button id="refreshPatients" class="btn btn-outline-secondary" type="button">Actualiser</button>
               </div>
@@ -49,29 +106,77 @@
             <div id="patientsTable"></div>
           </div>
         </div>
+        <div class="col-xl-4">
+          <div class="card-surface section-card mb-4">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Aide visuelle</span>
+                <h3 class="h5 mt-2">Bonnes pratiques</h3>
+              </div>
+            </div>
+            <div class="timeline-list">
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-person-vcard"></i></div>
+                <div class="timeline-card">
+                  <strong>Verifier le dossier</strong>
+                  <div class="text-muted">Controlez le patient avant toute nouvelle note clinique.</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-clipboard-plus"></i></div>
+                <div class="timeline-card">
+                  <strong>Structurer le resume</strong>
+                  <div class="text-muted">Restez concis mais utile pour les prochains intervenants.</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <div class="col-12">
-          <div class="card card-surface p-4">
-            <h2 class="h5 mb-3">Nouvelle consultation</h2>
-            <form id="consultationForm" class="row g-3" novalidate>
-              <div class="col-md-4">
-                <label for="patientSelect" class="form-label">Patient</label>
-                <select id="patientSelect" class="form-select" required></select>
+          <div class="card-surface section-card">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Focus du jour</span>
+                <h3 class="h5 mt-2">Vue clinique</h3>
               </div>
-              <div class="col-md-4">
-                <label for="consultationTitle" class="form-label">Titre</label>
-                <input id="consultationTitle" class="form-control" type="text" placeholder="Consultation generale" required>
+            </div>
+            <div class="chart-placeholder">
+              <div class="mini-bars">
+                <span style="height: 42%;"></span>
+                <span style="height: 68%;"></span>
+                <span style="height: 61%;"></span>
+                <span style="height: 78%;"></span>
               </div>
-              <div class="col-md-4">
-                <label for="consultationSummary" class="form-label">Resume</label>
-                <textarea id="consultationSummary" class="form-control" rows="2" placeholder="Minimum 10 caracteres" required></textarea>
-              </div>
-              <div class="col-12">
-                <button id="consultationSubmit" class="btn btn-primary" type="submit">Enregistrer la consultation</button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
+      </section>
+
+      <section id="consultations" class="card-surface section-card">
+        <div class="section-header">
+          <div>
+            <span class="small-label">Nouvelle consultation</span>
+            <h3 class="h4 mt-2">Documenter la prise en charge</h3>
+            <p>Le formulaire garde la meme qualite visuelle que le reste du produit et reste integre au flux clinique.</p>
+          </div>
+        </div>
+
+        <form id="consultationForm" class="row g-3" novalidate>
+          <div class="col-lg-4">
+            <label for="patientSelect" class="form-label">Patient</label>
+            <select id="patientSelect" class="form-select" required></select>
+          </div>
+          <div class="col-lg-4">
+            <label for="consultationTitle" class="form-label">Titre</label>
+            <input id="consultationTitle" class="form-control" type="text" placeholder="Consultation generale" required>
+          </div>
+          <div class="col-lg-4">
+            <label for="consultationSummary" class="form-label">Resume</label>
+            <textarea id="consultationSummary" class="form-control" rows="3" placeholder="Minimum 10 caracteres" required></textarea>
+          </div>
+          <div class="col-12">
+            <button id="consultationSubmit" class="btn btn-primary" type="submit">Enregistrer la consultation</button>
+          </div>
+        </form>
       </section>
     </main>
   </div>
@@ -108,6 +213,8 @@
     const patientsCount = document.getElementById('patientsCount');
     const consultationCount = document.getElementById('consultationCount');
     const lastRefresh = document.getElementById('lastRefresh');
+    const patientsCountMirror = document.getElementById('patientsCountMirror');
+    const consultationCountMirror = document.getElementById('consultationCountMirror');
 
     let cachedPatients = [];
 
@@ -155,7 +262,9 @@
       cachedPatients = rows;
       fillPatientSelect(rows);
       patientsCount.textContent = String(response.data.meta?.total || rows.length);
+      patientsCountMirror.textContent = String(response.data.meta?.total || rows.length);
       consultationCount.textContent = String(rows.filter(row => row.latestConsultationAt).length);
+      consultationCountMirror.textContent = String(rows.filter(row => row.latestConsultationAt).length);
       lastRefresh.textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
       renderDataTable(patientsTable, {

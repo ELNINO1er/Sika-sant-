@@ -75,11 +75,9 @@ export function setAlertMessage(target, message, type = 'success') {
 
 export function toggleDarkMode(enabled) {
   document.body.classList.toggle('dark', enabled);
-  if (enabled) {
-    document.querySelectorAll('.card-surface').forEach(el => el.classList.add('dark'));
-  } else {
-    document.querySelectorAll('.card-surface').forEach(el => el.classList.remove('dark'));
-  }
+  document.querySelectorAll('.card-surface').forEach(el => {
+    el.classList.toggle('dark', enabled);
+  });
 }
 
 export function createLoadingMarkup(label = 'Chargement...') {

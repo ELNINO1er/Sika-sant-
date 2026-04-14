@@ -10,54 +10,107 @@
 </head>
 <body>
   <main class="auth-shell">
-    <section class="auth-panel">
-      <div class="auth-brand mb-4">
-        <i class="bi bi-building fs-3"></i>
-        <span>Sika-Sante</span>
+    <section class="auth-story">
+      <div class="auth-brand">
+        <span class="auth-brand-badge"><i class="bi bi-bank"></i></span>
+        <div>
+          <div>Sika-Sante</div>
+          <small class="text-muted">Espace institution</small>
+        </div>
       </div>
-      <h1 class="display-6 fw-bold mb-3">Connexion institutionnelle</h1>
-      <p class="helper-text mb-4">Acces renforce pour les structures publiques et partenaires institutionnels.</p>
 
-      <div class="card card-surface p-4 login-card">
-        <div id="message" class="alert d-none" role="alert"></div>
+      <div class="auth-copy">
+        <span class="saas-badge"><i class="bi bi-graph-up-arrow"></i>Vue globale de la sante</span>
+        <h1>Pilotez les tendances, les alertes et la lecture globale du dispositif de sante</h1>
+        <p>L'espace institutionnel porte une lecture plus large du systeme: activite globale, signaux a surveiller, alertes et traces utiles a la gouvernance.</p>
+      </div>
 
-        <form id="loginForm" novalidate>
-          <div class="mb-3">
-            <label for="institutionId" class="form-label">Identifiant institutionnel</label>
-            <input type="text" class="form-control" id="institutionId" placeholder="GOV-MSANTE-1001" required>
+      <div class="auth-bullet-list">
+        <div class="auth-bullet">
+          <i class="bi bi-buildings"></i>
+          <div>
+            <strong>Vision consolidee</strong>
+            <div class="text-muted">Une meme plateforme pour relier les structures, les acteurs et les signaux d'activite.</div>
           </div>
-          <div class="mb-3">
-            <label for="password" class="form-label">Mot de passe</label>
-            <input type="password" class="form-control" id="password" placeholder="Minimum 12 caracteres" minlength="12" required>
+        </div>
+        <div class="auth-bullet">
+          <i class="bi bi-bell"></i>
+          <div>
+            <strong>Alertes lisibles</strong>
+            <div class="text-muted">Les signaux sensibles remontent dans un tableau de bord premium et simple a lire.</div>
           </div>
-          <button id="loginButton" type="submit" class="btn btn-primary w-100">Demander le code MFA</button>
-        </form>
+        </div>
+        <div class="auth-bullet">
+          <i class="bi bi-lock"></i>
+          <div>
+            <strong>Acces institutionnel renforce</strong>
+            <div class="text-muted">Identifiant structure, mot de passe et MFA obligatoire.</div>
+          </div>
+        </div>
+      </div>
 
-        <form id="verifyMfaForm" class="mt-4 d-none" novalidate>
-          <div class="mb-3">
-            <label for="mfaCode" class="form-label">Code MFA</label>
-            <input type="text" class="form-control" id="mfaCode" placeholder="000000" maxlength="6" required>
+      <div class="auth-preview">
+        <div class="section-header mb-3">
+          <div>
+            <strong>Lecture institutionnelle</strong>
+            <p>Le produit reste medical dans le ton, meme quand la vue devient globale.</p>
           </div>
-          <div class="d-grid gap-2">
-            <button id="verifyButton" type="submit" class="btn btn-success">Valider et acceder</button>
-            <button id="resendButton" type="button" class="btn btn-outline-secondary">Renvoyer le code</button>
+          <span class="status-badge warning">Gouvernance</span>
+        </div>
+        <div class="auth-preview-grid">
+          <div class="preview-stat">
+            <small class="text-muted">Population</small>
+            <strong>Vue globale</strong>
           </div>
-        </form>
-
-        <div class="mt-4 text-center">
-          <a href="connexion.html" class="link-primary">Retour a la selection de profil</a>
+          <div class="preview-stat">
+            <small class="text-muted">Tendances</small>
+            <strong>Lecture rapide</strong>
+          </div>
+          <div class="preview-stat">
+            <small class="text-muted">Alertes</small>
+            <strong>Priorisation</strong>
+          </div>
+          <div class="preview-stat">
+            <small class="text-muted">Audit</small>
+            <strong>Trajectoires tracees</strong>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="auth-visual">
-      <div class="glass-card">
-        <h2 class="h4 mb-3">Controles institutionnels</h2>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item bg-transparent px-0">MFA obligatoire</li>
-          <li class="list-group-item bg-transparent px-0">Journalisation des acces</li>
-          <li class="list-group-item bg-transparent px-0">Acces lecture aux logs d'audit</li>
-        </ul>
+    <section class="auth-form-wrap">
+      <div class="auth-form-shell">
+        <a href="connexion.html" class="auth-back-link"><i class="bi bi-arrow-left"></i>Retour aux espaces</a>
+
+        <div class="card-surface login-card">
+          <div class="form-stage">
+            <strong>Connexion institutionnelle</strong>
+            <div class="text-muted">Entrez l'identifiant de votre structure puis validez le code MFA.</div>
+          </div>
+
+          <div id="message" class="alert d-none" role="alert"></div>
+
+          <form id="loginForm" novalidate>
+            <div class="mb-3">
+              <label for="institutionId" class="form-label">Identifiant institutionnel</label>
+              <input type="text" class="form-control" id="institutionId" placeholder="GOV-CNAM-3001" required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Mot de passe</label>
+              <input type="password" class="form-control" id="password" placeholder="Minimum 12 caracteres" minlength="12" required>
+            </div>
+            <button id="loginButton" type="submit" class="btn btn-primary w-100">Demander le code MFA</button>
+          </form>
+
+          <form id="verifyMfaForm" class="mt-4 d-none" novalidate>
+            <label for="mfaCode" class="form-label">Code MFA</label>
+            <input type="text" class="form-control mb-3" id="mfaCode" placeholder="000000" maxlength="6" required>
+            <div class="d-grid gap-2">
+              <button id="verifyButton" type="submit" class="btn btn-primary">Valider et acceder</button>
+              <button id="resendButton" type="button" class="btn btn-outline-secondary">Renvoyer le code</button>
+            </div>
+          </form>
+        </div>
       </div>
     </section>
   </main>

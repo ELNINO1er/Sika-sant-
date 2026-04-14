@@ -15,47 +15,123 @@
       <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
 
-      <section class="metric-strip mb-4">
-        <div class="metric-card">
-          <span class="metric-label">Utilisateurs</span>
-          <strong id="usersCount">0</strong>
-          <span class="metric-helper">Comptes visibles</span>
+      <section id="overview" class="card-surface dashboard-hero">
+        <div class="hero-copy">
+          <span class="saas-badge"><i class="bi bi-shield-lock"></i>Espace administrateur</span>
+          <h2>Pilotez la plateforme avec une lecture claire des comptes et des actions sensibles</h2>
+          <p>L'administration de Sika-Sante garde une apparence produit premium tout en donnant une lecture rapide des utilisateurs, des roles actifs et de l'audit recent.</p>
+          <div class="hero-meta">
+            <div class="hero-meta-card">
+              <span>Utilisateurs</span>
+              <strong id="usersCount">0</strong>
+            </div>
+            <div class="hero-meta-card">
+              <span>Logs d'audit</span>
+              <strong id="logsCount">0</strong>
+            </div>
+            <div class="hero-meta-card">
+              <span>Roles actifs</span>
+              <strong id="rolesCount">0</strong>
+            </div>
+          </div>
         </div>
-        <div class="metric-card">
-          <span class="metric-label">Logs d'audit</span>
-          <strong id="logsCount">0</strong>
-          <span class="metric-helper">Evenements traces</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Profils</span>
-          <strong id="rolesCount">0</strong>
-          <span class="metric-helper">Roles actifs</span>
+        <div class="hero-visual">
+          <div class="hero-visual-card">
+            <div class="section-header mb-3">
+              <div>
+                <strong>Activite recente</strong>
+                <p>Une lecture simple des volumes par type de supervision.</p>
+              </div>
+              <span class="status-badge warning">Admin</span>
+            </div>
+            <div class="mini-bars">
+              <span id="adminBarUsers" style="height: 38%;"></span>
+              <span id="adminBarLogs" style="height: 66%;"></span>
+              <span id="adminBarRoles" style="height: 52%;"></span>
+            </div>
+          </div>
+          <div class="hero-visual-card">
+            <strong>Lecture prioritaire</strong>
+            <p class="text-muted mb-0 mt-2">Les zones utilisateurs et audit restent visibles sans rupture de style ni surcharge technique.</p>
+          </div>
         </div>
       </section>
 
-      <section class="row g-4">
-        <div class="col-12">
-          <div class="card card-surface p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+      <section class="metric-strip">
+        <div class="metric-card">
+          <span class="metric-label">Comptes platforme</span>
+          <strong id="usersCountMirror">0</strong>
+          <span class="metric-helper">Nombre de comptes visibles</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Evenements traces</span>
+          <strong id="logsCountMirror">0</strong>
+          <span class="metric-helper">Volume d'audit consulte</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Conformite</span>
+          <strong id="rolesCountMirror">0</strong>
+          <span class="metric-helper">Familles de roles presentes</span>
+        </div>
+      </section>
+
+      <section id="users" class="row g-4 mb-4">
+        <div class="col-xl-7">
+          <div class="card-surface section-card h-100">
+            <div class="section-header">
               <div>
-                <h2 class="h5 mb-1">Utilisateurs</h2>
-                <p class="text-muted mb-0">Vue consolidee des comptes de la plateforme.</p>
+                <span class="small-label">Vue utilisateurs</span>
+                <h3 class="h4 mt-2">Comptes visibles dans la plateforme</h3>
+                <p>La table conserve une lecture nette avec les informations essentielles pour la supervision.</p>
               </div>
             </div>
             <div id="usersTable"></div>
           </div>
         </div>
-        <div class="col-12">
-          <div class="card card-surface p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="col-xl-5">
+          <div class="card-surface section-card h-100">
+            <div class="section-header">
               <div>
-                <h2 class="h5 mb-1">Audit logs recents</h2>
-                <p class="text-muted mb-0">Evenements securite et operations critiques.</p>
+                <span class="small-label">Points de controle</span>
+                <h3 class="h5 mt-2">Priorites admin</h3>
               </div>
             </div>
-            <div id="auditTable"></div>
+            <div class="timeline-list">
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-person-lock"></i></div>
+                <div class="timeline-card">
+                  <strong>Verifier les acces</strong>
+                  <div class="text-muted">Gardez un oeil sur les comptes sensibles et les roles actifs.</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-file-text"></i></div>
+                <div class="timeline-card">
+                  <strong>Lire l'audit</strong>
+                  <div class="text-muted">Les actions critiques restent visibles dans une table dediee.</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-graph-up"></i></div>
+                <div class="timeline-card">
+                  <strong>Suivre la tendance</strong>
+                  <div class="text-muted">Le dashboard conserve des indicateurs lisibles pour la prise de decision.</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
+
+      <section id="audit" class="card-surface section-card">
+        <div class="section-header">
+          <div>
+            <span class="small-label">Journal d'audit</span>
+            <h3 class="h4 mt-2">Evenements recents</h3>
+            <p>Les traces de securite et d'administration restent accessibles sans quitter le tableau de bord.</p>
+          </div>
+        </div>
+        <div id="auditTable"></div>
       </section>
     </main>
   </div>
@@ -92,10 +168,21 @@
 
       const users = usersResponse.data.items || [];
       const logs = auditResponse.data.items || [];
+      const usersTotal = usersResponse.data.meta?.total || users.length;
+      const logsTotal = auditResponse.data.meta?.total || logs.length;
+      const rolesTotal = new Set(users.map(user => user.role)).size;
+      const maxValue = Math.max(usersTotal, logsTotal, rolesTotal, 1);
 
-      document.getElementById('usersCount').textContent = String(usersResponse.data.meta?.total || users.length);
-      document.getElementById('logsCount').textContent = String(auditResponse.data.meta?.total || logs.length);
-      document.getElementById('rolesCount').textContent = String(new Set(users.map(user => user.role)).size);
+      document.getElementById('usersCount').textContent = String(usersTotal);
+      document.getElementById('logsCount').textContent = String(logsTotal);
+      document.getElementById('rolesCount').textContent = String(rolesTotal);
+      document.getElementById('usersCountMirror').textContent = String(usersTotal);
+      document.getElementById('logsCountMirror').textContent = String(logsTotal);
+      document.getElementById('rolesCountMirror').textContent = String(rolesTotal);
+
+      document.getElementById('adminBarUsers').style.height = `${Math.max((usersTotal / maxValue) * 100, 18)}%`;
+      document.getElementById('adminBarLogs').style.height = `${Math.max((logsTotal / maxValue) * 100, 18)}%`;
+      document.getElementById('adminBarRoles').style.height = `${Math.max((rolesTotal / maxValue) * 100, 18)}%`;
 
       renderDataTable(usersTable, {
         columns: [

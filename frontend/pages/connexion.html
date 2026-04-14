@@ -3,63 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion | Sika-Santé</title>
+  <title>Connexion | Sika-Sante</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
   <main class="auth-shell">
-    <section class="auth-panel">
-      <div class="auth-brand mb-4">
-        <i class="bi bi-heart-pulse-fill fs-3"></i>
-        <span>Sika-Santé</span>
+    <section class="auth-story">
+      <div class="auth-brand">
+        <span class="auth-brand-badge"><i class="bi bi-heart-pulse-fill"></i></span>
+        <div>
+          <div>Sika-Sante</div>
+          <small class="text-muted">Carnet medical connecte</small>
+        </div>
       </div>
-      <h1 class="display-6 fw-bold mb-3">Plateforme santé sécurisée</h1>
-      <p class="helper-text mb-4">Authentification unifiée, auditabilité et tableaux de bord connectés à l’API réelle.</p>
-      <div class="card card-surface p-4 login-card">
-        <h2 class="h5 mb-3">Choisissez votre espace</h2>
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <a href="connexion-patient.html" class="card card-surface profile-selector h-100 text-decoration-none text-reset p-3">
-              <i class="bi bi-person-heart fs-3 text-primary mb-2"></i>
-              <div class="fw-semibold">Patient</div>
-              <div class="helper-text">OTP CMU</div>
-            </a>
+
+      <div class="auth-copy">
+        <span class="saas-badge"><i class="bi bi-stars"></i>Une seule experience pour quatre espaces</span>
+        <h1>Choisissez le parcours adapte a votre role dans le systeme de sante</h1>
+        <p>Patient, professionnel, administrateur ou institution: chaque acces garde la meme identite produit, avec une lecture claire et un niveau de detail adapte.</p>
+      </div>
+
+      <div class="auth-bullet-list">
+        <div class="auth-bullet">
+          <i class="bi bi-journal-medical"></i>
+          <div>
+            <strong>Carnet patient lisible</strong>
+            <div class="text-muted">Le dossier de sante reste simple a consulter et a suivre dans le temps.</div>
           </div>
-          <div class="col-sm-6">
-            <a href="connexion-professionnel.html" class="card card-surface profile-selector h-100 text-decoration-none text-reset p-3">
-              <i class="bi bi-stethoscope fs-3 text-success mb-2"></i>
-              <div class="fw-semibold">Professionnel</div>
-              <div class="helper-text">Email + MFA</div>
-            </a>
+        </div>
+        <div class="auth-bullet">
+          <i class="bi bi-clipboard2-pulse"></i>
+          <div>
+            <strong>Pratique clinique plus fluide</strong>
+            <div class="text-muted">Le praticien retrouve les informations utiles et documente la prise en charge.</div>
           </div>
-          <div class="col-sm-6">
-            <a href="connexion-admin.html" class="card card-surface profile-selector h-100 text-decoration-none text-reset p-3">
-              <i class="bi bi-shield-lock fs-3 text-danger mb-2"></i>
-              <div class="fw-semibold">Admin</div>
-              <div class="helper-text">Pilotage SaaS</div>
-            </a>
+        </div>
+        <div class="auth-bullet">
+          <i class="bi bi-building-check"></i>
+          <div>
+            <strong>Gouvernance medicale plus claire</strong>
+            <div class="text-muted">L'institution lit les tendances, les alertes et l'activite globale.</div>
           </div>
-          <div class="col-sm-6">
-            <a href="connexion-institution.html" class="card card-surface profile-selector h-100 text-decoration-none text-reset p-3">
-              <i class="bi bi-building fs-3 text-secondary mb-2"></i>
-              <div class="fw-semibold">Institution</div>
-              <div class="helper-text">Accès institutionnel</div>
-            </a>
+        </div>
+      </div>
+
+      <div class="auth-preview">
+        <div class="section-header mb-3">
+          <div>
+            <strong>Vue produit</strong>
+            <p>Un meme design system sur landing, authentification et dashboards.</p>
+          </div>
+          <span class="status-badge success">Premium</span>
+        </div>
+        <div class="auth-preview-grid">
+          <div class="preview-stat">
+            <small class="text-muted">Espace patient</small>
+            <strong>OTP + carnet</strong>
+          </div>
+          <div class="preview-stat">
+            <small class="text-muted">Espace soignant</small>
+            <strong>Patients + consultations</strong>
+          </div>
+          <div class="preview-stat">
+            <small class="text-muted">Espace admin</small>
+            <strong>Utilisateurs + audit</strong>
+          </div>
+          <div class="preview-stat">
+            <small class="text-muted">Espace institution</small>
+            <strong>Tendances + alertes</strong>
           </div>
         </div>
       </div>
     </section>
-    <section class="auth-visual">
-      <div class="glass-card">
-        <h2 class="h4 mb-3">Architecture cible</h2>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item bg-transparent px-0">Backend Node.js + Express + MySQL sécurisé</li>
-          <li class="list-group-item bg-transparent px-0">API unique en <code>/api/v1</code></li>
-          <li class="list-group-item bg-transparent px-0">CSRF, JWT courts, rotation refresh token</li>
-          <li class="list-group-item bg-transparent px-0">Front modulaire unique servi par Express</li>
-        </ul>
+
+    <section class="auth-form-wrap">
+      <div class="auth-form-shell">
+        <a href="/" class="auth-back-link"><i class="bi bi-arrow-left"></i>Retour a la vitrine</a>
+
+        <div class="card-surface login-card">
+          <div class="form-stage">
+            <strong>Selection de profil</strong>
+            <div class="text-muted">Chaque espace ouvre un parcours, une connexion et un tableau de bord adaptes.</div>
+          </div>
+
+          <div class="selector-grid">
+            <a href="connexion-patient.html" class="selector-card">
+              <i class="bi bi-person-heart"></i>
+              <h2 class="h5 mt-3 mb-2">Patient</h2>
+              <small>Connexion CMU + OTP pour consulter le carnet personnel.</small>
+              <span class="selector-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a href="connexion-professionnel.html" class="selector-card">
+              <i class="bi bi-stethoscope"></i>
+              <h2 class="h5 mt-3 mb-2">Professionnel</h2>
+              <small>Connexion email + MFA pour le suivi clinique et les consultations.</small>
+              <span class="selector-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a href="connexion-admin.html" class="selector-card">
+              <i class="bi bi-shield-lock"></i>
+              <h2 class="h5 mt-3 mb-2">Admin</h2>
+              <small>Superviser les comptes, les journaux et les acces sensibles.</small>
+              <span class="selector-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a href="connexion-institution.html" class="selector-card">
+              <i class="bi bi-bank"></i>
+              <h2 class="h5 mt-3 mb-2">Institution</h2>
+              <small>Lire la vue globale des tendances, alertes et activites consolidees.</small>
+              <span class="selector-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+          </div>
+        </div>
       </div>
     </section>
   </main>

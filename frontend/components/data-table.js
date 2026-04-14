@@ -1,6 +1,9 @@
 import { createEmptyStateMarkup, createLoadingMarkup } from '../utils/helpers.js';
 
-export function renderDataTable(container, { columns, rows, loading = false, emptyTitle = 'Aucune donnée', emptyDescription = 'Aucun élément à afficher.' }) {
+export function renderDataTable(
+  container,
+  { columns, rows, loading = false, emptyTitle = 'Aucune donnee', emptyDescription = 'Aucun element a afficher.' }
+) {
   if (!container) return;
 
   if (loading) {
@@ -21,11 +24,13 @@ export function renderDataTable(container, { columns, rows, loading = false, emp
   `).join('');
 
   container.innerHTML = `
-    <div class="table-responsive">
-      <table class="table align-middle mb-0">
-        <thead><tr>${head}</tr></thead>
-        <tbody>${body}</tbody>
-      </table>
+    <div class="table-shell">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead><tr>${head}</tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
     </div>
   `;
 }

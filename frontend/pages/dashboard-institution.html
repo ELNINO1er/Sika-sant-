@@ -15,42 +15,120 @@
       <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
 
-      <section class="metric-strip mb-4">
-        <div class="metric-card">
-          <span class="metric-label">Etat API</span>
-          <strong id="apiStatus">-</strong>
-          <span class="metric-helper">Disponibilite backend</span>
+      <section id="overview" class="card-surface dashboard-hero">
+        <div class="hero-copy">
+          <span class="saas-badge"><i class="bi bi-bank"></i>Espace institution</span>
+          <h2>Suivez les tendances, les signaux d'alerte et la lecture globale du dispositif</h2>
+          <p>Le tableau de bord institutionnel met en avant une vision plus large: activite consolidee, alertes prioritaires, tendances de suivi et lecture recente des evenements importants.</p>
+          <div class="hero-meta">
+            <div class="hero-meta-card">
+              <span>Evenements traces</span>
+              <strong id="auditVisibleCount">0</strong>
+            </div>
+            <div class="hero-meta-card">
+              <span>Acteurs visibles</span>
+              <strong id="institutionActorsCount">0</strong>
+            </div>
+            <div class="hero-meta-card">
+              <span>Derniere mise a jour</span>
+              <strong id="institutionLastUpdate">Aucune</strong>
+            </div>
+          </div>
         </div>
-        <div class="metric-card">
-          <span class="metric-label">Environnement</span>
-          <strong id="environmentName">-</strong>
-          <span class="metric-helper">Contexte d'execution</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Audit visible</span>
-          <strong id="auditVisibleCount">0</strong>
-          <span class="metric-helper">Evenements traces</span>
+        <div class="hero-visual">
+          <div class="hero-visual-card">
+            <div class="section-header mb-3">
+              <div>
+                <strong>Tendances de suivi</strong>
+                <p>Lecture rapide des volumes recents.</p>
+              </div>
+              <span class="status-badge warning">Gouvernance</span>
+            </div>
+            <div class="mini-bars">
+              <span id="instBar1" style="height: 38%;"></span>
+              <span id="instBar2" style="height: 46%;"></span>
+              <span id="instBar3" style="height: 54%;"></span>
+              <span id="instBar4" style="height: 66%;"></span>
+              <span id="instBar5" style="height: 72%;"></span>
+            </div>
+          </div>
+          <div class="hero-visual-card">
+            <strong>Lecture executive</strong>
+            <p class="text-muted mb-0 mt-2">Une interface moins technique, plus orientee activite, signaux et priorisation des sujets a surveiller.</p>
+          </div>
         </div>
       </section>
 
-      <section class="row g-4">
-        <div class="col-lg-4">
-          <div class="card card-surface p-4 h-100">
-            <h2 class="h5 mb-3">Disponibilite service</h2>
-            <dl class="row mb-0">
-              <dt class="col-sm-5">Uptime</dt>
-              <dd class="col-sm-7" id="uptimeValue">-</dd>
-              <dt class="col-sm-5">Dernier check</dt>
-              <dd class="col-sm-7" id="healthTimestamp">-</dd>
-            </dl>
+      <section class="metric-strip">
+        <div class="metric-card">
+          <span class="metric-label">Tendance recente</span>
+          <strong id="trendSignal">0</strong>
+          <span class="metric-helper">Evenements sur les 7 derniers jours</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Alertes a revoir</span>
+          <strong id="institutionAlertCount">0</strong>
+          <span class="metric-helper">Actions sensibles ou echecs detectes</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Vue populationnelle</span>
+          <strong>Axes de suivi</strong>
+          <span class="metric-helper">Prevention, chronicite et parcours sensibles</span>
+        </div>
+      </section>
+
+      <section class="row g-4 mb-4" id="trends">
+        <div class="col-xl-7">
+          <div class="card-surface section-card h-100">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Vue globale</span>
+                <h3 class="h4 mt-2">Axes prioritaires de lecture</h3>
+                <p>Une presentation visuelle des chantiers majeurs a suivre, sans tomber dans un tableau purement technique.</p>
+              </div>
+            </div>
+            <div class="support-grid">
+              <article class="support-card">
+                <span class="status-badge success mb-3">Prevention</span>
+                <h4 class="h6">Suivi des parcours continus</h4>
+                <p class="text-muted mb-0">Mesurer la regularite des prises en charge et les ruptures de suivi.</p>
+              </article>
+              <article class="support-card">
+                <span class="status-badge warning mb-3">Chronicite</span>
+                <h4 class="h6">Patients a vigilance forte</h4>
+                <p class="text-muted mb-0">Concentrer l'attention sur les dossiers ou la coordination est determinante.</p>
+              </article>
+              <article class="support-card">
+                <span class="status-badge success mb-3">Territoire</span>
+                <h4 class="h6">Lecture institutionnelle</h4>
+                <p class="text-muted mb-0">Croiser activite recente, signaux et gouvernance dans un meme ecran.</p>
+              </article>
+            </div>
           </div>
         </div>
-        <div class="col-lg-8">
-          <div class="card card-surface p-4 h-100">
-            <h2 class="h5 mb-3">Audit logs</h2>
-            <div id="institutionAuditTable"></div>
+        <div class="col-xl-5" id="alerts">
+          <div class="card-surface section-card h-100">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Alertes</span>
+                <h3 class="h5 mt-2">Signaux a surveiller</h3>
+                <p>Les actions les plus sensibles remontent dans une liste concise.</p>
+              </div>
+            </div>
+            <div id="alertList"></div>
           </div>
         </div>
+      </section>
+
+      <section class="card-surface section-card">
+        <div class="section-header">
+          <div>
+            <span class="small-label">Activite recente</span>
+            <h3 class="h4 mt-2">Evenements institutionnels</h3>
+            <p>Le tableau garde une lecture claire des actions remontees pour la gouvernance.</p>
+          </div>
+        </div>
+        <div id="institutionAuditTable"></div>
       </section>
     </main>
   </div>
@@ -59,11 +137,10 @@
     import { renderNavbar, bindNavbarActions } from '../components/navbar.js';
     import { renderSidebar } from '../components/sidebar.js';
     import { renderDataTable } from '../components/data-table.js';
-    import { apiGet } from '../services/api.js';
     import { listAuditLogs } from '../services/admin.js';
     import { authGuard, roleGuard } from '../utils/guards.js';
     import { ROLES } from '../utils/access.js';
-    import { formatDateTime, showToast, toggleDarkMode } from '../utils/helpers.js';
+    import { createEmptyStateMarkup, formatDateTime, showToast, toggleDarkMode } from '../utils/helpers.js';
     import { getDarkMode } from '../utils/storage.js';
 
     await authGuard();
@@ -75,28 +152,69 @@
     toggleDarkMode(getDarkMode());
 
     const auditTable = document.getElementById('institutionAuditTable');
+    const alertList = document.getElementById('alertList');
     renderDataTable(auditTable, { columns: [], rows: [], loading: true });
 
-    function formatUptime(seconds) {
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      return `${hours}h ${minutes}m`;
+    function isAlertAction(action = '') {
+      return /(fail|error|revoke|blocked|suspend|mfa|logout)/i.test(action);
+    }
+
+    function buildTrendBuckets(rows) {
+      const buckets = new Array(5).fill(0);
+      rows.slice(0, 20).forEach((row, index) => {
+        buckets[index % 5] += 1;
+      });
+      return buckets;
     }
 
     try {
-      const [healthResponse, auditResponse] = await Promise.all([
-        apiGet('/health'),
-        listAuditLogs({ page: 1, pageSize: 20 })
-      ]);
-
-      const health = healthResponse.data;
+      const auditResponse = await listAuditLogs({ page: 1, pageSize: 20 });
       const logs = auditResponse.data.items || [];
+      const total = auditResponse.data.meta?.total || logs.length;
+      const actorsCount = new Set(
+        logs.map(log => log.userName || log.userEmail || log.user_id).filter(Boolean)
+      ).size;
+      const alertLogs = logs.filter(log => isAlertAction(log.action));
+      const recentWindow = logs.filter(log => {
+        const createdAt = new Date(log.created_at).getTime();
+        return Number.isFinite(createdAt) && createdAt > (Date.now() - (7 * 24 * 60 * 60 * 1000));
+      });
+      const trendBuckets = buildTrendBuckets(logs);
+      const maxBucket = Math.max(...trendBuckets, 1);
 
-      document.getElementById('apiStatus').textContent = health.status || 'ok';
-      document.getElementById('environmentName').textContent = health.environment || 'development';
-      document.getElementById('uptimeValue').textContent = formatUptime(Math.round(health.uptime || 0));
-      document.getElementById('healthTimestamp').textContent = formatDateTime(health.timestamp);
-      document.getElementById('auditVisibleCount').textContent = String(auditResponse.data.meta?.total || logs.length);
+      document.getElementById('auditVisibleCount').textContent = String(total);
+      document.getElementById('institutionActorsCount').textContent = String(actorsCount);
+      document.getElementById('institutionAlertCount').textContent = String(alertLogs.length);
+      document.getElementById('trendSignal').textContent = String(recentWindow.length);
+      document.getElementById('institutionLastUpdate').textContent = logs[0] ? formatDateTime(logs[0].created_at) : 'Aucune';
+
+      trendBuckets.forEach((bucket, index) => {
+        const bar = document.getElementById(`instBar${index + 1}`);
+        if (bar) {
+          bar.style.height = `${Math.max((bucket / maxBucket) * 100, 18)}%`;
+        }
+      });
+
+      if (!alertLogs.length) {
+        alertList.innerHTML = createEmptyStateMarkup(
+          'Aucune alerte prioritaire',
+          'Les derniers evenements ne remontent aucun signal critique a traiter.'
+        );
+      } else {
+        alertList.innerHTML = `
+          <div class="timeline-list">
+            ${alertLogs.slice(0, 4).map(log => `
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-bell"></i></div>
+                <div class="timeline-card">
+                  <strong>${log.action}</strong>
+                  <div class="text-muted">${log.userName || log.userEmail || 'Systeme'} · ${formatDateTime(log.created_at)}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
 
       renderDataTable(auditTable, {
         columns: [
@@ -111,6 +229,10 @@
       });
     } catch (error) {
       showToast(error.message, 'danger');
+      alertList.innerHTML = createEmptyStateMarkup(
+        'Chargement impossible',
+        'Les alertes institutionnelles n ont pas pu etre chargees.'
+      );
       renderDataTable(auditTable, {
         columns: [],
         rows: [],

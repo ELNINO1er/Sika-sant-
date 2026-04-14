@@ -1,0 +1,84 @@
+<svg width="840" height="760" viewBox="0 0 840 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="114" y1="62" x2="700" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EFF6FF"/>
+      <stop offset="0.5" stop-color="#EDE9FE"/>
+      <stop offset="1" stop-color="#DCFCE7"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="150" y1="120" x2="640" y2="660" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#F8FAFC" stop-opacity="0.88"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="262" y1="182" x2="562" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="0.5" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+    <filter id="shadow" x="48" y="26" width="744" height="708" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="32"/>
+      <feGaussianBlur stdDeviation="36"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.145098 0 0 0 0 0.388235 0 0 0 0 0.921569 0 0 0 0.14 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <rect width="840" height="760" rx="42" fill="url(#bg)"/>
+  <circle cx="666" cy="120" r="74" fill="#FFFFFF" fill-opacity="0.38"/>
+  <circle cx="154" cy="630" r="96" fill="#FFFFFF" fill-opacity="0.32"/>
+
+  <g filter="url(#shadow)">
+    <rect x="120" y="94" width="600" height="564" rx="42" fill="url(#panel)"/>
+  </g>
+
+  <rect x="470" y="146" width="168" height="72" rx="24" fill="#FFFFFF" fill-opacity="0.78"/>
+  <text x="500" y="179" fill="#64748B" font-family="Arial, sans-serif" font-size="18">Analyse</text>
+  <text x="500" y="201" fill="#0F172A" font-family="Arial, sans-serif" font-size="28" font-weight="700">Clinique</text>
+  <circle cx="592" cy="182" r="24" fill="url(#accent)"/>
+  <path d="M583 182L590 189L603 175" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="196" y="470" width="212" height="98" rx="28" fill="#FFFFFF" fill-opacity="0.82"/>
+  <circle cx="238" cy="519" r="18" fill="#DBEAFE"/>
+  <path d="M238 507V531M226 519H250" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/>
+  <text x="270" y="510" fill="#0F172A" font-family="Arial, sans-serif" font-size="24" font-weight="700">Suivi stable</text>
+  <text x="270" y="538" fill="#64748B" font-family="Arial, sans-serif" font-size="18">Dossier a jour</text>
+
+  <circle cx="420" cy="324" r="132" fill="url(#accent)" fill-opacity="0.14"/>
+  <ellipse cx="420" cy="336" rx="118" ry="128" fill="#E0ECFF"/>
+  <path d="M333 542C337 460 370 420 420 420C470 420 503 460 507 542H333Z" fill="#FFFFFF"/>
+  <path d="M367 551C370 480 392 448 420 448C448 448 470 480 473 551H367Z" fill="#DCEAFE"/>
+  <path d="M379 542C383 487 398 458 420 458C442 458 457 487 461 542H379Z" fill="#FFFFFF"/>
+
+  <ellipse cx="420" cy="298" rx="86" ry="96" fill="#FFD9C7"/>
+  <path d="M346 293C350 236 381 199 420 199C459 199 490 236 494 293C488 262 466 244 443 235C422 227 404 227 382 235C359 244 352 263 346 293Z" fill="#0F172A"/>
+  <path d="M393 348C406 357 434 357 447 348" stroke="#C97D62" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="389" cy="296" r="8" fill="#1E293B"/>
+  <circle cx="451" cy="296" r="8" fill="#1E293B"/>
+  <path d="M398 323C404 329 436 329 442 323" stroke="#9A5B46" stroke-width="4" stroke-linecap="round"/>
+  <path d="M379 278C389 268 404 266 413 272" stroke="#1E293B" stroke-width="6" stroke-linecap="round"/>
+  <path d="M427 272C437 266 452 268 462 278" stroke="#1E293B" stroke-width="6" stroke-linecap="round"/>
+
+  <path d="M357 476C369 447 392 430 420 430C448 430 471 447 483 476L448 505H392L357 476Z" fill="#FFFFFF"/>
+  <path d="M401 430H439L432 472H408L401 430Z" fill="#2563EB"/>
+  <path d="M421 430L445 456L432 472H408L395 456L421 430Z" fill="#EFF6FF"/>
+  <path d="M371 548V509L392 505L420 548H371Z" fill="#2563EB"/>
+  <path d="M469 548V509L448 505L420 548H469Z" fill="#2563EB"/>
+
+  <path d="M352 486C344 485 339 491 339 498C339 510 351 511 351 524C351 533 359 540 368 540C377 540 385 533 385 524V500" stroke="#0F172A" stroke-width="6" stroke-linecap="round"/>
+  <path d="M488 486C496 485 501 491 501 498C501 510 489 511 489 524C489 533 481 540 472 540C463 540 455 533 455 524V500" stroke="#0F172A" stroke-width="6" stroke-linecap="round"/>
+  <path d="M355 502C374 483 390 486 404 495" stroke="#0F172A" stroke-width="6" stroke-linecap="round"/>
+  <path d="M485 502C466 483 450 486 436 495" stroke="#0F172A" stroke-width="6" stroke-linecap="round"/>
+
+  <rect x="540" y="430" width="118" height="116" rx="28" fill="#FFFFFF" fill-opacity="0.76"/>
+  <text x="566" y="468" fill="#64748B" font-family="Arial, sans-serif" font-size="16">Signaux</text>
+  <text x="566" y="499" fill="#0F172A" font-family="Arial, sans-serif" font-size="32" font-weight="700">82%</text>
+  <rect x="566" y="516" width="66" height="12" rx="6" fill="#DBEAFE"/>
+  <rect x="566" y="516" width="52" height="12" rx="6" fill="url(#accent)"/>
+
+  <rect x="170" y="166" width="144" height="56" rx="22" fill="#FFFFFF" fill-opacity="0.8"/>
+  <circle cx="206" cy="194" r="14" fill="#E0F2FE"/>
+  <path d="M206 187V201M199 194H213" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+  <text x="230" y="199" fill="#0F172A" font-family="Arial, sans-serif" font-size="20" font-weight="700">Carnet vivant</text>
+</svg>
