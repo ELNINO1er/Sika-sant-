@@ -11,204 +11,267 @@
 <body>
   <div class="layout-shell">
     <div id="appSidebar"></div>
-    <main class="main-content">
+
+    <main class="main-content patient-main-shell">
       <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
 
-      <section id="overview" class="card-surface dashboard-hero">
-        <div class="hero-copy">
-          <span class="saas-badge"><i class="bi bi-heart-pulse"></i>Espace patient</span>
-          <h2>Bonjour, <span id="profileName">Patient</span></h2>
-          <p>Retrouvez votre carnet de sante, votre historique recent et les informations utiles pour comprendre votre parcours de soins.</p>
-          <div class="hero-meta">
-            <div class="hero-meta-card">
-              <span>Role</span>
-              <strong id="profileRole">Patient</strong>
-            </div>
-            <div class="hero-meta-card">
-              <span>Numero CMU</span>
-              <strong id="cmuNumber">-</strong>
-            </div>
-            <div class="hero-meta-card">
-              <span>Derniere mise a jour</span>
-              <strong id="lastVisit">Aucune consultation</strong>
-            </div>
-          </div>
-        </div>
-        <div class="hero-visual">
-          <div class="hero-visual-card">
-            <div class="section-header mb-3">
-              <div>
-                <strong>Lecture rapide</strong>
-                <p>Trois indicateurs pour suivre votre dossier en un coup d'oeil.</p>
-              </div>
-              <span class="status-badge success">Carnet actif</span>
-            </div>
-            <div class="mini-bars">
-              <span style="height: 48%;"></span>
-              <span style="height: 58%;"></span>
-              <span style="height: 74%;"></span>
-              <span style="height: 67%;"></span>
-            </div>
-          </div>
-          <div class="hero-visual-card">
-            <strong>Prochaine lecture</strong>
-            <p class="text-muted mb-0 mt-2">Vos consultations recentes et vos donnees de contact restent disponibles dans le meme espace.</p>
-          </div>
-        </div>
-      </section>
+      <section class="card-surface patient-overview-board">
+        <header id="patientOverviewHeader" class="patient-overview-header"></header>
 
-      <section class="metric-strip">
-        <div class="metric-card">
-          <span class="metric-label">Consultations</span>
-          <strong id="historyCount">0</strong>
-          <span class="metric-helper">Historique recent disponible</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Traitements</span>
-          <strong id="treatmentCount">0</strong>
-          <span class="metric-helper">Signaux detectes dans le dossier</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Alertes</span>
-          <strong id="alertCount">0</strong>
-          <span class="metric-helper">Points de vigilance a surveiller</span>
-        </div>
-      </section>
+        <div class="patient-overview-grid">
+          <article class="patient-overview-card medications-card">
+            <div class="patient-panel-header">
+              <div>
+                <span class="small-label">Traitements actuels</span>
+                <h3 class="patient-panel-title">Traitements en cours</h3>
+              </div>
+            </div>
+            <div id="overviewMedications" class="patient-medication-stack"></div>
+            <div class="patient-overview-footer">
+              <a href="patient-medications.html">Voir tous les traitements</a>
+              <button type="button" data-patient-action="refill">Demander un renouvellement</button>
+            </div>
+          </article>
 
-      <section class="row g-4 mb-4">
-        <div class="col-xl-8" id="history">
-          <div class="card-surface section-card h-100">
-            <div class="section-header">
+          <article class="patient-overview-card appointment-card">
+            <div class="patient-panel-header">
               <div>
-                <span class="small-label">Historique medical</span>
-                <h3 class="h4 mt-2">Vos consultations recentes</h3>
-                <p>Chaque ligne vous aide a relire votre parcours et les prises en charge deja effectuees.</p>
+                <span class="small-label">Prochain rendez-vous</span>
+                <h3 class="patient-panel-title">Prochain rendez-vous</h3>
               </div>
             </div>
-            <div id="historyTable"></div>
-          </div>
-        </div>
-        <div class="col-xl-4">
-          <div class="card-surface section-card mb-4">
-            <div class="section-header">
-              <div>
-                <span class="small-label">Coordonnees</span>
-                <h3 class="h5 mt-2">Informations de contact</h3>
-              </div>
-            </div>
-            <div class="key-value-list">
-              <div class="key-value-item">
-                <div class="text-muted">Telephone</div>
-                <strong id="profilePhone">-</strong>
-              </div>
-              <div class="key-value-item">
-                <div class="text-muted">Email</div>
-                <strong id="profileEmail">-</strong>
-              </div>
-            </div>
-          </div>
+            <div id="overviewAppointment"></div>
+          </article>
 
-          <div class="card-surface section-card" id="wellness">
-            <div class="section-header">
+          <article class="patient-overview-card messages-card">
+            <div class="patient-panel-header">
               <div>
-                <span class="small-label">Evolution sante</span>
-                <h3 class="h5 mt-2">Tendance de suivi</h3>
+                <span class="small-label">Nouveaux messages</span>
+                <h3 class="patient-panel-title">Messages recents <span id="messageCounter" class="patient-item-tag">0</span></h3>
               </div>
             </div>
-            <div class="chart-placeholder">
-              <div class="trend-bars">
-                <span style="height: 35%;"></span>
-                <span style="height: 58%;"></span>
-                <span style="height: 46%;"></span>
-                <span style="height: 70%;"></span>
-                <span style="height: 62%;"></span>
+            <div id="overviewMessages" class="patient-thread-list"></div>
+          </article>
+
+          <article class="patient-overview-card history-card">
+            <div class="patient-panel-header">
+              <div>
+                <span class="small-label">Dossier medical</span>
+                <h3 class="patient-panel-title">Historique medical recent</h3>
               </div>
+              <a class="patient-panel-link" href="patient-history.html">Voir tout le dossier</a>
             </div>
-            <div class="timeline-list mt-3">
-              <div class="timeline-item">
-                <div class="timeline-dot"><i class="bi bi-check2-circle"></i></div>
-                <div class="timeline-card">
-                  <strong>Lecture du dossier</strong>
-                  <div class="text-muted">Votre espace reunit historique, contact et tendances de suivi.</div>
-                </div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-dot"><i class="bi bi-bell"></i></div>
-                <div class="timeline-card">
-                  <strong>Points d'attention</strong>
-                  <div class="text-muted">Les alertes apparaissent ici des qu'un signal prioritaire est detecte.</div>
-                </div>
-              </div>
-            </div>
-          </div>
+            <div id="overviewHistory" class="patient-history-table"></div>
+          </article>
         </div>
       </section>
     </main>
   </div>
 
   <script type="module">
-    import { renderNavbar, bindNavbarActions } from '../components/navbar.js';
-    import { renderSidebar } from '../components/sidebar.js';
-    import { renderDataTable } from '../components/data-table.js';
-    import { loadUserProfile } from '../services/auth.js';
-    import { authGuard, roleGuard } from '../utils/guards.js';
-    import { ROLES } from '../utils/access.js';
-    import { formatDateTime, getRoleLabel, showToast, toggleDarkMode } from '../utils/helpers.js';
-    import { getDarkMode } from '../utils/storage.js';
+    import {
+      initializePatientPage,
+      bindPatientActionButtons,
+      escapeHtml
+    } from '../assets/js/patient-portal.js';
+    import { formatDate, formatDateTime } from '../utils/helpers.js';
+    import { logout } from '../services/auth.js';
 
-    await authGuard();
-    roleGuard(ROLES.PATIENT);
+    const patientPhoto = '../assets/img/home.jpg';
+    const attachmentThumb = '../assets/img/seka01.jpg';
+    const appointmentThumb = '../assets/img/seka2.jpg';
 
-    document.getElementById('appSidebar').innerHTML = renderSidebar();
-    document.getElementById('appNavbar').innerHTML = renderNavbar();
-    bindNavbarActions();
-    toggleDarkMode(getDarkMode());
-
-    const historyTable = document.getElementById('historyTable');
-    renderDataTable(historyTable, {
-      columns: [],
-      rows: [],
-      loading: true
+    const state = await initializePatientPage({
+      pageTitle: 'Dashboard Patient',
+      showNavbar: false
     });
 
-    try {
-      const response = await loadUserProfile();
-      const history = response.recentHistory || [];
-      const treatmentCount = history.filter(row => /trait|ordon|prescri/i.test(`${row.title || ''} ${row.summary || ''}`)).length;
-      const alertCount = history.filter(row => /urgent|alerte|controle|suivi/i.test(`${row.title || ''} ${row.summary || ''}`)).length;
-      const latestHistory = history[0];
+    const firstName = (state.profile.name || 'Patient').split(' ')[0];
+    const messageCount = state.messages.length;
+    const refillCount = state.treatments.filter((item) => item.status === 'Actif').length > 0 ? 1 : 0;
+    const latestHistory = state.latestHistory;
 
-      document.getElementById('profileName').textContent = response.name || 'Patient';
-      document.getElementById('profileRole').textContent = getRoleLabel(response.role || ROLES.PATIENT);
-      document.getElementById('cmuNumber').textContent = response.cmuNumber || 'Non renseigne';
-      document.getElementById('profilePhone').textContent = response.phone || 'Non renseigne';
-      document.getElementById('profileEmail').textContent = response.email || 'Non renseigne';
-      document.getElementById('historyCount').textContent = String(history.length);
-      document.getElementById('treatmentCount').textContent = String(treatmentCount);
-      document.getElementById('alertCount').textContent = String(alertCount);
-      document.getElementById('lastVisit').textContent = latestHistory ? formatDateTime(latestHistory.created_at) : 'Aucune consultation';
+    function buildMedicationRows(items) {
+      const rows = items.slice(0, 3);
+      if (!rows.length) {
+        return `
+          <div class="patient-empty-card">
+            <strong>Aucun traitement actif</strong>
+            <p>Les prescriptions visibles apparaitront ici apres publication par le centre.</p>
+          </div>
+        `;
+      }
 
-      renderDataTable(historyTable, {
-        columns: [
-          { label: 'Date', render: row => formatDateTime(row.created_at) },
-          { label: 'Titre', render: row => row.title || 'Consultation' },
-          { label: 'Professionnel', render: row => row.professionalName || 'Non renseigne' },
-          { label: 'Resume', render: row => row.summary || 'Aucun resume disponible' }
-        ],
-        rows: history,
-        emptyTitle: 'Aucun historique',
-        emptyDescription: 'Les consultations apparaitront ici apres synchronisation.'
-      });
-    } catch (error) {
-      showToast(error.message, 'danger');
-      renderDataTable(historyTable, {
-        columns: [],
-        rows: [],
-        emptyTitle: 'Chargement impossible',
-        emptyDescription: 'Le profil patient n a pas pu etre recupere.'
-      });
+      return rows.map((item) => `
+        <div class="patient-medication-row">
+          <div>
+            <strong>${escapeHtml(item.label)}</strong>
+            <div class="patient-medication-meta">${escapeHtml(item.dosage)}</div>
+          </div>
+          <i class="bi bi-chevron-right patient-row-arrow"></i>
+        </div>
+      `).join('');
     }
+
+    function buildAppointmentBlock() {
+      const derivedDate = latestHistory
+        ? new Date(new Date(latestHistory.created_at).getTime() + (21 * 24 * 60 * 60 * 1000))
+        : null;
+      const dateLabel = derivedDate
+        ? derivedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })
+        : 'A confirmer';
+
+      const timeLabel = derivedDate ? '10:30 - 11:00 - 30 min' : 'Date et heure a confirmer';
+      const doctorName = latestHistory?.professionalName || 'Equipe clinique';
+
+      return `
+        <div class="patient-appointment-main">
+          <div class="patient-appointment-date">${escapeHtml(dateLabel)}</div>
+          <div class="patient-appointment-line">
+            <i class="bi bi-clock"></i>
+            <span>${escapeHtml(timeLabel)}</span>
+          </div>
+          <div class="patient-appointment-line">
+            <i class="bi bi-geo-alt"></i>
+            <span>Centre Sika-Sante Abidjan</span>
+          </div>
+          <div class="patient-inline-person">
+            <img src="${patientPhoto}" alt="Professionnel de sante">
+            <div>
+              <strong>${escapeHtml(doctorName)}</strong>
+              <small class="text-muted">Professionnel de sante</small>
+            </div>
+          </div>
+          <a class="patient-panel-link" href="patient-appointments.html">Gerer le rendez-vous</a>
+          <img class="patient-thumb-banner" src="${appointmentThumb}" alt="Consultation et suivi medical">
+        </div>
+      `;
+    }
+
+    function buildMessageThreads(items) {
+      return items.slice(0, 3).map((item, index) => `
+        <div class="patient-thread-card">
+          <img class="patient-photo-avatar" src="${patientPhoto}" alt="Auteur du message">
+          <div class="patient-thread-main">
+            <strong>${escapeHtml(item.sender)}</strong>
+            <small>${escapeHtml(formatDateTime(item.date))}</small>
+            <p>${escapeHtml(item.preview)}</p>
+            ${index === 1 ? `
+              <div class="patient-attachment-card">
+                <img src="${attachmentThumb}" alt="Attachment preview">
+                <div>
+                  <strong>Fasting_Results.pdf</strong>
+                  <small>345kb</small>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+          <div class="patient-thread-toolbar">
+            <i class="bi bi-three-dots-vertical"></i>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function buildHistoryTable(rows) {
+      if (!rows.length) {
+        return `
+          <div class="patient-empty-card">
+            <strong>Aucun historique medical</strong>
+            <p>Les consultations synchronisees apparaitront ici.</p>
+          </div>
+        `;
+      }
+
+      const body = rows.slice(0, 5).map((row) => `
+        <tr>
+          <td>
+            <strong>${escapeHtml(row.professionalName || 'Equipe clinique')}</strong>
+            <small>${escapeHtml(row.title || 'Consultation')}</small>
+          </td>
+          <td>${escapeHtml(formatDate(row.created_at))}</td>
+          <td>${escapeHtml(row.summary || 'Resume non disponible')}</td>
+          <td class="patient-history-status">Disponible</td>
+        </tr>
+      `).join('');
+
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th>Professionnel</th>
+              <th>Date</th>
+              <th>Resume</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>${body}</tbody>
+        </table>
+      `;
+    }
+
+    document.getElementById('patientOverviewHeader').innerHTML = `
+      <div class="patient-overview-copy">
+        <h2>Bonjour, ${escapeHtml(firstName)}</h2>
+        <p>Vous avez ${messageCount} nouveau(x) message(s) et ${refillCount} demande(s) de renouvellement a traiter.</p>
+      </div>
+      <div class="patient-overview-profile">
+        <button type="button" id="patientProfileTrigger" class="patient-profile-trigger" aria-expanded="false" aria-haspopup="true">
+          <img class="patient-photo-avatar" src="${patientPhoto}" alt="Photo patient">
+          <div>
+            <strong>${escapeHtml(state.profile.name || 'Patient')}</strong>
+            <small>No. ${escapeHtml(state.profile.cmuNumber || 'Non attribue')}</small>
+          </div>
+          <i class="bi bi-chevron-down"></i>
+        </button>
+        <div id="patientProfileMenu" class="patient-profile-menu" role="menu">
+          <a href="patient-profile.html" role="menuitem">
+            <i class="bi bi-person"></i>
+            <span>Mon profil</span>
+          </a>
+          <a href="patient-appointments.html" role="menuitem">
+            <i class="bi bi-calendar-event"></i>
+            <span>Mes rendez-vous</span>
+          </a>
+          <button type="button" id="patientLogoutMenu" role="menuitem">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Deconnexion</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('messageCounter').textContent = String(messageCount);
+    document.getElementById('overviewMedications').innerHTML = buildMedicationRows(state.treatments);
+    document.getElementById('overviewAppointment').innerHTML = buildAppointmentBlock();
+    document.getElementById('overviewMessages').innerHTML = buildMessageThreads(state.messages);
+    document.getElementById('overviewHistory').innerHTML = buildHistoryTable(state.history);
+
+    bindPatientActionButtons();
+
+    const profileTrigger = document.getElementById('patientProfileTrigger');
+    const profileMenu = document.getElementById('patientProfileMenu');
+    const logoutButton = document.getElementById('patientLogoutMenu');
+
+    function closeProfileMenu() {
+      profileMenu.classList.remove('is-open');
+      profileTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    profileTrigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const open = profileMenu.classList.toggle('is-open');
+      profileTrigger.setAttribute('aria-expanded', String(open));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!profileMenu.contains(event.target) && !profileTrigger.contains(event.target)) {
+        closeProfileMenu();
+      }
+    });
+
+    logoutButton.addEventListener('click', logout);
   </script>
 </body>
 </html>

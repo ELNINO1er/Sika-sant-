@@ -20,7 +20,7 @@ export function renderNavbar() {
       <div>
         <span class="small-label">Session active</span>
         <h1 class="page-title">Bonjour, ${firstName}</h1>
-        <p class="text-muted mb-0">${getRoleLabel(user.role)} · ${getTodayLabel()}</p>
+        <p class="text-muted mb-0">${getRoleLabel(user.role)} - ${getTodayLabel()}</p>
       </div>
       <div class="toolbar">
         <div class="profile-pill">

@@ -3,120 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion | Sika-Sante</title>
+  <title>Connexion | Sika-Sant&eacute;</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/img/sika-sante-mark.svg">
+  <link rel="shortcut icon" href="../assets/img/sika-sante-mark.svg">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-  <main class="auth-shell">
-    <section class="auth-story">
-      <div class="auth-brand">
-        <span class="auth-brand-badge"><i class="bi bi-heart-pulse-fill"></i></span>
+  <main class="auth-selector-shell">
+    <section class="auth-selector-panel">
+      <a href="/" class="auth-back-link auth-selector-back-button">
+        <i class="bi bi-arrow-left"></i>
+        Retour &agrave; la vitrine
+      </a>
+
+      <div class="auth-selector-brand">
+        <span class="landing-premium-brand-badge">
+          <img src="../assets/img/sika-sante-mark.svg" alt="Logo SIKA SANTE">
+        </span>
         <div>
-          <div>Sika-Sante</div>
-          <small class="text-muted">Carnet medical connecte</small>
+          <strong>Sika-Sant&eacute;</strong>
+          <small>Carnet m&eacute;dical connect&eacute;</small>
         </div>
       </div>
 
-      <div class="auth-copy">
-        <span class="saas-badge"><i class="bi bi-stars"></i>Une seule experience pour quatre espaces</span>
-        <h1>Choisissez le parcours adapte a votre role dans le systeme de sante</h1>
-        <p>Patient, professionnel, administrateur ou institution: chaque acces garde la meme identite produit, avec une lecture claire et un niveau de detail adapte.</p>
+      <span class="landing-premium-badge auth-selector-heading-badge" id="selectorBadge">
+        <i class="bi bi-person-heart"></i>
+        Connexion patient
+      </span>
+
+      <div class="auth-selector-copy">
+        <h1 id="selectorTitle">Acc&eacute;dez &agrave; votre espace patient simplement</h1>
+        <p id="selectorDescription">
+          Entrez votre num&eacute;ro CMU, recevez votre code OTP puis retrouvez votre carnet dans un parcours clair.
+        </p>
       </div>
 
-      <div class="auth-bullet-list">
-        <div class="auth-bullet">
-          <i class="bi bi-journal-medical"></i>
-          <div>
-            <strong>Carnet patient lisible</strong>
-            <div class="text-muted">Le dossier de sante reste simple a consulter et a suivre dans le temps.</div>
-          </div>
+      <div class="card-surface auth-selector-form-card">
+        <div class="form-stage" id="selectorStage">
+          <strong>Identification patient</strong>
         </div>
-        <div class="auth-bullet">
-          <i class="bi bi-clipboard2-pulse"></i>
-          <div>
-            <strong>Pratique clinique plus fluide</strong>
-            <div class="text-muted">Le praticien retrouve les informations utiles et documente la prise en charge.</div>
-          </div>
-        </div>
-        <div class="auth-bullet">
-          <i class="bi bi-building-check"></i>
-          <div>
-            <strong>Gouvernance medicale plus claire</strong>
-            <div class="text-muted">L'institution lit les tendances, les alertes et l'activite globale.</div>
-          </div>
-        </div>
-      </div>
 
-      <div class="auth-preview">
-        <div class="section-header mb-3">
-          <div>
-            <strong>Vue produit</strong>
-            <p>Un meme design system sur landing, authentification et dashboards.</p>
-          </div>
-          <span class="status-badge success">Premium</span>
-        </div>
-        <div class="auth-preview-grid">
-          <div class="preview-stat">
-            <small class="text-muted">Espace patient</small>
-            <strong>OTP + carnet</strong>
-          </div>
-          <div class="preview-stat">
-            <small class="text-muted">Espace soignant</small>
-            <strong>Patients + consultations</strong>
-          </div>
-          <div class="preview-stat">
-            <small class="text-muted">Espace admin</small>
-            <strong>Utilisateurs + audit</strong>
-          </div>
-          <div class="preview-stat">
-            <small class="text-muted">Espace institution</small>
-            <strong>Tendances + alertes</strong>
-          </div>
-        </div>
+        <div id="selectorMessage" class="alert d-none" role="alert"></div>
+        <div id="selectorFormMount"></div>
       </div>
     </section>
 
-    <section class="auth-form-wrap">
-      <div class="auth-form-shell">
-        <a href="/" class="auth-back-link"><i class="bi bi-arrow-left"></i>Retour a la vitrine</a>
+    <section class="auth-selector-showcase">
+      <div class="auth-selector-showcase-glow"></div>
 
-        <div class="card-surface login-card">
-          <div class="form-stage">
-            <strong>Selection de profil</strong>
-            <div class="text-muted">Chaque espace ouvre un parcours, une connexion et un tableau de bord adaptes.</div>
-          </div>
-
-          <div class="selector-grid">
-            <a href="connexion-patient.html" class="selector-card">
-              <i class="bi bi-person-heart"></i>
-              <h2 class="h5 mt-3 mb-2">Patient</h2>
-              <small>Connexion CMU + OTP pour consulter le carnet personnel.</small>
-              <span class="selector-arrow"><i class="bi bi-arrow-right"></i></span>
-            </a>
-            <a href="connexion-professionnel.html" class="selector-card">
-              <i class="bi bi-stethoscope"></i>
-              <h2 class="h5 mt-3 mb-2">Professionnel</h2>
-              <small>Connexion email + MFA pour le suivi clinique et les consultations.</small>
-              <span class="selector-arrow"><i class="bi bi-arrow-right"></i></span>
-            </a>
-            <a href="connexion-admin.html" class="selector-card">
-              <i class="bi bi-shield-lock"></i>
-              <h2 class="h5 mt-3 mb-2">Admin</h2>
-              <small>Superviser les comptes, les journaux et les acces sensibles.</small>
-              <span class="selector-arrow"><i class="bi bi-arrow-right"></i></span>
-            </a>
-            <a href="connexion-institution.html" class="selector-card">
-              <i class="bi bi-bank"></i>
-              <h2 class="h5 mt-3 mb-2">Institution</h2>
-              <small>Lire la vue globale des tendances, alertes et activites consolidees.</small>
-              <span class="selector-arrow"><i class="bi bi-arrow-right"></i></span>
-            </a>
-          </div>
+      <div class="auth-selector-showcase-card">
+        <div class="auth-selector-showcase-head">
+          <span class="landing-premium-badge">
+            <i class="bi bi-grid-1x2"></i>
+            Quatre espaces
+          </span>
+          <h2>Choisissez votre profil</h2>
         </div>
+
+        <div class="auth-selector-cards" id="selectorCards">
+          <button type="button" class="auth-role-card is-active" data-profile="patient">
+            <span class="auth-role-card-icon"><i class="bi bi-person-heart"></i></span>
+            <strong>Patient</strong>
+            <small>CMU + OTP pour consulter le carnet personnel.</small>
+          </button>
+
+          <button type="button" class="auth-role-card" data-profile="professional">
+            <span class="auth-role-card-icon"><i class="bi bi-stethoscope"></i></span>
+            <strong>Professionnel</strong>
+            <small>Email + MFA pour le suivi clinique et les consultations.</small>
+          </button>
+
+          <button type="button" class="auth-role-card" data-profile="admin">
+            <span class="auth-role-card-icon"><i class="bi bi-shield-lock"></i></span>
+            <strong>Admin</strong>
+            <small>Supervision des comptes, audits et acc&egrave;s sensibles.</small>
+          </button>
+
+          <button type="button" class="auth-role-card" data-profile="institution">
+            <span class="auth-role-card-icon"><i class="bi bi-bank"></i></span>
+            <strong>Institution</strong>
+            <small>Vue globale des tendances, alertes et activit&eacute;s consolid&eacute;es.</small>
+          </button>
+        </div>
+
       </div>
     </section>
   </main>
+
+  <script type="module" src="../assets/js/connexion-selector.js"></script>
 </body>
 </html>

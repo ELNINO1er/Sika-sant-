@@ -3,9 +3,13 @@ import { ROLES } from '../utils/access.js';
 
 const linksByRole = {
   [ROLES.PATIENT]: [
-    { href: 'dashboard-patient.html#overview', label: 'Vue generale', icon: 'bi-grid-1x2-fill' },
-    { href: 'dashboard-patient.html#history', label: 'Historique medical', icon: 'bi-clock-history' },
-    { href: 'dashboard-patient.html#wellness', label: 'Suivi sante', icon: 'bi-activity' }
+    { href: 'dashboard-patient.html', label: 'Apercu sante', icon: 'bi-grid-1x2-fill' },
+    { href: 'patient-messages.html', label: 'Messages', icon: 'bi-chat-left-text' },
+    { href: 'patient-documents.html', label: 'Documents', icon: 'bi-file-earmark-medical' },
+    { href: 'patient-profile.html', label: 'Profil', icon: 'bi-person-badge' },
+    { href: 'patient-medications.html', label: 'Traitements', icon: 'bi-capsule-pill' },
+    { href: 'patient-appointments.html', label: 'Rendez-vous', icon: 'bi-calendar-event' },
+    { href: 'patient-history.html', label: 'Dossier medical', icon: 'bi-clock-history' }
   ],
   [ROLES.PROFESSIONAL]: [
     { href: 'dashboard-professional.html#overview', label: 'Vue clinique', icon: 'bi-grid-1x2-fill' },
@@ -47,6 +51,42 @@ function isActiveLink(href) {
 export function renderSidebar() {
   const user = getUserData() || { role: ROLES.PATIENT, name: 'Utilisateur' };
   const links = linksByRole[user.role] || linksByRole[ROLES.PATIENT];
+  const isPatient = user.role === ROLES.PATIENT;
+
+  if (isPatient) {
+    return `
+      <aside class="sidebar patient-sidebar">
+        <div class="brand">
+          <div class="brand-badge">
+            <i class="bi bi-heart-pulse-fill"></i>
+          </div>
+          <div class="brand-copy">
+            <strong>Sika-Sante</strong>
+          </div>
+        </div>
+
+        <nav class="patient-sidebar-nav">
+          ${links.map(link => `
+            <a href="${link.href}" class="${isActiveLink(link.href) ? 'active' : ''}">
+              <i class="bi ${link.icon}"></i>
+              <span>${link.label}</span>
+            </a>
+          `).join('')}
+        </nav>
+
+        <div class="patient-sidebar-footer">
+          <a href="#" data-patient-action="settings">
+            <i class="bi bi-gear"></i>
+            <span>Parametres</span>
+          </a>
+          <a href="#" data-patient-action="help">
+            <i class="bi bi-question-circle"></i>
+            <span>Aide</span>
+          </a>
+        </div>
+      </aside>
+    `;
+  }
 
   return `
     <aside class="sidebar">

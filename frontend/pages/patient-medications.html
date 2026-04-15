@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medications | Sika-Sante</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div class="layout-shell">
+    <div id="appSidebar"></div>
+    <main class="main-content patient-main-shell">
+      <div id="appNavbar"></div>
+      <div id="toastContainer" class="toast-container"></div>
+      <div id="patientPageHero"></div>
+
+      <section class="patient-page-grid patient-page-grid-2">
+        <div class="patient-page-column">
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Active treatment</span>
+                <h3 class="patient-module-title">Traitements actifs</h3>
+              </div>
+            </div>
+            <div id="activeMedications" class="patient-stacked-list"></div>
+          </article>
+        </div>
+
+        <div class="patient-page-column">
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Finished treatment</span>
+                <h3 class="patient-module-title">Traitements termines</h3>
+              </div>
+            </div>
+            <div id="finishedMedications" class="patient-stacked-list"></div>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Therapeutic support</span>
+                <h3 class="patient-module-title">Comprendre mon suivi</h3>
+              </div>
+            </div>
+            <div class="patient-card-note">
+              <strong>Lecture patient</strong>
+              Le patient consulte les traitements, la posologie et le statut, mais ne modifie pas une prescription medicale validee.
+            </div>
+            <div class="patient-inline-actions">
+              <button type="button" class="btn btn-outline-primary btn-sm" data-patient-action="refill">Demander un renouvellement</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import {
+      initializePatientPage,
+      renderTreatmentList,
+      bindPatientActionButtons
+    } from '../assets/js/patient-portal.js';
+
+    const state = await initializePatientPage({
+      pageTitle: 'Medications',
+      heroBadge: 'Medications',
+      heroTitle: 'Medicaments, posologie et statut du traitement',
+      heroDescription: 'Consultez les traitements visibles dans votre dossier et demandez un renouvellement si necessaire.',
+      heroStats: (data) => [
+        { label: 'Actifs', value: String(data.treatments.filter((item) => item.status === 'Actif').length), description: 'Traitements en cours' },
+        { label: 'Termines', value: String(data.treatments.filter((item) => item.status !== 'Actif').length), description: 'Traitements termines ou a verifier' },
+        { label: 'Consultations', value: String(data.history.length), description: 'Sources de prescription visibles' },
+        { label: 'Demandes', value: '0', description: 'Renouvellements en attente' }
+      ]
+    });
+
+    renderTreatmentList(
+      document.getElementById('activeMedications'),
+      state.treatments.filter((item) => item.status === 'Actif'),
+      {
+        allowRefill: true,
+        emptyTitle: 'Aucun traitement actif',
+        emptyDescription: 'Les prescriptions actuellement actives apparaitront ici.'
+      }
+    );
+
+    renderTreatmentList(
+      document.getElementById('finishedMedications'),
+      state.treatments.filter((item) => item.status !== 'Actif'),
+      {
+        emptyTitle: 'Aucun traitement termine',
+        emptyDescription: 'Les traitements termines apparaitront ici lorsqu ils seront visibles.'
+      }
+    );
+
+    bindPatientActionButtons();
+  </script>
+</body>
+</html>
