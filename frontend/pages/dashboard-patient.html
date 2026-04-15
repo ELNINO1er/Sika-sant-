@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body>
+<body class="patient-dashboard-page">
   <div class="layout-shell">
     <div id="appSidebar"></div>
 
@@ -159,7 +159,7 @@
             <p>${escapeHtml(item.preview)}</p>
             ${index === 1 ? `
               <div class="patient-attachment-card">
-                <img src="${attachmentThumb}" alt="Attachment preview">
+                <img src="${attachmentThumb}" alt="Apercu de la piece jointe">
                 <div>
                   <strong>Fasting_Results.pdf</strong>
                   <small>345kb</small>
@@ -221,7 +221,7 @@
           <img class="patient-photo-avatar" src="${patientPhoto}" alt="Photo patient">
           <div>
             <strong>${escapeHtml(state.profile.name || 'Patient')}</strong>
-            <small>No. ${escapeHtml(state.profile.cmuNumber || 'Non attribue')}</small>
+            <small>CMU ${escapeHtml(state.profile.cmuNumber || 'Non attribue')}</small>
           </div>
           <i class="bi bi-chevron-down"></i>
         </button>
