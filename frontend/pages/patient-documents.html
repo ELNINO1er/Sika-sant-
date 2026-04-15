@@ -8,11 +8,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body>
+<body class="patient-dashboard-page">
   <div class="layout-shell">
     <div id="appSidebar"></div>
     <main class="main-content patient-main-shell">
-      <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
       <div id="patientPageHero"></div>
 
@@ -21,7 +20,7 @@
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Medical files</span>
+                <span class="small-label">Dossiers medicaux</span>
                 <h3 class="patient-module-title">Documents medicaux</h3>
               </div>
             </div>
@@ -33,7 +32,7 @@
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Use and access</span>
+                <span class="small-label">Utilisation et acces</span>
                 <h3 class="patient-module-title">Ce que vous pouvez faire</h3>
               </div>
             </div>
@@ -72,6 +71,7 @@
 
     const state = await initializePatientPage({
       pageTitle: 'Documents',
+      showNavbar: false,
       heroBadge: 'Documents',
       heroTitle: 'Documents medicaux, rapports et ordonnances',
       heroDescription: 'Accedez aux comptes rendus, ordonnances et resultats rendus disponibles dans votre dossier patient.',

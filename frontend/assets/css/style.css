@@ -251,8 +251,18 @@ textarea.form-control {
   grid-template-columns: 285px minmax(0, 1fr);
 }
 
+.patient-dashboard-page {
+  padding: 0.5rem;
+  background: #f5f7fb;
+}
+
 .patient-dashboard-page .layout-shell {
-  grid-template-columns: 190px minmax(0, 1fr);
+  grid-template-columns: 180px minmax(0, 1fr);
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
 }
 
 .sidebar {
@@ -330,32 +340,34 @@ body.dark .sidebar {
 .patient-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
-  padding: 1.4rem 1rem 1.2rem;
+  gap: 1.6rem;
+  padding: 1.7rem 1rem 1.2rem;
+  background: #ffffff;
 }
 
 .patient-sidebar .brand {
   padding: 0;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
   border-radius: 0;
   background: transparent;
 }
 
-.patient-sidebar .brand-badge {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.75rem;
-  box-shadow: none;
+.patient-sidebar-logo {
+  width: 1.55rem;
+  height: 1.55rem;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .patient-sidebar .brand-copy strong {
-  font-size: 1.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
 }
 
 .patient-sidebar-nav {
   display: grid;
-  gap: 0.2rem;
-  margin-top: 0.2rem;
+  gap: 0.1rem;
+  margin-top: 0.5rem;
 }
 
 .patient-sidebar nav a,
@@ -366,29 +378,32 @@ body.dark .sidebar {
   align-items: center;
   gap: 0.85rem;
   min-height: 2.9rem;
-  padding: 0.7rem 1rem;
+  padding: 0.7rem 0.85rem;
   border-radius: 0.95rem;
   color: #111827;
   text-decoration: none;
-  transition: background 0.18s ease, color 0.18s ease;
+  background: transparent !important;
+  box-shadow: none !important;
+  transition: color 0.18s ease;
 }
 
 .patient-sidebar-nav a i,
 .patient-sidebar-footer a i {
   width: 1rem;
   color: #111827;
+  font-size: 0.92rem;
 }
 
 .patient-sidebar-nav a:hover,
 .patient-sidebar-footer a:hover {
-  background: rgba(79, 70, 229, 0.05);
-  color: #111827;
+  background: transparent !important;
+  color: #4f46e5;
   transform: none;
 }
 
 .patient-sidebar-nav a.active {
-  background: transparent;
-  color: #111827;
+  background: transparent !important;
+  color: #4f46e5;
   font-weight: 600;
   transform: none;
 }
@@ -403,8 +418,8 @@ body.dark .sidebar {
   right: -1rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 3px;
-  height: 2rem;
+  width: 2.5px;
+  height: 2.2rem;
   border-radius: 999px;
   background: #4f46e5;
 }
@@ -413,7 +428,7 @@ body.dark .sidebar {
   display: grid;
   gap: 0.2rem;
   margin-top: auto;
-  padding-top: 1rem;
+  padding-top: 1.2rem;
 }
 
 .sidebar-note {
@@ -433,7 +448,7 @@ body.dark .sidebar-note {
 }
 
 .patient-dashboard-page .main-content {
-  padding: 1rem 1rem 1rem 1.15rem;
+  padding: 1.15rem 1.7rem 1.7rem;
 }
 
 .topbar {
@@ -961,7 +976,8 @@ body.dark .loading-state {
 
 .patient-main-shell {
   display: grid;
-  gap: 1rem;
+  gap: 0.45rem;
+  align-content: start;
 }
 
 .patient-welcome-card {
@@ -3239,5 +3255,683 @@ body.dark .auth-preview {
   .landing-cta-actions {
     width: 100%;
     min-width: 0;
+  }
+}
+
+/* =============================================
+   PATIENT DASHBOARD — Healer-style redesign
+   ============================================= */
+
+/* Header */
+.pd-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0;
+  margin-bottom: 0.3rem;
+}
+
+.pd-welcome {
+  margin: 0;
+  font-size: clamp(2.45rem, 3.4vw, 3.1rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.pd-summary {
+  margin: 0.45rem 0 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.pd-header-right {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pd-profile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+.pd-profile-pill:hover {
+  opacity: 0.82;
+}
+
+.pd-profile-pill[aria-expanded="true"] .pd-profile-caret i {
+  transform: rotate(180deg);
+}
+
+.pd-profile-pill i {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  transition: transform 0.18s ease;
+}
+
+.pd-profile-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  margin-left: 0.1rem;
+}
+
+.pd-profile-info strong {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.pd-profile-info small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.pd-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 230px;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.14);
+  z-index: 50;
+  display: none;
+}
+
+.pd-profile-dropdown.open {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.pd-profile-dropdown a,
+.pd-profile-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+  text-align: left;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pd-profile-dropdown a:hover,
+.pd-profile-dropdown button:hover {
+  background: var(--primary-soft);
+}
+
+.pd-profile-dropdown hr {
+  margin: 0.25rem 0;
+  border-color: var(--border);
+}
+
+/* Avatar */
+.pd-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  flex-shrink: 0;
+}
+
+.pd-avatar-image {
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pd-avatar-image.sm {
+  width: 2.15rem;
+  height: 2.15rem;
+}
+
+.pd-avatar.sm {
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: 0.72rem;
+}
+
+/* Cards */
+.pd-card {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 0.55rem;
+  padding: 1rem 1rem 0.95rem;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
+}
+
+body.dark .pd-card {
+  background: var(--surface);
+}
+
+.pd-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pd-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pd-count {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.pd-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: #6366f1;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.pd-link {
+  color: #6366f1;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pd-link:hover {
+  text-decoration: underline;
+}
+
+/* Grid layout — 3 columns like Healer */
+.pd-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(290px, 1.08fr);
+  grid-template-areas:
+    "medications appointment messages"
+    "table table messages";
+  gap: 0.9rem;
+  margin-top: 0;
+  align-items: start;
+}
+
+.pd-card-medications {
+  grid-area: medications;
+}
+
+.pd-card-appointment {
+  grid-area: appointment;
+}
+
+.pd-card-messages {
+  grid-area: messages;
+}
+
+.pd-card-table {
+  grid-area: table;
+}
+
+/* Medications */
+.pd-med-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.pd-med-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 0.82rem;
+  border-radius: 0.45rem;
+  border: 1px solid #e7ebf3;
+  background: #ffffff;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.pd-med-row:hover {
+  background: #fbfcff;
+  border-color: #dbe2f0;
+}
+
+.pd-med-bullet {
+  color: #111827;
+  font-size: 0.9rem;
+}
+
+.pd-med-icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.65rem;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.pd-med-icon.active {
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+}
+
+.pd-med-icon.ended {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+}
+
+.pd-med-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pd-med-info strong {
+  display: block;
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.pd-med-info span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.pd-pill-badge {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.pd-pill-badge.actif {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.pd-pill-badge.termine {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+}
+
+.pd-pill-badge.left {
+  background: rgba(248, 113, 113, 0.12);
+  color: #dc2626;
+}
+
+.pd-arrow {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.pd-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eef2f7;
+}
+
+.pd-card-footer a,
+.pd-card-footer button {
+  font-size: 0.86rem;
+  color: var(--text-soft);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: color 0.15s;
+}
+
+.pd-card-footer a:hover,
+.pd-card-footer button:hover {
+  color: #6366f1;
+}
+
+/* Appointment */
+.pd-appointment {
+  display: grid;
+  gap: 0.75rem;
+  min-height: 252px;
+}
+
+.pd-appt-date {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.pd-appt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.pd-appt-row i {
+  color: var(--text-muted);
+  width: 1rem;
+  text-align: center;
+}
+
+.pd-appt-doctor {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+  padding: 0.55rem 0;
+  background: transparent;
+  border: 0;
+}
+
+.pd-appt-doctor strong {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.pd-appt-doctor small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Messages */
+.pd-card-messages {
+  align-self: stretch;
+}
+
+.pd-msg-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.pd-msg-card {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.8rem;
+  border-radius: 0.45rem;
+  border: 1px solid #e7ebf3;
+  background: #ffffff;
+  transition: background 0.15s;
+}
+
+.pd-msg-card:hover {
+  background: #fbfcff;
+}
+
+.pd-msg-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pd-msg-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.pd-msg-head strong {
+  font-size: 0.9rem;
+}
+
+.pd-msg-head small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.pd-msg-body p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pd-msg-attachment {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.45rem;
+  background: #f8fafc;
+  border: 1px solid #e7ebf3;
+}
+
+.pd-attachment-thumb {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.45rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pd-attachment-actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-muted);
+}
+
+.pd-msg-attachment > i:first-child {
+  font-size: 1.2rem;
+  color: #ef4444;
+}
+
+.pd-msg-attachment strong {
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.pd-msg-attachment small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.pd-msg-menu {
+  background: none;
+  border: 0;
+  padding: 0.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Consultations table */
+.pd-card-table {
+  margin-bottom: 0;
+}
+
+.pd-table-wrap {
+  overflow-x: auto;
+}
+
+.pd-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pd-table thead th {
+  padding: 0.75rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.pd-table tbody td {
+  padding: 0.85rem;
+  border-bottom: 1px solid #eef2f7;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+.pd-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.pd-table tbody tr:hover {
+  background: var(--primary-soft);
+}
+
+.pd-table tbody strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.pd-table tbody small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.pd-table-status {
+  display: inline-flex;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(34, 197, 94, 0.1);
+  color: #15803d;
+}
+
+/* Empty state */
+.pd-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.pd-empty p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Dark mode overrides */
+body.dark .pd-profile-pill {
+  background: transparent;
+}
+
+body.dark .pd-profile-dropdown {
+  background: var(--surface-strong);
+}
+
+body.dark .pd-med-row,
+body.dark .pd-msg-card {
+  background: rgba(30, 41, 59, 0.6);
+}
+
+body.dark .pd-msg-attachment {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+body.dark .pd-avatar {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%);
+}
+
+body.dark .pd-pill-badge.actif {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+
+body.dark .pd-table-status {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .pd-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "medications appointment"
+      "table table"
+      "messages messages";
+  }
+}
+
+@media (max-width: 768px) {
+  .pd-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .pd-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "medications"
+      "appointment"
+      "messages"
+      "table";
+  }
+  .pd-profile-pill {
+    align-items: flex-start;
   }
 }

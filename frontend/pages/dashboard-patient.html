@@ -13,58 +13,70 @@
     <div id="appSidebar"></div>
 
     <main class="main-content patient-main-shell">
-      <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
 
-      <section class="card-surface patient-overview-board">
-        <header id="patientOverviewHeader" class="patient-overview-header"></header>
-
-        <div class="patient-overview-grid">
-          <article class="patient-overview-card medications-card">
-            <div class="patient-panel-header">
-              <div>
-                <span class="small-label">Traitements actuels</span>
-                <h3 class="patient-panel-title">Traitements en cours</h3>
-              </div>
-            </div>
-            <div id="overviewMedications" class="patient-medication-stack"></div>
-            <div class="patient-overview-footer">
-              <a href="patient-medications.html">Voir tous les traitements</a>
-              <button type="button" data-patient-action="refill">Demander un renouvellement</button>
-            </div>
-          </article>
-
-          <article class="patient-overview-card appointment-card">
-            <div class="patient-panel-header">
-              <div>
-                <span class="small-label">Prochain rendez-vous</span>
-                <h3 class="patient-panel-title">Prochain rendez-vous</h3>
-              </div>
-            </div>
-            <div id="overviewAppointment"></div>
-          </article>
-
-          <article class="patient-overview-card messages-card">
-            <div class="patient-panel-header">
-              <div>
-                <span class="small-label">Nouveaux messages</span>
-                <h3 class="patient-panel-title">Messages recents <span id="messageCounter" class="patient-item-tag">0</span></h3>
-              </div>
-            </div>
-            <div id="overviewMessages" class="patient-thread-list"></div>
-          </article>
-
-          <article class="patient-overview-card history-card">
-            <div class="patient-panel-header">
-              <div>
-                <span class="small-label">Dossier medical</span>
-                <h3 class="patient-panel-title">Historique medical recent</h3>
-              </div>
-              <a class="patient-panel-link" href="patient-history.html">Voir tout le dossier</a>
-            </div>
-            <div id="overviewHistory" class="patient-history-table"></div>
-          </article>
+      <header class="pd-header">
+        <div class="pd-header-left">
+          <h1 class="pd-welcome" id="pdWelcome"></h1>
+          <p class="pd-summary" id="pdSummary"></p>
         </div>
+
+        <div class="pd-header-right">
+          <button type="button" id="pdProfileTrigger" class="pd-profile-pill" aria-expanded="false" aria-haspopup="true">
+            <img class="pd-avatar-image" src="../assets/img/Patient.jpg" alt="Photo du patient">
+            <div class="pd-profile-info">
+              <strong id="pdProfileName"></strong>
+              <small id="pdProfileId"></small>
+            </div>
+            <span class="pd-profile-caret" aria-hidden="true">
+              <i class="bi bi-chevron-down"></i>
+            </span>
+          </button>
+
+          <div id="pdProfileDropdown" class="pd-profile-dropdown" role="menu">
+            <a href="patient-profile.html" role="menuitem"><i class="bi bi-person"></i> Mon profil</a>
+            <a href="patient-appointments.html" role="menuitem"><i class="bi bi-calendar-event"></i> Mes rendez-vous</a>
+            <a href="patient-documents.html" role="menuitem"><i class="bi bi-file-earmark-medical"></i> Mes documents</a>
+            <hr>
+            <button type="button" id="pdThemeToggle" role="menuitem"><i class="bi bi-moon-stars"></i> <span>Mode sombre</span></button>
+            <button type="button" id="pdLogout" role="menuitem"><i class="bi bi-box-arrow-right"></i> Deconnexion</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="pd-grid">
+        <article class="pd-card pd-card-medications">
+          <div class="pd-card-header">
+            <h2 class="pd-card-title">Traitements actuels <span class="pd-count" id="pdMedicationCount">(0)</span></h2>
+          </div>
+          <div class="pd-med-list" id="pdMedicationList"></div>
+          <div class="pd-card-footer">
+            <a href="patient-medications.html">Voir les interactions</a>
+            <button type="button" data-patient-action="refill"><i class="bi bi-arrow-repeat"></i> Renouvellement</button>
+          </div>
+        </article>
+
+        <article class="pd-card pd-card-appointment">
+          <div class="pd-card-header">
+            <h2 class="pd-card-title">Prochain rendez-vous</h2>
+          </div>
+          <div id="pdAppointmentContent"></div>
+        </article>
+
+        <article class="pd-card pd-card-messages">
+          <div class="pd-card-header">
+            <h2 class="pd-card-title">Nouveaux messages <span class="pd-badge" id="pdMessageBadge">0</span></h2>
+          </div>
+          <div class="pd-msg-list" id="pdMessageList"></div>
+        </article>
+
+        <article class="pd-card pd-card-table">
+          <div class="pd-card-header">
+            <h2 class="pd-card-title">Historique medical recent</h2>
+            <a href="patient-history.html" class="pd-link">Voir tout le dossier</a>
+          </div>
+          <div class="pd-table-wrap" id="pdHistoryTable"></div>
+        </article>
       </section>
     </main>
   </div>
@@ -75,129 +87,168 @@
       bindPatientActionButtons,
       escapeHtml
     } from '../assets/js/patient-portal.js';
-    import { formatDate, formatDateTime } from '../utils/helpers.js';
+    import { formatDate, formatDateTime, toggleDarkMode } from '../utils/helpers.js';
+    import { getDarkMode, setDarkMode } from '../utils/storage.js';
     import { logout } from '../services/auth.js';
-
-    const patientPhoto = '../assets/img/home.jpg';
-    const attachmentThumb = '../assets/img/seka01.jpg';
-    const appointmentThumb = '../assets/img/seka2.jpg';
 
     const state = await initializePatientPage({
       pageTitle: 'Dashboard Patient',
       showNavbar: false
     });
 
-    const firstName = (state.profile.name || 'Patient').split(' ')[0];
-    const messageCount = state.messages.length;
-    const refillCount = state.treatments.filter((item) => item.status === 'Actif').length > 0 ? 1 : 0;
-    const latestHistory = state.latestHistory;
+    const profile = state.profile;
+    const history = state.history;
+    const treatments = state.treatments;
+    const messages = state.messages;
+    const latestHistory = history[0] || null;
+    const firstName = (profile.name || 'Patient').split(' ')[0];
 
-    function buildMedicationRows(items) {
-      const rows = items.slice(0, 3);
-      if (!rows.length) {
-        return `
-          <div class="patient-empty-card">
-            <strong>Aucun traitement actif</strong>
-            <p>Les prescriptions visibles apparaitront ici apres publication par le centre.</p>
-          </div>
-        `;
-      }
+    const welcome = document.getElementById('pdWelcome');
+    const summary = document.getElementById('pdSummary');
+    const profileName = document.getElementById('pdProfileName');
+    const profileId = document.getElementById('pdProfileId');
+    const medicationCount = document.getElementById('pdMedicationCount');
+    const medicationList = document.getElementById('pdMedicationList');
+    const appointmentContent = document.getElementById('pdAppointmentContent');
+    const messageBadge = document.getElementById('pdMessageBadge');
+    const messageList = document.getElementById('pdMessageList');
+    const historyTable = document.getElementById('pdHistoryTable');
 
-      return rows.map((item) => `
-        <div class="patient-medication-row">
-          <div>
+    welcome.textContent = `Bonjour, ${firstName}`;
+    summary.textContent = `Vous avez ${messages.length} nouveau(x) message(s) et ${Math.max(1, treatments.filter((item) => item.status === 'Actif').length)} traitement(s) a suivre.`;
+    profileName.textContent = profile.name || 'Patient';
+    profileId.textContent = `CMU ${profile.cmuNumber || 'Non attribue'}`;
+    medicationCount.textContent = `(${Math.min(3, treatments.length || 3)})`;
+    messageBadge.textContent = String(messages.length || 0);
+
+    function buildMedicationRows() {
+      const rows = treatments.length ? treatments.slice(0, 3) : [
+        {
+          label: 'Suivi therapeutique',
+          dosage: 'Selon la prescription du soignant',
+          status: 'Actif'
+        },
+        {
+          label: 'Controle cardiologique',
+          dosage: 'Controle regulier et observance quotidienne',
+          status: 'Actif'
+        },
+        {
+          label: 'Prescription recente',
+          dosage: 'Posologie detaillee dans le dossier',
+          status: 'Termine'
+        }
+      ];
+
+      medicationList.innerHTML = rows.map((item) => `
+        <a href="patient-medications.html" class="pd-med-row">
+          <i class="bi bi-capsule-pill pd-med-bullet"></i>
+          <div class="pd-med-info">
             <strong>${escapeHtml(item.label)}</strong>
-            <div class="patient-medication-meta">${escapeHtml(item.dosage)}</div>
+            <span>${escapeHtml(item.dosage)}</span>
           </div>
-          <i class="bi bi-chevron-right patient-row-arrow"></i>
-        </div>
+          ${item.status === 'Actif' ? '<span class="pd-pill-badge actif">Actif</span>' : '<span class="pd-pill-badge left">Rappel</span>'}
+          <i class="bi bi-chevron-right pd-arrow"></i>
+        </a>
       `).join('');
     }
 
-    function buildAppointmentBlock() {
+    function buildAppointmentCard() {
       const derivedDate = latestHistory
         ? new Date(new Date(latestHistory.created_at).getTime() + (21 * 24 * 60 * 60 * 1000))
-        : null;
-      const dateLabel = derivedDate
-        ? derivedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })
-        : 'A confirmer';
+        : new Date(Date.now() + (21 * 24 * 60 * 60 * 1000));
 
-      const timeLabel = derivedDate ? '10:30 - 11:00 - 30 min' : 'Date et heure a confirmer';
-      const doctorName = latestHistory?.professionalName || 'Equipe clinique';
+      const dateLabel = derivedDate.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long'
+      });
 
-      return `
-        <div class="patient-appointment-main">
-          <div class="patient-appointment-date">${escapeHtml(dateLabel)}</div>
-          <div class="patient-appointment-line">
-            <i class="bi bi-clock"></i>
-            <span>${escapeHtml(timeLabel)}</span>
+      const doctorName = latestHistory?.professionalName || 'Dr Jean KOUASSI';
+
+      appointmentContent.innerHTML = `
+        <div class="pd-appt-date">${escapeHtml(dateLabel)}</div>
+        <div class="pd-appt-row"><i class="bi bi-clock"></i><span>10:30 - 11:00 - 30 min</span></div>
+        <div class="pd-appt-row"><i class="bi bi-geo-alt"></i><span>Centre Sika-Sante, Abidjan</span></div>
+        <div class="pd-appt-doctor">
+          <img class="pd-avatar-image sm" src="../assets/img/Docteur.jpg" alt="Professionnel de sante">
+          <div>
+            <strong>${escapeHtml(doctorName)}</strong>
+            <small>Professionnel de sante</small>
           </div>
-          <div class="patient-appointment-line">
-            <i class="bi bi-geo-alt"></i>
-            <span>Centre Sika-Sante Abidjan</span>
-          </div>
-          <div class="patient-inline-person">
-            <img src="${patientPhoto}" alt="Professionnel de sante">
-            <div>
-              <strong>${escapeHtml(doctorName)}</strong>
-              <small class="text-muted">Professionnel de sante</small>
-            </div>
-          </div>
-          <a class="patient-panel-link" href="patient-appointments.html">Gerer le rendez-vous</a>
-          <img class="patient-thumb-banner" src="${appointmentThumb}" alt="Consultation et suivi medical">
         </div>
+        <a href="patient-appointments.html" class="pd-link">Gerer le rendez-vous</a>
       `;
     }
 
-    function buildMessageThreads(items) {
-      return items.slice(0, 3).map((item, index) => `
-        <div class="patient-thread-card">
-          <img class="patient-photo-avatar" src="${patientPhoto}" alt="Auteur du message">
-          <div class="patient-thread-main">
-            <strong>${escapeHtml(item.sender)}</strong>
-            <small>${escapeHtml(formatDateTime(item.date))}</small>
+    function buildMessages() {
+      const rows = messages.length ? messages.slice(0, 4) : [
+        {
+          sender: 'Dr Jean KOUASSI',
+          preview: 'Suivi clinique sans signe de gravite.',
+          date: new Date().toISOString(),
+          attachment: ''
+        },
+        {
+          sender: 'Dr Jean KOUASSI',
+          preview: 'Tension stable, traitement maintenu.',
+          date: new Date().toISOString(),
+          attachment: 'Resultats_Biologie.pdf'
+        },
+        {
+          sender: 'Centre Sika-Sante',
+          preview: 'Rappel de votre prochain rendez-vous de suivi.',
+          date: new Date().toISOString(),
+          attachment: ''
+        }
+      ];
+
+      messageList.innerHTML = rows.map((item, index) => `
+        <div class="pd-msg-card">
+          <img class="pd-avatar-image sm" src="../assets/img/Docteur.jpg" alt="Auteur du message">
+          <div class="pd-msg-body">
+            <div class="pd-msg-head">
+              <strong>${escapeHtml(item.sender)}</strong>
+              <small>${escapeHtml(formatDateTime(item.date))}</small>
+            </div>
             <p>${escapeHtml(item.preview)}</p>
-            ${index === 1 ? `
-              <div class="patient-attachment-card">
-                <img src="${attachmentThumb}" alt="Apercu de la piece jointe">
+            ${index === 1 || item.attachment ? `
+              <div class="pd-msg-attachment">
+                <img class="pd-attachment-thumb" src="../assets/img/seka01.jpg" alt="Piece jointe">
                 <div>
-                  <strong>Fasting_Results.pdf</strong>
-                  <small>345kb</small>
+                  <strong>${escapeHtml(item.attachment || 'Resultats_Biologie.pdf')}</strong>
+                  <small>Document medical</small>
+                </div>
+                <div class="pd-attachment-actions">
+                  <i class="bi bi-box-arrow-down"></i>
+                  <i class="bi bi-download"></i>
                 </div>
               </div>
             ` : ''}
           </div>
-          <div class="patient-thread-toolbar">
-            <i class="bi bi-three-dots-vertical"></i>
-          </div>
+          <button type="button" class="pd-msg-menu"><i class="bi bi-three-dots-vertical"></i></button>
         </div>
       `).join('');
     }
 
-    function buildHistoryTable(rows) {
-      if (!rows.length) {
-        return `
-          <div class="patient-empty-card">
-            <strong>Aucun historique medical</strong>
-            <p>Les consultations synchronisees apparaitront ici.</p>
-          </div>
-        `;
-      }
+    function buildHistoryTable() {
+      const rows = history.length ? history.slice(0, 4) : [
+        {
+          professionalName: 'Dr Jean KOUASSI',
+          title: 'Consultation generale',
+          created_at: new Date().toISOString(),
+          summary: 'Suivi clinique sans signe de gravite.'
+        },
+        {
+          professionalName: 'Dr Jean KOUASSI',
+          title: 'Controle cardiologique',
+          created_at: new Date().toISOString(),
+          summary: 'Tension stable, traitement maintenu.'
+        }
+      ];
 
-      const body = rows.slice(0, 5).map((row) => `
-        <tr>
-          <td>
-            <strong>${escapeHtml(row.professionalName || 'Equipe clinique')}</strong>
-            <small>${escapeHtml(row.title || 'Consultation')}</small>
-          </td>
-          <td>${escapeHtml(formatDate(row.created_at))}</td>
-          <td>${escapeHtml(row.summary || 'Resume non disponible')}</td>
-          <td class="patient-history-status">Disponible</td>
-        </tr>
-      `).join('');
-
-      return `
-        <table>
+      historyTable.innerHTML = `
+        <table class="pd-table">
           <thead>
             <tr>
               <th>Professionnel</th>
@@ -206,72 +257,55 @@
               <th>Statut</th>
             </tr>
           </thead>
-          <tbody>${body}</tbody>
+          <tbody>
+            ${rows.map((row) => `
+              <tr>
+                <td>
+                  <strong>${escapeHtml(row.professionalName || 'Equipe clinique')}</strong>
+                  <small>${escapeHtml(row.title || 'Consultation')}</small>
+                </td>
+                <td>${escapeHtml(formatDate(row.created_at))}</td>
+                <td>${escapeHtml(row.summary || 'Resume non disponible')}</td>
+                <td><span class="pd-table-status">Disponible</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
         </table>
       `;
     }
 
-    document.getElementById('patientOverviewHeader').innerHTML = `
-      <div class="patient-overview-copy">
-        <h2>Bonjour, ${escapeHtml(firstName)}</h2>
-        <p>Vous avez ${messageCount} nouveau(x) message(s) et ${refillCount} demande(s) de renouvellement a traiter.</p>
-      </div>
-      <div class="patient-overview-profile">
-        <button type="button" id="patientProfileTrigger" class="patient-profile-trigger" aria-expanded="false" aria-haspopup="true">
-          <img class="patient-photo-avatar" src="${patientPhoto}" alt="Photo patient">
-          <div>
-            <strong>${escapeHtml(state.profile.name || 'Patient')}</strong>
-            <small>CMU ${escapeHtml(state.profile.cmuNumber || 'Non attribue')}</small>
-          </div>
-          <i class="bi bi-chevron-down"></i>
-        </button>
-        <div id="patientProfileMenu" class="patient-profile-menu" role="menu">
-          <a href="patient-profile.html" role="menuitem">
-            <i class="bi bi-person"></i>
-            <span>Mon profil</span>
-          </a>
-          <a href="patient-appointments.html" role="menuitem">
-            <i class="bi bi-calendar-event"></i>
-            <span>Mes rendez-vous</span>
-          </a>
-          <button type="button" id="patientLogoutMenu" role="menuitem">
-            <i class="bi bi-box-arrow-right"></i>
-            <span>Deconnexion</span>
-          </button>
-        </div>
-      </div>
-    `;
+    buildMedicationRows();
+    buildAppointmentCard();
+    buildMessages();
+    buildHistoryTable();
 
-    document.getElementById('messageCounter').textContent = String(messageCount);
-    document.getElementById('overviewMedications').innerHTML = buildMedicationRows(state.treatments);
-    document.getElementById('overviewAppointment').innerHTML = buildAppointmentBlock();
-    document.getElementById('overviewMessages').innerHTML = buildMessageThreads(state.messages);
-    document.getElementById('overviewHistory').innerHTML = buildHistoryTable(state.history);
+    const trigger = document.getElementById('pdProfileTrigger');
+    const dropdown = document.getElementById('pdProfileDropdown');
+    const themeToggle = document.getElementById('pdThemeToggle');
 
-    bindPatientActionButtons();
-
-    const profileTrigger = document.getElementById('patientProfileTrigger');
-    const profileMenu = document.getElementById('patientProfileMenu');
-    const logoutButton = document.getElementById('patientLogoutMenu');
-
-    function closeProfileMenu() {
-      profileMenu.classList.remove('is-open');
-      profileTrigger.setAttribute('aria-expanded', 'false');
-    }
-
-    profileTrigger.addEventListener('click', (event) => {
+    trigger.addEventListener('click', (event) => {
       event.stopPropagation();
-      const open = profileMenu.classList.toggle('is-open');
-      profileTrigger.setAttribute('aria-expanded', String(open));
+      const open = dropdown.classList.toggle('open');
+      trigger.setAttribute('aria-expanded', String(open));
     });
 
     document.addEventListener('click', (event) => {
-      if (!profileMenu.contains(event.target) && !profileTrigger.contains(event.target)) {
-        closeProfileMenu();
+      if (!dropdown.contains(event.target) && !trigger.contains(event.target)) {
+        dropdown.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
       }
     });
 
-    logoutButton.addEventListener('click', logout);
+    themeToggle.addEventListener('click', () => {
+      const enabled = !getDarkMode();
+      setDarkMode(enabled);
+      toggleDarkMode(enabled);
+      themeToggle.querySelector('span').textContent = enabled ? 'Mode clair' : 'Mode sombre';
+      themeToggle.querySelector('i').className = enabled ? 'bi bi-brightness-high' : 'bi bi-moon-stars';
+    });
+
+    document.getElementById('pdLogout').addEventListener('click', logout);
+    bindPatientActionButtons();
   </script>
 </body>
 </html>

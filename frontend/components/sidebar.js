@@ -4,12 +4,13 @@ import { ROLES } from '../utils/access.js';
 const linksByRole = {
   [ROLES.PATIENT]: [
     { href: 'dashboard-patient.html', label: 'Apercu sante', icon: 'bi-grid-1x2-fill' },
+    { href: '#', label: 'Recherche', icon: 'bi-search', action: 'search' },
     { href: 'patient-messages.html', label: 'Messages', icon: 'bi-chat-left-text' },
     { href: 'patient-documents.html', label: 'Documents', icon: 'bi-file-earmark-medical' },
     { href: 'patient-profile.html', label: 'Profil', icon: 'bi-person-badge' },
     { href: 'patient-medications.html', label: 'Traitements', icon: 'bi-capsule-pill' },
-    { href: 'patient-appointments.html', label: 'Rendez-vous', icon: 'bi-calendar-event' },
-    { href: 'patient-history.html', label: 'Dossier medical', icon: 'bi-clock-history' }
+    { href: 'patient-appointments.html', label: 'Agenda', icon: 'bi-calendar-event' },
+    { href: 'patient-history.html', label: 'Dossier medical', icon: 'bi-clock-history' },
   ],
   [ROLES.PROFESSIONAL]: [
     { href: 'dashboard-professional.html#overview', label: 'Vue clinique', icon: 'bi-grid-1x2-fill' },
@@ -57,9 +58,7 @@ export function renderSidebar() {
     return `
       <aside class="sidebar patient-sidebar">
         <div class="brand">
-          <div class="brand-badge">
-            <i class="bi bi-heart-pulse-fill"></i>
-          </div>
+          <img class="patient-sidebar-logo" src="../assets/img/sika-sante-mark.svg" alt="Logo Sika-Sante">
           <div class="brand-copy">
             <strong>Sika-Sante</strong>
           </div>
@@ -67,7 +66,7 @@ export function renderSidebar() {
 
         <nav class="patient-sidebar-nav">
           ${links.map(link => `
-            <a href="${link.href}" class="${isActiveLink(link.href) ? 'active' : ''}">
+            <a href="${link.href}" class="${isActiveLink(link.href) ? 'active' : ''}" ${link.action ? `data-patient-action="${link.action}"` : ''}>
               <i class="bi ${link.icon}"></i>
               <span>${link.label}</span>
             </a>

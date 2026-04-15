@@ -353,7 +353,7 @@ export function createHeroMarkup(state, { badge, title, description, stats = [] 
         </div>
 
         <div class="patient-account-pill">
-          <div class="patient-avatar">${escapeHtml(getInitials(state.profile.name))}</div>
+          <img class="pd-avatar-image" src="../assets/img/Patient.jpg" alt="Photo du patient">
           <div>
             <strong>${escapeHtml(state.profile.name || 'Patient')}</strong>
             <div class="text-muted">CMU ${escapeHtml(state.profile.cmuNumber || '-')}</div>
@@ -615,6 +615,7 @@ export function bindPatientActionButtons(root = document) {
     upload: 'Le depot de document personnel sera disponible dans la prochaine version.',
     profile: 'La mise a jour du profil personnel sera ouverte avec un formulaire dedie.',
     message: 'La messagerie securisee patient-soignant sera bientot disponible.',
+    search: 'La recherche patient sera disponible dans la prochaine iteration.',
     settings: 'Le centre de preferences sera ajoute dans la prochaine iteration.',
     help: 'L aide contextuelle patient sera bientot disponible.'
   };

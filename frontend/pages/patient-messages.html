@@ -8,11 +8,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body>
+<body class="patient-dashboard-page">
   <div class="layout-shell">
     <div id="appSidebar"></div>
     <main class="main-content patient-main-shell">
-      <div id="appNavbar"></div>
       <div id="toastContainer" class="toast-container"></div>
       <div id="patientPageHero"></div>
 
@@ -21,7 +20,7 @@
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Inbox</span>
+                <span class="small-label">Boite de reception</span>
                 <h3 class="patient-module-title">Messages recus</h3>
               </div>
             </div>
@@ -55,8 +54,9 @@
     } from '../assets/js/patient-portal.js';
 
     const state = await initializePatientPage({
-      pageTitle: 'Messages',
-      heroBadge: 'Messages',
+      pageTitle: 'Messagerie',
+      showNavbar: false,
+      heroBadge: 'Messagerie',
       heroTitle: 'Messages patient et echanges utiles',
       heroDescription: 'Retrouvez les messages utiles, les informations du centre et les pieces jointes disponibles dans votre espace.',
       heroStats: (data) => [
