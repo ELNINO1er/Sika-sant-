@@ -44,38 +44,126 @@
         </div>
       </header>
 
-      <section class="pd-grid">
+      <section class="pd-kpi-row" id="pdKpiRow">
+        <article class="pd-kpi-card pd-card skeleton-card">
+          <div class="pd-kpi-top">
+            <span class="pd-kpi-icon"><i class="bi bi-capsule-pill"></i></span>
+            <span class="small-label">Traitements actifs</span>
+          </div>
+          <strong class="pd-skeleton-line w-25"></strong>
+          <p class="pd-skeleton-line w-75"></p>
+        </article>
+        <article class="pd-kpi-card pd-card skeleton-card">
+          <div class="pd-kpi-top">
+            <span class="pd-kpi-icon"><i class="bi bi-chat-dots"></i></span>
+            <span class="small-label">Messages non lus</span>
+          </div>
+          <strong class="pd-skeleton-line w-25"></strong>
+          <p class="pd-skeleton-line w-75"></p>
+        </article>
+        <article class="pd-kpi-card pd-card skeleton-card">
+          <div class="pd-kpi-top">
+            <span class="pd-kpi-icon"><i class="bi bi-calendar-check"></i></span>
+            <span class="small-label">Prochain rendez-vous</span>
+          </div>
+          <strong class="pd-skeleton-line w-50"></strong>
+          <p class="pd-skeleton-line w-75"></p>
+        </article>
+        <article class="pd-kpi-card pd-card skeleton-card">
+          <div class="pd-kpi-top">
+            <span class="pd-kpi-icon"><i class="bi bi-heart-pulse"></i></span>
+            <span class="small-label">Etat global</span>
+          </div>
+          <strong class="pd-skeleton-line w-50"></strong>
+          <p class="pd-skeleton-line w-75"></p>
+        </article>
+      </section>
+
+      <section class="pd-main-row">
         <article class="pd-card pd-card-medications">
           <div class="pd-card-header">
-            <h2 class="pd-card-title">Traitements actuels <span class="pd-count" id="pdMedicationCount">(0)</span></h2>
+            <div>
+              <span class="small-label">Traitements en cours</span>
+              <h2 class="pd-card-title">Traitements actuels <span class="pd-count" id="pdMedicationCount">(0)</span></h2>
+            </div>
           </div>
-          <div class="pd-med-list" id="pdMedicationList"></div>
+          <p class="pd-card-copy">Retrouvez vos traitements actifs, leur statut et les actions rapides disponibles cote patient.</p>
+          <div class="pd-med-list" id="pdMedicationList">
+            <div class="pd-med-row skeleton-card"><span class="pd-skeleton-line w-75"></span></div>
+            <div class="pd-med-row skeleton-card"><span class="pd-skeleton-line w-50"></span></div>
+          </div>
           <div class="pd-card-footer">
-            <a href="patient-medications.html">Voir les interactions</a>
-            <button type="button" data-patient-action="refill"><i class="bi bi-arrow-repeat"></i> Renouvellement</button>
+            <a href="patient-medications.html">Voir tous les traitements</a>
+            <button type="button" data-patient-action="refill"><i class="bi bi-arrow-repeat"></i> Demander renouvellement</button>
           </div>
         </article>
 
-        <article class="pd-card pd-card-appointment">
+        <article class="pd-card pd-card-appointment pd-card-spotlight">
           <div class="pd-card-header">
-            <h2 class="pd-card-title">Prochain rendez-vous</h2>
+            <div>
+              <span class="small-label">A venir</span>
+              <h2 class="pd-card-title">Prochain rendez-vous</h2>
+            </div>
           </div>
-          <div id="pdAppointmentContent"></div>
+          <div id="pdAppointmentContent">
+            <div class="pd-skeleton-stack">
+              <span class="pd-skeleton-line w-50"></span>
+              <span class="pd-skeleton-line w-75"></span>
+              <span class="pd-skeleton-line w-75"></span>
+            </div>
+          </div>
         </article>
 
         <article class="pd-card pd-card-messages">
           <div class="pd-card-header">
-            <h2 class="pd-card-title">Nouveaux messages <span class="pd-badge" id="pdMessageBadge">0</span></h2>
+            <div>
+              <span class="small-label">Messages recents</span>
+              <h2 class="pd-card-title">Nouveaux messages <span class="pd-badge" id="pdMessageBadge">0</span></h2>
+            </div>
           </div>
-          <div class="pd-msg-list" id="pdMessageList"></div>
+          <div class="pd-msg-list" id="pdMessageList">
+            <div class="pd-msg-card skeleton-card"><span class="pd-skeleton-line w-100"></span></div>
+            <div class="pd-msg-card skeleton-card"><span class="pd-skeleton-line w-75"></span></div>
+          </div>
+          <div class="pd-card-footer">
+            <a href="patient-messages.html">Voir tous les messages</a>
+          </div>
         </article>
+      </section>
 
+      <section class="pd-health-row">
+        <article class="pd-card pd-card-health">
+          <div class="pd-card-header">
+            <div>
+              <span class="small-label">Etat de sante</span>
+              <h2 class="pd-card-title">Etat general</h2>
+            </div>
+          </div>
+          <div id="pdHealthStatus"></div>
+          <div class="pd-quick-actions">
+            <a class="btn btn-outline-primary btn-sm" href="patient-record.html"><i class="bi bi-journal-medical"></i> Voir le dossier</a>
+            <a class="btn btn-outline-primary btn-sm" href="patient-medications.html"><i class="bi bi-capsule-pill"></i> Voir les traitements</a>
+            <a class="btn btn-outline-primary btn-sm" href="patient-appointments.html"><i class="bi bi-calendar-check"></i> Gerer le rendez-vous</a>
+          </div>
+        </article>
+      </section>
+
+      <section class="pd-history-row">
         <article class="pd-card pd-card-table">
           <div class="pd-card-header">
-            <h2 class="pd-card-title">Historique medical recent</h2>
+            <div>
+              <span class="small-label">Historique recent</span>
+              <h2 class="pd-card-title">Historique medical recent</h2>
+            </div>
             <a href="patient-history.html" class="pd-link">Voir tout le dossier</a>
           </div>
-          <div class="pd-table-wrap" id="pdHistoryTable"></div>
+          <div class="pd-table-wrap" id="pdHistoryTable">
+            <div class="pd-table-skeleton">
+              <span class="pd-skeleton-line w-100"></span>
+              <span class="pd-skeleton-line w-100"></span>
+              <span class="pd-skeleton-line w-100"></span>
+            </div>
+          </div>
         </article>
       </section>
     </main>
@@ -113,13 +201,93 @@
     const messageBadge = document.getElementById('pdMessageBadge');
     const messageList = document.getElementById('pdMessageList');
     const historyTable = document.getElementById('pdHistoryTable');
+    const kpiRow = document.getElementById('pdKpiRow');
+    const healthStatus = document.getElementById('pdHealthStatus');
 
     welcome.textContent = `Bonjour, ${firstName}`;
     summary.textContent = `Vous avez ${messages.length} nouveau(x) message(s) et ${Math.max(1, treatments.filter((item) => item.status === 'Actif').length)} traitement(s) a suivre.`;
     profileName.textContent = profile.name || 'Patient';
     profileId.textContent = `CMU ${profile.cmuNumber || 'Non attribue'}`;
-    medicationCount.textContent = `(${Math.min(3, treatments.length || 3)})`;
+    medicationCount.textContent = `(${treatments.length ? Math.min(3, treatments.length) : 0})`;
     messageBadge.textContent = String(messages.length || 0);
+
+    function getHealthStatus() {
+      if (state.conditions.includes('Allergies a verifier')) {
+        return {
+          label: 'A surveiller',
+          tone: 'warning',
+          description: 'Des elements de vigilance necessitent une verification par le centre.'
+        };
+      }
+
+      if (treatments.filter((item) => item.status === 'Actif').length > 0 || messages.length > 0) {
+        return {
+          label: 'Suivi',
+          tone: 'info',
+          description: 'Votre suivi est actif avec des traitements ou messages a consulter.'
+        };
+      }
+
+      return {
+        label: 'Stable',
+        tone: 'success',
+        description: 'Aucun signal prioritaire n apparait dans les informations actuellement visibles.'
+      };
+    }
+
+    function buildKpiCards() {
+      const nextAppointmentDate = latestHistory
+        ? formatDate(new Date(new Date(latestHistory.created_at).getTime() + (21 * 24 * 60 * 60 * 1000)))
+        : 'A planifier';
+      const activeTreatments = treatments.filter((item) => item.status === 'Actif').length;
+      const status = getHealthStatus();
+
+      const cards = [
+        {
+          href: 'patient-medications.html',
+          icon: 'bi-capsule-pill',
+          label: 'Traitements actifs',
+          value: String(activeTreatments),
+          helper: 'Traitements en cours a suivre',
+          tone: 'primary'
+        },
+        {
+          href: 'patient-messages.html',
+          icon: 'bi-chat-dots',
+          label: 'Messages non lus',
+          value: String(messages.length),
+          helper: 'Informations utiles a consulter',
+          tone: 'violet'
+        },
+        {
+          href: 'patient-appointments.html',
+          icon: 'bi-calendar-check',
+          label: 'Prochain rendez-vous',
+          value: nextAppointmentDate,
+          helper: 'Date de suivi estimee',
+          tone: 'green'
+        },
+        {
+          href: 'patient-record.html',
+          icon: 'bi-heart-pulse',
+          label: 'Etat global',
+          value: status.label,
+          helper: status.description,
+          tone: status.tone
+        }
+      ];
+
+      kpiRow.innerHTML = cards.map((card) => `
+        <a href="${card.href}" class="pd-kpi-card pd-card pd-kpi-card-${card.tone}">
+          <div class="pd-kpi-top">
+            <span class="pd-kpi-icon"><i class="bi ${card.icon}"></i></span>
+            <span class="small-label">${escapeHtml(card.label)}</span>
+          </div>
+          <strong>${escapeHtml(card.value)}</strong>
+          <p>${escapeHtml(card.helper)}</p>
+        </a>
+      `).join('');
+    }
 
     function buildMedicationRows() {
       const rows = treatments.length ? treatments.slice(0, 3) : [
@@ -182,7 +350,7 @@
     }
 
     function buildMessages() {
-      const rows = messages.length ? messages.slice(0, 4) : [
+      const rows = messages.length ? messages.slice(0, 2) : [
         {
           sender: 'Dr Jean KOUASSI',
           preview: 'Suivi clinique sans signe de gravite.',
@@ -231,6 +399,33 @@
       `).join('');
     }
 
+    function buildHealthStatusCard() {
+      const status = getHealthStatus();
+      const tones = {
+        success: { className: 'success', icon: 'bi-heart-pulse' },
+        info: { className: 'info', icon: 'bi-clipboard2-pulse' },
+        warning: { className: 'warning', icon: 'bi-exclamation-circle' }
+      };
+      const currentTone = tones[status.tone] || tones.info;
+
+      healthStatus.innerHTML = `
+        <div class="pd-health-indicator pd-health-${currentTone.className}">
+          <div class="pd-health-main">
+            <span class="pd-health-icon"><i class="bi ${currentTone.icon}"></i></span>
+            <div>
+              <strong>${escapeHtml(status.label)}</strong>
+              <p>${escapeHtml(status.description)}</p>
+            </div>
+          </div>
+          <div class="pd-health-bars" aria-hidden="true">
+            <span class="is-active"></span>
+            <span class="${status.tone !== 'success' ? 'is-active' : ''}"></span>
+            <span class="${status.tone === 'warning' ? 'is-active' : ''}"></span>
+          </div>
+        </div>
+      `;
+    }
+
     function buildHistoryTable() {
       const rows = history.length ? history.slice(0, 4) : [
         {
@@ -274,8 +469,10 @@
       `;
     }
 
+    buildKpiCards();
     buildMedicationRows();
     buildAppointmentCard();
+    buildHealthStatusCard();
     buildMessages();
     buildHistoryTable();
 

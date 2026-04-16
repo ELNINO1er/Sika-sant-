@@ -460,13 +460,13 @@ body.dark .sidebar {
 
 .patient-sidebar-nav a:hover,
 .patient-sidebar-footer a:hover {
-  background: rgba(79, 70, 229, 0.06);
+  background: transparent;
   color: #4f46e5;
-  transform: translateX(2px);
+  transform: none;
 }
 
 .patient-sidebar-nav a.active {
-  background: rgba(79, 70, 229, 0.08);
+  background: transparent;
   color: #4f46e5;
   font-weight: 700;
   transform: none;
@@ -1055,10 +1055,11 @@ body.dark .loading-state {
 .patient-welcome-card {
   display: grid;
   gap: 1rem;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
+  padding: 1rem 1rem 1.05rem;
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 0.55rem;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
   backdrop-filter: none;
 }
 
@@ -1067,7 +1068,7 @@ body.dark .loading-state {
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.2rem;
 }
 
 .patient-welcome-header h2 {
@@ -1120,14 +1121,13 @@ body.dark .loading-state {
 }
 
 .patient-kpi-card {
-  padding: 1rem 1rem 0.95rem;
-  border-radius: 0.55rem;
+  min-height: 132px;
 }
 
 .patient-kpi-card strong {
   display: block;
-  margin: 0.45rem 0 0.3rem;
-  font-size: 1.18rem;
+  margin: 0 0 0.3rem;
+  font-size: 1.28rem;
 }
 
 .patient-kpi-card p {
@@ -1330,7 +1330,7 @@ body.dark .loading-state {
 }
 
 .patient-page-grid.patient-page-grid-2 {
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  grid-template-columns: minmax(0, 1.24fr) minmax(340px, 0.86fr);
 }
 
 .patient-page-column,
@@ -3574,6 +3574,13 @@ body.dark .pd-card {
   color: var(--text);
 }
 
+.pd-card-copy {
+  margin: -0.15rem 0 0.95rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
 .pd-count {
   font-weight: 400;
   color: var(--text-muted);
@@ -3605,6 +3612,106 @@ body.dark .pd-card {
   text-decoration: underline;
 }
 
+.pd-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.pd-kpi-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.pd-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.pd-kpi-top {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.85rem;
+}
+
+.pd-kpi-icon {
+  width: 2rem;
+  height: 2rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 0.7rem;
+  font-size: 0.95rem;
+}
+
+.pd-kpi-card strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 1.32rem;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.pd-kpi-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.pd-kpi-card-primary .pd-kpi-icon {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+.pd-kpi-card-violet .pd-kpi-icon {
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+}
+
+.pd-kpi-card-green .pd-kpi-icon,
+.pd-kpi-card-success .pd-kpi-icon {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.pd-kpi-card-warning .pd-kpi-icon {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.pd-kpi-card-info .pd-kpi-icon {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+}
+
+.pd-main-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr) minmax(0, 1.1fr);
+  gap: 0.9rem;
+  align-items: stretch;
+}
+
+.pd-health-row,
+.pd-history-row {
+  display: block;
+}
+
+.pd-card-spotlight {
+  background:
+    linear-gradient(180deg, rgba(248, 250, 255, 0.96), rgba(255, 255, 255, 1)),
+    #ffffff;
+  border-color: #dce5f8;
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.06);
+}
+
+.pd-card-health {
+  display: grid;
+  gap: 0.9rem;
+}
+
 /* Grid layout — 3 columns like Healer */
 .pd-grid {
   display: grid;
@@ -3618,19 +3725,19 @@ body.dark .pd-card {
 }
 
 .pd-card-medications {
-  grid-area: medications;
+  min-height: 100%;
 }
 
 .pd-card-appointment {
-  grid-area: appointment;
+  min-height: 100%;
 }
 
 .pd-card-messages {
-  grid-area: messages;
+  min-height: 100%;
 }
 
 .pd-card-table {
-  grid-area: table;
+  margin-bottom: 0;
 }
 
 /* Medications */
@@ -3814,6 +3921,89 @@ body.dark .pd-card {
 /* Messages */
 .pd-card-messages {
   align-self: stretch;
+}
+
+.pd-health-indicator {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.pd-health-main {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.pd-health-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 0.8rem;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.pd-health-main strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.pd-health-main p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  max-width: none;
+}
+
+.pd-health-success .pd-health-icon {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.pd-health-info .pd-health-icon {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+}
+
+.pd-health-warning .pd-health-icon {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.pd-health-bars {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.pd-health-bars span {
+  flex: 1;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #e7ebf3;
+}
+
+.pd-health-bars span.is-active {
+  background: linear-gradient(135deg, #4f46e5, #2563eb);
+}
+
+.pd-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.15rem;
+}
+
+.pd-quick-actions .btn {
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 2.55rem;
+  padding: 0.65rem 0.9rem;
 }
 
 .pd-msg-list {
@@ -4002,6 +4192,30 @@ body.dark .pd-card {
   font-size: 0.9rem;
 }
 
+.skeleton-card {
+  pointer-events: none;
+}
+
+.pd-skeleton-line {
+  display: block;
+  height: 0.9rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #eef2f7 0%, #f8fafc 50%, #eef2f7 100%);
+  background-size: 200% 100%;
+  animation: pdSkeleton 1.4s ease-in-out infinite;
+}
+
+.pd-skeleton-stack,
+.pd-table-skeleton {
+  display: grid;
+  gap: 0.8rem;
+}
+
+@keyframes pdSkeleton {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
 /* Dark mode overrides */
 body.dark .pd-profile-pill {
   background: transparent;
@@ -4036,6 +4250,14 @@ body.dark .pd-table-status {
 
 /* Responsive */
 @media (max-width: 1100px) {
+  .pd-kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pd-main-row {
+    grid-template-columns: 1fr;
+  }
+
   .pd-grid {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
@@ -4050,6 +4272,15 @@ body.dark .pd-table-status {
     flex-direction: column;
     gap: 1rem;
   }
+
+  .pd-kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-health-indicator {
+    grid-template-columns: 1fr;
+  }
+
   .pd-grid {
     grid-template-columns: 1fr;
     grid-template-areas:

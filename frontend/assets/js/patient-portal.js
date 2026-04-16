@@ -351,7 +351,7 @@ export function createHeroMarkup(state, { badge, title, description, stats = [] 
   const heroStats = stats.length ? createMetricCardsMarkup(stats) : '';
 
   return `
-    <section class="patient-welcome-card">
+    <section class="patient-welcome-card pd-card">
       <div class="patient-welcome-header">
         <div>
           <span class="saas-badge"><i class="bi bi-heart-pulse"></i>${escapeHtml(badge || 'Espace patient')}</span>
@@ -374,11 +374,53 @@ export function createHeroMarkup(state, { badge, title, description, stats = [] 
 }
 
 export function createMetricCardsMarkup(items) {
+  function getPatientStatVisual(item) {
+    const normalized = `${item.label || ''} ${item.description || ''}`.toLowerCase();
+
+    if (/message|alerte|boite/.test(normalized)) {
+      return { icon: 'bi-chat-dots', tone: 'violet' };
+    }
+
+    if (/rendez|agenda|visite/.test(normalized)) {
+      return { icon: 'bi-calendar-check', tone: 'green' };
+    }
+
+    if (/trait|prescri|medic/.test(normalized)) {
+      return { icon: 'bi-capsule-pill', tone: 'primary' };
+    }
+
+    if (/document|piece|compte rendu|resultat/.test(normalized)) {
+      return { icon: 'bi-file-earmark-medical', tone: 'info' };
+    }
+
+    if (/profil|cmu|identi/.test(normalized)) {
+      return { icon: 'bi-person-badge', tone: 'primary' };
+    }
+
+    if (/secur|param|theme|langue/.test(normalized)) {
+      return { icon: 'bi-gear', tone: 'warning' };
+    }
+
+    if (/aide|support|faq/.test(normalized)) {
+      return { icon: 'bi-question-circle', tone: 'info' };
+    }
+
+    return { icon: 'bi-heart-pulse', tone: 'primary' };
+  }
+
   return `
     <div class="patient-kpi-row">
       ${items.map((item) => `
-        <article class="patient-kpi-card pd-card">
-          <span class="small-label">${escapeHtml(item.label)}</span>
+        ${(() => {
+          const visual = getPatientStatVisual(item);
+          return `
+            <article class="patient-kpi-card pd-kpi-card pd-card pd-kpi-card-${visual.tone}">
+              <div class="pd-kpi-top">
+                <span class="pd-kpi-icon"><i class="bi ${visual.icon}"></i></span>
+                <span class="small-label">${escapeHtml(item.label)}</span>
+              </div>
+          `;
+        })()}
           <strong>${escapeHtml(item.value)}</strong>
           <p>${escapeHtml(item.description)}</p>
         </article>
