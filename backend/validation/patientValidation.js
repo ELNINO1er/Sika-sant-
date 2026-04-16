@@ -10,6 +10,10 @@ const listPatientsSchema = {
   query: paginationQuery
 };
 
+const overviewSchema = {
+  query: Joi.object({}).unknown(false)
+};
+
 const createPatientSchema = {
   body: Joi.object({
     name: Joi.string().trim().min(3).max(150).required(),
@@ -37,6 +41,7 @@ const createConsultationSchema = {
 
 module.exports = {
   listPatientsSchema,
+  overviewSchema,
   createPatientSchema,
   patientIdParamsSchema,
   createConsultationSchema

@@ -56,7 +56,8 @@
   <script type="module">
     import {
       initializePatientPage,
-      escapeHtml
+      escapeHtml,
+      completePatientPageLoading
     } from '../assets/js/patient-portal.js';
     import { formatDateTime } from '../utils/helpers.js';
 
@@ -169,6 +170,7 @@
 
     renderInbox();
     renderSelected();
+    completePatientPageLoading();
   </script>
 </body>
 </html>

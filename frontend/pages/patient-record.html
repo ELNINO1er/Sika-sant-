@@ -79,7 +79,8 @@
       initializePatientPage,
       renderSummaryGrid,
       renderProfileGrid,
-      escapeHtml
+      escapeHtml,
+      completePatientPageLoading
     } from '../assets/js/patient-portal.js';
     import { formatDate } from '../utils/helpers.js';
 
@@ -175,6 +176,8 @@
         </div>
       </div>
     `).join('');
+
+    completePatientPageLoading();
   </script>
 </body>
 </html>

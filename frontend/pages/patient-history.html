@@ -46,7 +46,8 @@
   <script type="module">
     import {
       initializePatientPage,
-      renderHistoryTableWithDetails
+      renderHistoryTableWithDetails,
+      completePatientPageLoading
     } from '../assets/js/patient-portal.js';
 
     const state = await initializePatientPage({
@@ -68,6 +69,8 @@
       detailContainer: document.getElementById('historyDetails'),
       history: state.history
     });
+
+    completePatientPageLoading();
   </script>
 </body>
 </html>

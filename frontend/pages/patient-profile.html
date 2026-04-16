@@ -91,7 +91,8 @@
     import {
       initializePatientPage,
       renderProfileGrid,
-      renderSummaryGrid
+      renderSummaryGrid,
+      completePatientPageLoading
     } from '../assets/js/patient-portal.js';
     import { showToast } from '../utils/helpers.js';
 
@@ -133,6 +134,8 @@
       event.preventDefault();
       showToast('Le profil patient sera enregistre via PUT /api/v1/patient/profile.', 'success');
     });
+
+    completePatientPageLoading();
   </script>
 </body>
 </html>

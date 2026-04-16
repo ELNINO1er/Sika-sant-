@@ -6,11 +6,20 @@ const { authorizeRoles, authorizePermissions } = require('../middlewares/roleMid
 const { validateRequest } = require('../middlewares/validateMiddleware');
 const {
   listPatientsSchema,
+  overviewSchema,
   createPatientSchema,
   patientIdParamsSchema,
   createConsultationSchema
 } = require('../validation/patientValidation');
 const { ROLES, PERMISSIONS } = require('../constants/access');
+
+router.get(
+  '/overview',
+  verifyToken,
+  authorizeRoles(ROLES.PATIENT),
+  validateRequest(overviewSchema),
+  patientController.getOverview
+);
 
 router.get(
   '/',

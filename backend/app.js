@@ -102,6 +102,7 @@ app.get('/api/v1/csrf-token', (req, res) => {
 app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/v1/user', generalLimiter, userRoutes);
 app.use('/api/v1/patients', generalLimiter, patientRoutes);
+app.use('/api/v1/patient', generalLimiter, patientRoutes);
 app.use('/api/v1', generalLimiter, adminRoutes);
 
 app.use((req, res) => {

@@ -173,23 +173,18 @@
     import {
       initializePatientPage,
       bindPatientActionButtons,
-      escapeHtml
+      escapeHtml,
+      completePatientPageLoading
     } from '../assets/js/patient-portal.js';
-    import { formatDate, formatDateTime, toggleDarkMode } from '../utils/helpers.js';
+    import { formatDate, formatDateTime, showToast, toggleDarkMode } from '../utils/helpers.js';
     import { getDarkMode, setDarkMode } from '../utils/storage.js';
     import { logout } from '../services/auth.js';
+    import { apiGet } from '../services/api.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Dashboard Patient',
       showNavbar: false
     });
-
-    const profile = state.profile;
-    const history = state.history;
-    const treatments = state.treatments;
-    const messages = state.messages;
-    const latestHistory = history[0] || null;
-    const firstName = (profile.name || 'Patient').split(' ')[0];
 
     const welcome = document.getElementById('pdWelcome');
     const summary = document.getElementById('pdSummary');
@@ -204,43 +199,87 @@
     const kpiRow = document.getElementById('pdKpiRow');
     const healthStatus = document.getElementById('pdHealthStatus');
 
-    welcome.textContent = `Bonjour, ${firstName}`;
-    summary.textContent = `Vous avez ${messages.length} nouveau(x) message(s) et ${Math.max(1, treatments.filter((item) => item.status === 'Actif').length)} traitement(s) a suivre.`;
-    profileName.textContent = profile.name || 'Patient';
-    profileId.textContent = `CMU ${profile.cmuNumber || 'Non attribue'}`;
-    medicationCount.textContent = `(${treatments.length ? Math.min(3, treatments.length) : 0})`;
-    messageBadge.textContent = String(messages.length || 0);
+    function deriveFallbackOverview() {
+      const profile = state.profile;
+      const history = state.history || [];
+      const treatments = state.treatments || [];
+      const messages = state.messages || [];
+      const latestHistory = history[0] || null;
+      const nextDate = latestHistory
+        ? new Date(new Date(latestHistory.created_at).getTime() + (21 * 24 * 60 * 60 * 1000))
+        : null;
 
-    function getHealthStatus() {
-      if (state.conditions.includes('Allergies a verifier')) {
-        return {
-          label: 'A surveiller',
-          tone: 'warning',
-          description: 'Des elements de vigilance necessitent une verification par le centre.'
-        };
-      }
-
-      if (treatments.filter((item) => item.status === 'Actif').length > 0 || messages.length > 0) {
-        return {
-          label: 'Suivi',
-          tone: 'info',
-          description: 'Votre suivi est actif avec des traitements ou messages a consulter.'
-        };
-      }
+      const status = state.conditions.includes('Allergies a verifier')
+        ? {
+            label: 'A surveiller',
+            tone: 'critical',
+            description: 'Des elements de vigilance necessitent une verification par le centre.'
+          }
+        : (treatments.filter((item) => item.status === 'Actif').length > 0 || messages.length > 0)
+          ? {
+              label: 'Suivi',
+              tone: 'info',
+              description: 'Votre suivi est actif avec des traitements ou messages a consulter.'
+            }
+          : {
+              label: 'Stable',
+              tone: 'success',
+              description: 'Aucun signal prioritaire n apparait dans les informations actuellement visibles.'
+            };
 
       return {
-        label: 'Stable',
-        tone: 'success',
-        description: 'Aucun signal prioritaire n apparait dans les informations actuellement visibles.'
+        patient: {
+          name: profile.name || 'Patient',
+          cmuNumber: profile.cmuNumber || 'Non attribue'
+        },
+        summary: {
+          activeTreatments: treatments.filter((item) => item.status === 'Actif').length,
+          unreadMessages: messages.length,
+          nextAppointmentDate: nextDate ? nextDate.toISOString().slice(0, 10) : null,
+          globalStatus: status.label
+        },
+        currentTreatments: treatments.slice(0, 3).map((item) => ({
+          label: item.label,
+          description: item.dosage || item.detail,
+          status: (item.status || '').toUpperCase() === 'TERMINE' ? 'TERMINE' : 'ACTIF'
+        })),
+        nextAppointment: nextDate ? {
+          date: nextDate.toISOString(),
+          dateOnly: nextDate.toISOString().slice(0, 10),
+          time: '10:30',
+          durationMinutes: 30,
+          location: 'Centre Sika-Sante, Abidjan',
+          professionalName: latestHistory?.professionalName || 'Dr Jean KOUASSI',
+          specialty: 'Professionnel de sante'
+        } : null,
+        recentMessages: messages.slice(0, 2).map((item) => ({
+          sender: item.sender,
+          preview: item.preview,
+          date: item.date,
+          attachment: item.attachment ? { name: item.attachment } : null
+        })),
+        recentHistory: history.slice(0, 4).map((item) => ({
+          professionalName: item.professionalName,
+          consultationType: item.title,
+          date: item.created_at,
+          summary: item.summary,
+          status: 'DISPONIBLE'
+        })),
+        healthStatus: status
       };
     }
 
-    function buildKpiCards() {
-      const nextAppointmentDate = latestHistory
-        ? formatDate(new Date(new Date(latestHistory.created_at).getTime() + (21 * 24 * 60 * 60 * 1000)))
+    function buildKpiCards(overview) {
+      const nextAppointmentDate = overview.summary?.nextAppointmentDate
+        ? formatDate(overview.summary.nextAppointmentDate)
         : 'A planifier';
-      const activeTreatments = treatments.filter((item) => item.status === 'Actif').length;
-      const status = getHealthStatus();
+      const activeTreatments = overview.summary?.activeTreatments || 0;
+      const unreadMessages = overview.summary?.unreadMessages || 0;
+      const status = overview.healthStatus || {
+        label: overview.summary?.globalStatus || 'Stable',
+        tone: 'success',
+        description: 'Aucun signal prioritaire n apparait dans les informations actuellement visibles.'
+      };
 
       const cards = [
         {
@@ -255,7 +294,7 @@
           href: 'patient-messages.html',
           icon: 'bi-chat-dots',
           label: 'Messages non lus',
-          value: String(messages.length),
+          value: String(unreadMessages),
           helper: 'Informations utiles a consulter',
           tone: 'violet'
         },
@@ -289,22 +328,22 @@
       `).join('');
     }
 
-    function buildMedicationRows() {
-      const rows = treatments.length ? treatments.slice(0, 3) : [
+    function buildMedicationRows(overview) {
+      const rows = overview.currentTreatments?.length ? overview.currentTreatments.slice(0, 3) : [
         {
           label: 'Suivi therapeutique',
-          dosage: 'Selon la prescription du soignant',
-          status: 'Actif'
+          description: 'Selon la prescription du soignant',
+          status: 'ACTIF'
         },
         {
           label: 'Controle cardiologique',
-          dosage: 'Controle regulier et observance quotidienne',
-          status: 'Actif'
+          description: 'Controle regulier et observance quotidienne',
+          status: 'ACTIF'
         },
         {
           label: 'Prescription recente',
-          dosage: 'Posologie detaillee dans le dossier',
-          status: 'Termine'
+          description: 'Posologie detaillee dans le dossier',
+          status: 'TERMINE'
         }
       ];
 
@@ -313,44 +352,50 @@
           <i class="bi bi-capsule-pill pd-med-bullet"></i>
           <div class="pd-med-info">
             <strong>${escapeHtml(item.label)}</strong>
-            <span>${escapeHtml(item.dosage)}</span>
+            <span>${escapeHtml(item.description)}</span>
           </div>
-          ${item.status === 'Actif' ? '<span class="pd-pill-badge actif">Actif</span>' : '<span class="pd-pill-badge left">Rappel</span>'}
+          ${item.status === 'ACTIF' ? '<span class="pd-pill-badge actif">Actif</span>' : '<span class="pd-pill-badge left">Termine</span>'}
           <i class="bi bi-chevron-right pd-arrow"></i>
         </a>
       `).join('');
     }
 
-    function buildAppointmentCard() {
-      const derivedDate = latestHistory
-        ? new Date(new Date(latestHistory.created_at).getTime() + (21 * 24 * 60 * 60 * 1000))
-        : new Date(Date.now() + (21 * 24 * 60 * 60 * 1000));
+    function buildAppointmentCard(overview) {
+      const appointment = overview.nextAppointment;
+      if (!appointment?.date) {
+        appointmentContent.innerHTML = `
+          <div class="patient-empty-card">
+            <strong>Aucun rendez-vous planifie</strong>
+            <p>Un nouveau suivi sera propose par votre centre de sante.</p>
+          </div>
+        `;
+        return;
+      }
 
-      const dateLabel = derivedDate.toLocaleDateString('fr-FR', {
+      const appointmentDate = new Date(appointment.date);
+      const dateLabel = appointmentDate.toLocaleDateString('fr-FR', {
         weekday: 'long',
         day: '2-digit',
         month: 'long'
       });
 
-      const doctorName = latestHistory?.professionalName || 'Dr Jean KOUASSI';
-
       appointmentContent.innerHTML = `
         <div class="pd-appt-date">${escapeHtml(dateLabel)}</div>
-        <div class="pd-appt-row"><i class="bi bi-clock"></i><span>10:30 - 11:00 - 30 min</span></div>
-        <div class="pd-appt-row"><i class="bi bi-geo-alt"></i><span>Centre Sika-Sante, Abidjan</span></div>
+        <div class="pd-appt-row"><i class="bi bi-clock"></i><span>${escapeHtml(appointment.time || '10:30')} - ${escapeHtml(appointment.durationMinutes ? `${appointment.durationMinutes} min` : '30 min')}</span></div>
+        <div class="pd-appt-row"><i class="bi bi-geo-alt"></i><span>${escapeHtml(appointment.location || 'Centre Sika-Sante, Abidjan')}</span></div>
         <div class="pd-appt-doctor">
           <img class="pd-avatar-image sm" src="../assets/img/Docteur.jpg" alt="Professionnel de sante">
           <div>
-            <strong>${escapeHtml(doctorName)}</strong>
-            <small>Professionnel de sante</small>
+            <strong>${escapeHtml(appointment.professionalName || 'Professionnel de sante')}</strong>
+            <small>${escapeHtml(appointment.specialty || 'Professionnel de sante')}</small>
           </div>
         </div>
         <a href="patient-appointments.html" class="pd-link">Gerer le rendez-vous</a>
       `;
     }
 
-    function buildMessages() {
-      const rows = messages.length ? messages.slice(0, 2) : [
+    function buildMessages(overview) {
+      const rows = overview.recentMessages?.length ? overview.recentMessages.slice(0, 2) : [
         {
           sender: 'Dr Jean KOUASSI',
           preview: 'Suivi clinique sans signe de gravite.',
@@ -380,11 +425,11 @@
               <small>${escapeHtml(formatDateTime(item.date))}</small>
             </div>
             <p>${escapeHtml(item.preview)}</p>
-            ${index === 1 || item.attachment ? `
+            ${index === 1 || item.attachment?.name || item.attachment ? `
               <div class="pd-msg-attachment">
                 <img class="pd-attachment-thumb" src="../assets/img/seka01.jpg" alt="Piece jointe">
                 <div>
-                  <strong>${escapeHtml(item.attachment || 'Resultats_Biologie.pdf')}</strong>
+                  <strong>${escapeHtml(item.attachment?.name || item.attachment || 'Resultats_Biologie.pdf')}</strong>
                   <small>Document medical</small>
                 </div>
                 <div class="pd-attachment-actions">
@@ -399,11 +444,16 @@
       `).join('');
     }
 
-    function buildHealthStatusCard() {
-      const status = getHealthStatus();
+    function buildHealthStatusCard(overview) {
+      const status = overview.healthStatus || {
+        label: 'Stable',
+        tone: 'success',
+        description: 'Aucun signal prioritaire n apparait dans les informations actuellement visibles.'
+      };
       const tones = {
         success: { className: 'success', icon: 'bi-heart-pulse' },
         info: { className: 'info', icon: 'bi-clipboard2-pulse' },
+        critical: { className: 'warning', icon: 'bi-exclamation-circle' },
         warning: { className: 'warning', icon: 'bi-exclamation-circle' }
       };
       const currentTone = tones[status.tone] || tones.info;
@@ -426,18 +476,18 @@
       `;
     }
 
-    function buildHistoryTable() {
-      const rows = history.length ? history.slice(0, 4) : [
+    function buildHistoryTable(overview) {
+      const rows = overview.recentHistory?.length ? overview.recentHistory.slice(0, 4) : [
         {
           professionalName: 'Dr Jean KOUASSI',
-          title: 'Consultation generale',
-          created_at: new Date().toISOString(),
+          consultationType: 'Consultation generale',
+          date: new Date().toISOString(),
           summary: 'Suivi clinique sans signe de gravite.'
         },
         {
           professionalName: 'Dr Jean KOUASSI',
-          title: 'Controle cardiologique',
-          created_at: new Date().toISOString(),
+          consultationType: 'Controle cardiologique',
+          date: new Date().toISOString(),
           summary: 'Tension stable, traitement maintenu.'
         }
       ];
@@ -457,11 +507,11 @@
               <tr>
                 <td>
                   <strong>${escapeHtml(row.professionalName || 'Equipe clinique')}</strong>
-                  <small>${escapeHtml(row.title || 'Consultation')}</small>
+                  <small>${escapeHtml(row.consultationType || 'Consultation')}</small>
                 </td>
-                <td>${escapeHtml(formatDate(row.created_at))}</td>
+                <td>${escapeHtml(formatDate(row.date))}</td>
                 <td>${escapeHtml(row.summary || 'Resume non disponible')}</td>
-                <td><span class="pd-table-status">Disponible</span></td>
+                <td><span class="pd-table-status">${escapeHtml((row.status || 'DISPONIBLE').toLowerCase() === 'disponible' ? 'Disponible' : row.status)}</span></td>
               </tr>
             `).join('')}
           </tbody>
@@ -469,12 +519,32 @@
       `;
     }
 
-    buildKpiCards();
-    buildMedicationRows();
-    buildAppointmentCard();
-    buildHealthStatusCard();
-    buildMessages();
-    buildHistoryTable();
+    async function loadOverview() {
+      try {
+        const response = await apiGet('/patient/overview');
+        return response.data;
+      } catch (error) {
+        showToast(error.message || 'Impossible de charger l apercu sante. Affichage des donnees synchronisees locales.', 'warning');
+        return deriveFallbackOverview();
+      }
+    }
+
+    const overview = await loadOverview();
+    const firstName = (overview.patient?.name || state.profile.name || 'Patient').split(' ')[0];
+    welcome.textContent = `Bonjour, ${firstName}`;
+    summary.textContent = `Vous avez ${overview.summary?.unreadMessages || 0} nouveau(x) message(s) et ${overview.summary?.activeTreatments || 0} traitement(s) a suivre.`;
+    profileName.textContent = overview.patient?.name || state.profile.name || 'Patient';
+    profileId.textContent = `CMU ${overview.patient?.cmuNumber || state.profile.cmuNumber || 'Non attribue'}`;
+    medicationCount.textContent = `(${overview.currentTreatments?.length || 0})`;
+    messageBadge.textContent = String(overview.summary?.unreadMessages || overview.recentMessages?.length || 0);
+
+    buildKpiCards(overview);
+    buildMedicationRows(overview);
+    buildAppointmentCard(overview);
+    buildHealthStatusCard(overview);
+    buildMessages(overview);
+    buildHistoryTable(overview);
+    completePatientPageLoading();
 
     const trigger = document.getElementById('pdProfileTrigger');
     const dropdown = document.getElementById('pdProfileDropdown');

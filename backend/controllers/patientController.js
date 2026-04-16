@@ -5,20 +5,30 @@ const patientService = require('../services/patientService');
 async function listPatients(req, res, next) {
   try {
     const patients = await patientService.getAllPatients(req.validated.query);
-    return res.formatResponse(patients, 'Liste des patients chargée');
+    return res.formatResponse(patients, 'Liste des patients chargee');
   } catch (error) {
     logger.error('listPatients error: %o', error);
-    return next(new AppError('Impossible de récupérer la liste des patients', 500));
+    return next(new AppError('Impossible de recuperer la liste des patients', 500));
+  }
+}
+
+async function getOverview(req, res, next) {
+  try {
+    const overview = await patientService.getPatientOverview(req.user.id);
+    return res.formatResponse(overview, 'Apercu sante charge');
+  } catch (error) {
+    logger.error('getOverview error: %o', error);
+    return next(new AppError(error.message || 'Impossible de recuperer l\'apercu sante', error.statusCode || 500));
   }
 }
 
 async function createPatient(req, res, next) {
   try {
     const newPatient = await patientService.createPatient(req.validated.body);
-    return res.formatResponse(newPatient, 'Patient créé avec succès');
+    return res.formatResponse(newPatient, 'Patient cree avec succes');
   } catch (error) {
     logger.error('createPatient error: %o', error);
-    return next(new AppError(error.message || 'Impossible de créer le patient', error.statusCode || 500));
+    return next(new AppError(error.message || 'Impossible de creer le patient', error.statusCode || 500));
   }
 }
 
@@ -26,10 +36,10 @@ async function listConsultations(req, res, next) {
   try {
     const { patientUserId } = req.validated.params;
     const consultations = await patientService.getConsultationsForPatient(patientUserId);
-    return res.formatResponse(consultations, 'Consultations patient chargées');
+    return res.formatResponse(consultations, 'Consultations patient chargees');
   } catch (error) {
     logger.error('listConsultations error: %o', error);
-    return next(new AppError('Impossible de récupérer les consultations', 500));
+    return next(new AppError('Impossible de recuperer les consultations', 500));
   }
 }
 
@@ -41,15 +51,16 @@ async function createConsultation(req, res, next) {
       req.user.id,
       req.validated.body
     );
-    return res.formatResponse(consultation, 'Consultation enregistrée');
+    return res.formatResponse(consultation, 'Consultation enregistree');
   } catch (error) {
     logger.error('createConsultation error: %o', error);
-    return next(new AppError('Impossible d’enregistrer la consultation', 500));
+    return next(new AppError('Impossible d\'enregistrer la consultation', 500));
   }
 }
 
 module.exports = {
   listPatients,
+  getOverview,
   createPatient,
   listConsultations,
   createConsultation

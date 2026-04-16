@@ -63,7 +63,8 @@
     import {
       initializePatientPage,
       renderTreatmentList,
-      bindPatientActionButtons
+      bindPatientActionButtons,
+      completePatientPageLoading
     } from '../assets/js/patient-portal.js';
 
     const state = await initializePatientPage({
@@ -100,6 +101,7 @@
     );
 
     bindPatientActionButtons();
+    completePatientPageLoading();
   </script>
 </body>
 </html>

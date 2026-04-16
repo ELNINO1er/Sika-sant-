@@ -17,6 +17,50 @@ function byNewest(a, b) {
   return new Date(b.created_at) - new Date(a.created_at);
 }
 
+const PATIENT_LOADING_MARKUP = `
+  <div id="pdLoadingScreen" class="pd-loading-screen" aria-live="polite" aria-label="Chargement de l espace patient">
+    <div class="pd-loading-card">
+      <div class="pd-loading-mark-wrap">
+        <span class="pd-loading-orbit pd-loading-orbit-one"></span>
+        <span class="pd-loading-orbit pd-loading-orbit-two"></span>
+        <img src="../assets/img/sika-sante-mark.svg" alt="Sika-Sante" class="pd-loading-mark">
+      </div>
+      <strong>Chargement de votre espace sante</strong>
+      <p>Synchronisation du dossier, des messages et du suivi patient.</p>
+      <div class="pd-loading-bars" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+`;
+
+export function ensurePatientPageLoading() {
+  document.body.classList.add('is-loading');
+  const mainShell = document.querySelector('.patient-main-shell');
+  if (!mainShell) return null;
+
+  let loadingScreen = document.getElementById('pdLoadingScreen');
+  if (!loadingScreen) {
+    mainShell.insertAdjacentHTML('afterbegin', PATIENT_LOADING_MARKUP);
+    loadingScreen = document.getElementById('pdLoadingScreen');
+  }
+
+  loadingScreen.classList.remove('is-hidden');
+  return loadingScreen;
+}
+
+export function completePatientPageLoading(delay = 260) {
+  const loadingScreen = document.getElementById('pdLoadingScreen');
+  window.requestAnimationFrame(() => {
+    window.setTimeout(() => {
+      document.body.classList.remove('is-loading');
+      loadingScreen?.classList.add('is-hidden');
+    }, delay);
+  });
+}
+
 export function escapeHtml(value) {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -304,6 +348,7 @@ export async function initializePatientPage({
   heroStats = [],
   showNavbar = true
 }) {
+  ensurePatientPageLoading();
   await authGuard();
   roleGuard(ROLES.PATIENT);
 

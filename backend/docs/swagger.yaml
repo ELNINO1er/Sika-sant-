@@ -192,6 +192,217 @@ paths:
           description: Profil charge
         '401':
           description: Non authentifie
+  /patient/overview:
+    get:
+      tags: [Patients]
+      summary: Recupere l'apercu sante du patient connecte
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Apercu patient charge
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Apercu sante charge
+                  data:
+                    type: object
+                    properties:
+                      patient:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: Jean KOUASSI
+                          cmuNumber:
+                            type: string
+                            example: '1234567890'
+                          phone:
+                            type: string
+                            example: '0701234567'
+                          email:
+                            type: string
+                            nullable: true
+                      summary:
+                        type: object
+                        properties:
+                          activeTreatments:
+                            type: integer
+                            example: 2
+                          unreadMessages:
+                            type: integer
+                            example: 2
+                          nextAppointmentDate:
+                            type: string
+                            example: '2026-05-05'
+                          globalStatus:
+                            type: string
+                            example: A surveiller
+                      currentTreatments:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: treatment-1
+                            label:
+                              type: string
+                              example: Consultation generale
+                            description:
+                              type: string
+                              example: Suivi clinique sans signe de gravite.
+                            type:
+                              type: string
+                              example: general
+                            status:
+                              type: string
+                              example: ACTIF
+                            startedAt:
+                              type: string
+                              format: date-time
+                      nextAppointment:
+                        type: object
+                        nullable: true
+                        properties:
+                          id:
+                            type: string
+                            example: appointment-2
+                          date:
+                            type: string
+                            format: date-time
+                          dateOnly:
+                            type: string
+                            example: '2026-05-05'
+                          time:
+                            type: string
+                            example: '10:30'
+                          durationMinutes:
+                            type: integer
+                            example: 30
+                          location:
+                            type: string
+                            example: Centre Sika-Sante, Abidjan
+                          professionalName:
+                            type: string
+                            example: Dr Jean KOUASSI
+                          specialty:
+                            type: string
+                            example: Cardiologie
+                          status:
+                            type: string
+                            example: A_PLANIFIER
+                      recentMessages:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: message-2
+                            sender:
+                              type: string
+                              example: Dr Jean KOUASSI
+                            subject:
+                              type: string
+                              example: Controle cardiologie
+                            preview:
+                              type: string
+                              example: Tension stable, traitement maintenu.
+                            date:
+                              type: string
+                              format: date-time
+                            unread:
+                              type: boolean
+                              example: true
+                            attachment:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  example: Compte rendu - Controle cardiologie.pdf
+                                type:
+                                  type: string
+                                  example: application/pdf
+                      recentHistory:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 2
+                            professionalName:
+                              type: string
+                              example: Dr Jean KOUASSI
+                            consultationType:
+                              type: string
+                              example: Controle cardiologie
+                            date:
+                              type: string
+                              format: date-time
+                            summary:
+                              type: string
+                              example: Tension stable, traitement maintenu.
+                            status:
+                              type: string
+                              example: DISPONIBLE
+                      healthStatus:
+                        type: object
+                        properties:
+                          label:
+                            type: string
+                            example: A surveiller
+                          tone:
+                            type: string
+                            example: critical
+                          description:
+                            type: string
+                            example: Une action proche ou un suivi prioritaire merite votre attention.
+                      alerts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: messages-unread
+                            type:
+                              type: string
+                              example: message
+                            label:
+                              type: string
+                              example: Messages non lus
+                            description:
+                              type: string
+                              example: 2 message(s) recent(s) sont en attente de lecture.
+        '401':
+          description: Non authentifie
+        '403':
+          description: Reserve au role patient
+  /patients/overview:
+    get:
+      tags: [Patients]
+      summary: Alias de l'apercu sante du patient connecte
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Meme reponse que /patient/overview
+        '401':
+          description: Non authentifie
+        '403':
+          description: Reserve au role patient
   /patients:
     get:
       tags: [Patients]

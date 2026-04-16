@@ -145,7 +145,7 @@
   </div>
 
   <script type="module">
-    import { initializePatientPage } from '../assets/js/patient-portal.js';
+    import { initializePatientPage, completePatientPageLoading } from '../assets/js/patient-portal.js';
     import { showToast } from '../utils/helpers.js';
 
     await initializePatientPage({
@@ -166,6 +166,8 @@
       event.preventDefault();
       showToast('La demande de support sera connectee a /api/v1/help/support-request.', 'success');
     });
+
+    completePatientPageLoading();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
