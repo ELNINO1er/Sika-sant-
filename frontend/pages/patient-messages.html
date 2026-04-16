@@ -24,7 +24,7 @@
                 <h3 class="patient-module-title">Messages recus</h3>
               </div>
             </div>
-            <div id="messagesList" class="patient-message-list"></div>
+            <div id="messagesInbox" class="patient-message-list"></div>
           </article>
         </div>
 
@@ -32,14 +32,21 @@
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Notifications</span>
-                <h3 class="patient-module-title">Alertes et rappels</h3>
+                <span class="small-label">Lecture</span>
+                <h3 class="patient-module-title">Message selectionne</h3>
+              </div>
+            </div>
+            <div id="messageDetail" class="patient-stacked-list"></div>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Alertes</span>
+                <h3 class="patient-module-title">Rappels du centre</h3>
               </div>
             </div>
             <div id="messageNotifications" class="patient-message-list"></div>
-            <div class="patient-inline-actions">
-              <button type="button" class="btn btn-outline-primary btn-sm" data-patient-action="message">Contacter le centre</button>
-            </div>
           </article>
         </div>
       </section>
@@ -49,38 +56,119 @@
   <script type="module">
     import {
       initializePatientPage,
-      renderMessageList,
-      bindPatientActionButtons
+      escapeHtml
     } from '../assets/js/patient-portal.js';
+    import { formatDateTime } from '../utils/helpers.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Messagerie',
       showNavbar: false,
       heroBadge: 'Messagerie',
       heroTitle: 'Messages patient et echanges utiles',
-      heroDescription: 'Retrouvez les messages utiles, les informations du centre et les pieces jointes disponibles dans votre espace.',
+      heroDescription: 'Consultez les messages du centre, relisez les pieces jointes et suivez les rappels importants de votre parcours de soins.',
       heroStats: (data) => [
-        { label: 'Messages', value: String(data.messages.length), description: 'Echanges affiches dans la boite' },
-        { label: 'Alertes', value: String(data.notifications.length), description: 'Rappels et informations utiles' },
-        { label: 'Pieces jointes', value: String(data.documents.length), description: 'Documents visibles a ce stade' },
-        { label: 'Messagerie', value: 'Bientot', description: 'Question administrative securisee' }
+        { label: 'Messages', value: String(data.messages.length), description: 'Messages visibles dans votre boite' },
+        { label: 'Non lus', value: String(data.messages.length), description: 'A confirmer cote API' },
+        { label: 'Pieces jointes', value: String(data.documents.length), description: 'Documents rattaches aux messages' },
+        { label: 'Rappels', value: String(data.notifications.length), description: 'Informations recues du centre' }
       ]
     });
 
-    renderMessageList(document.getElementById('messagesList'), state.messages);
-    renderMessageList(
-      document.getElementById('messageNotifications'),
-      state.notifications.map((item, index) => ({
-        id: `notification-${index}`,
-        sender: 'Centre de sante',
-        subject: item.title,
-        preview: item.text,
-        date: new Date().toISOString(),
-        attachment: ''
-      }))
-    );
+    const inbox = document.getElementById('messagesInbox');
+    const detail = document.getElementById('messageDetail');
+    const notifications = document.getElementById('messageNotifications');
+    const rows = state.messages.length ? state.messages : [];
+    let selected = rows[0] || null;
 
-    bindPatientActionButtons();
+    function renderSelected() {
+      if (!selected) {
+        detail.innerHTML = `
+          <div class="patient-empty-card">
+            <strong>Aucun message</strong>
+            <p>Les messages du centre s afficheront ici lorsqu ils seront disponibles.</p>
+          </div>
+        `;
+        return;
+      }
+
+      detail.innerHTML = `
+        <div class="patient-list-item">
+          <div class="patient-list-item-head">
+            <div>
+              <strong>${escapeHtml(selected.sender)}</strong>
+              <div class="text-muted">${escapeHtml(formatDateTime(selected.date))}</div>
+            </div>
+            <span class="status-badge success">Lu</span>
+          </div>
+          <div class="patient-card-note mt-3">
+            <strong>${escapeHtml(selected.subject)}</strong>
+            <p class="mb-0 mt-2">${escapeHtml(selected.preview)}</p>
+          </div>
+          ${selected.attachment ? `
+            <div class="patient-document-item mt-3">
+              <div class="patient-document-main">
+                <span class="patient-document-kind">Piece jointe</span>
+                <strong>${escapeHtml(selected.attachment)}</strong>
+                <small>Document telechargeable depuis votre dossier</small>
+              </div>
+              <button type="button" class="btn btn-outline-secondary btn-sm">Telecharger</button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderInbox() {
+      if (!rows.length) {
+        inbox.innerHTML = `
+          <div class="patient-empty-card">
+            <strong>Aucun message recu</strong>
+            <p>Votre boite de reception medicale s affichera ici.</p>
+          </div>
+        `;
+        return;
+      }
+
+      inbox.innerHTML = rows.map((item, index) => `
+        <button type="button" class="patient-message-item text-start ${selected?.id === item.id ? 'active' : ''}" data-message-index="${index}">
+          <div class="patient-message-icon"><i class="bi bi-chat-dots"></i></div>
+          <div>
+            <strong>${escapeHtml(item.sender)}</strong>
+            <div class="patient-message-subject">${escapeHtml(item.subject)}</div>
+            <p>${escapeHtml(item.preview)}</p>
+            <div class="patient-meta-row">
+              <span>${escapeHtml(formatDateTime(item.date))}</span>
+              ${item.attachment ? `<span class="patient-attachment-chip"><i class="bi bi-paperclip"></i>${escapeHtml(item.attachment)}</span>` : ''}
+            </div>
+          </div>
+        </button>
+      `).join('');
+
+      inbox.querySelectorAll('[data-message-index]').forEach((button) => {
+        button.addEventListener('click', () => {
+          selected = rows[Number(button.dataset.messageIndex)];
+          renderInbox();
+          renderSelected();
+        });
+      });
+    }
+
+    notifications.innerHTML = state.notifications.map((item) => `
+      <div class="patient-message-item">
+        <div class="patient-message-icon"><i class="bi ${escapeHtml(item.icon)}"></i></div>
+        <div>
+          <strong>Centre de sante</strong>
+          <div class="patient-message-subject">${escapeHtml(item.title)}</div>
+          <p>${escapeHtml(item.text)}</p>
+          <div class="patient-meta-row">
+            <span>${escapeHtml(formatDateTime(new Date().toISOString()))}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    renderInbox();
+    renderSelected();
   </script>
 </body>
 </html>

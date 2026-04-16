@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aide | Sika-Sante</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="patient-dashboard-page">
+  <div class="layout-shell">
+    <div id="appSidebar"></div>
+    <main class="main-content patient-main-shell">
+      <div id="toastContainer" class="toast-container"></div>
+      <div id="patientPageHero"></div>
+
+      <section class="patient-page-grid patient-page-grid-2">
+        <div class="patient-page-column">
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">FAQ</span>
+                <h3 class="patient-module-title">Questions frequentes</h3>
+              </div>
+            </div>
+            <div class="accordion" id="helpFaq">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqOne">
+                    Comment consulter mon dossier medical ?
+                  </button>
+                </h2>
+                <div id="faqOne" class="accordion-collapse collapse show" data-bs-parent="#helpFaq">
+                  <div class="accordion-body">Utilisez la rubrique <strong>Dossier medical</strong> pour relire vos informations consolidees et <strong>Historique medical</strong> pour le fil chronologique des consultations.</div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwo">
+                    Puis-je modifier une consultation ou un diagnostic ?
+                  </button>
+                </h2>
+                <div id="faqTwo" class="accordion-collapse collapse" data-bs-parent="#helpFaq">
+                  <div class="accordion-body">Non. Le patient peut consulter les informations, demander des corrections administratives et mettre a jour ses coordonnees, mais pas modifier les donnees medicales validees par un soignant.</div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThree">
+                    Comment telecharger mes documents ?
+                  </button>
+                </h2>
+                <div id="faqThree" class="accordion-collapse collapse" data-bs-parent="#helpFaq">
+                  <div class="accordion-body">Rendez-vous dans <strong>Documents</strong> pour retrouver ordonnances, resultats, comptes rendus et certificats disponibles.</div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Guides</span>
+                <h3 class="patient-module-title">Aide rapide</h3>
+              </div>
+            </div>
+            <div class="support-grid">
+              <div class="support-card">
+                <i class="bi bi-calendar-check"></i>
+                <h4>Rendez-vous</h4>
+                <p>Consultez votre agenda, demandez un changement ou suivez un rendez-vous passe.</p>
+              </div>
+              <div class="support-card">
+                <i class="bi bi-file-earmark-medical"></i>
+                <h4>Documents</h4>
+                <p>Telechargez les pieces publiees par le centre de sante ou le professionnel.</p>
+              </div>
+              <div class="support-card">
+                <i class="bi bi-chat-dots"></i>
+                <h4>Messages</h4>
+                <p>Relisez les rappels, notifications et echanges utiles relatifs a votre suivi.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="patient-page-column">
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Support</span>
+                <h3 class="patient-module-title">Demande d assistance</h3>
+              </div>
+            </div>
+            <form id="supportForm" class="d-grid gap-3">
+              <div>
+                <label class="form-label">Type de demande</label>
+                <select class="form-select">
+                  <option selected>Assistance technique</option>
+                  <option>Aide administrative</option>
+                  <option>Question sur un document</option>
+                  <option>Question sur un rendez-vous</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Objet</label>
+                <input class="form-control" type="text" placeholder="Exemple : document introuvable">
+              </div>
+              <div>
+                <label class="form-label">Message</label>
+                <textarea class="form-control" placeholder="Decrivez votre demande en quelques lignes"></textarea>
+              </div>
+              <div class="patient-inline-actions">
+                <button type="submit" class="btn btn-primary">Envoyer la demande</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Contact</span>
+                <h3 class="patient-module-title">Coordonnees utiles</h3>
+              </div>
+            </div>
+            <div class="key-value-list">
+              <div class="key-value-item">
+                <strong>Support patient</strong>
+                <p class="mb-0 text-muted">support@sika-sante.ci</p>
+              </div>
+              <div class="key-value-item">
+                <strong>Centre de reference</strong>
+                <p class="mb-0 text-muted">Centre Sika-Sante, Abidjan</p>
+              </div>
+              <div class="key-value-item">
+                <strong>Aide administrative</strong>
+                <p class="mb-0 text-muted">Disponible du lundi au vendredi de 8h a 17h.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initializePatientPage } from '../assets/js/patient-portal.js';
+    import { showToast } from '../utils/helpers.js';
+
+    await initializePatientPage({
+      pageTitle: 'Aide',
+      showNavbar: false,
+      heroBadge: 'Aide',
+      heroTitle: 'Assistance et guide de l espace patient',
+      heroDescription: 'Retrouvez les reponses frequentes, les points de contact utiles et un formulaire d assistance simple.',
+      heroStats: [
+        { label: 'FAQ', value: '3', description: 'Questions guidees en acces direct' },
+        { label: 'Support', value: 'Ouvert', description: 'Canal d assistance patient' },
+        { label: 'Documents', value: 'Aides', description: 'Explications sur l usage du portail' },
+        { label: 'Demande', value: 'Simple', description: 'Formulaire de support dedie' }
+      ]
+    });
+
+    document.getElementById('supportForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      showToast('La demande de support sera connectee a /api/v1/help/support-request.', 'success');
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

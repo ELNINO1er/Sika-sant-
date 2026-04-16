@@ -322,6 +322,13 @@ export async function initializePatientPage({
   const profile = await loadUserProfile();
   const state = createPatientState(profile);
 
+  if (sidebar) {
+    sidebar.innerHTML = renderSidebar({
+      user: profile,
+      patientState: state
+    });
+  }
+
   if (pageTitle) {
     document.title = `${pageTitle} | Sika-Sante`;
   }
@@ -344,7 +351,7 @@ export function createHeroMarkup(state, { badge, title, description, stats = [] 
   const heroStats = stats.length ? createMetricCardsMarkup(stats) : '';
 
   return `
-    <section class="card-surface patient-welcome-card">
+    <section class="patient-welcome-card">
       <div class="patient-welcome-header">
         <div>
           <span class="saas-badge"><i class="bi bi-heart-pulse"></i>${escapeHtml(badge || 'Espace patient')}</span>
@@ -370,7 +377,7 @@ export function createMetricCardsMarkup(items) {
   return `
     <div class="patient-kpi-row">
       ${items.map((item) => `
-        <article class="patient-kpi-card">
+        <article class="patient-kpi-card pd-card">
           <span class="small-label">${escapeHtml(item.label)}</span>
           <strong>${escapeHtml(item.value)}</strong>
           <p>${escapeHtml(item.description)}</p>

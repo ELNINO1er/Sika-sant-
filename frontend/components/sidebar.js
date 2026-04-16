@@ -1,17 +1,41 @@
 import { getUserData } from '../utils/storage.js';
 import { ROLES } from '../utils/access.js';
 
+export const PATIENT_MENU_SECTIONS = [
+  {
+    title: 'Apercu',
+    items: [
+      { href: 'dashboard-patient.html', label: 'Apercu sante', icon: 'bi-grid-1x2', key: 'overview' },
+      { href: 'patient-record.html', label: 'Dossier medical', icon: 'bi-journal-medical', key: 'record' }
+    ]
+  },
+  {
+    title: 'Suivi',
+    items: [
+      { href: 'patient-medications.html', label: 'Traitements', icon: 'bi-capsule-pill', key: 'medications' },
+      { href: 'patient-appointments.html', label: 'Agenda', icon: 'bi-calendar-check', key: 'appointments' },
+      { href: 'patient-history.html', label: 'Historique medical', icon: 'bi-clock-history', key: 'history' }
+    ]
+  },
+  {
+    title: 'Communication',
+    items: [
+      { href: 'patient-messages.html', label: 'Messages', icon: 'bi-chat-dots', key: 'messages', countKey: 'messages' },
+      { href: 'patient-documents.html', label: 'Documents', icon: 'bi-file-earmark-medical', key: 'documents' }
+    ]
+  },
+  {
+    title: 'Compte',
+    items: [
+      { href: 'patient-profile.html', label: 'Profil', icon: 'bi-person', key: 'profile' },
+      { href: 'patient-settings.html', label: 'Parametres', icon: 'bi-gear', key: 'settings' },
+      { href: 'patient-help.html', label: 'Aide', icon: 'bi-question-circle', key: 'help' }
+    ]
+  }
+];
+
 const linksByRole = {
-  [ROLES.PATIENT]: [
-    { href: 'dashboard-patient.html', label: 'Apercu sante', icon: 'bi-grid-1x2-fill' },
-    { href: '#', label: 'Recherche', icon: 'bi-search', action: 'search' },
-    { href: 'patient-messages.html', label: 'Messages', icon: 'bi-chat-left-text' },
-    { href: 'patient-documents.html', label: 'Documents', icon: 'bi-file-earmark-medical' },
-    { href: 'patient-profile.html', label: 'Profil', icon: 'bi-person-badge' },
-    { href: 'patient-medications.html', label: 'Traitements', icon: 'bi-capsule-pill' },
-    { href: 'patient-appointments.html', label: 'Agenda', icon: 'bi-calendar-event' },
-    { href: 'patient-history.html', label: 'Dossier medical', icon: 'bi-clock-history' },
-  ],
+  [ROLES.PATIENT]: PATIENT_MENU_SECTIONS.flatMap((section) => section.items),
   [ROLES.PROFESSIONAL]: [
     { href: 'dashboard-professional.html#overview', label: 'Vue clinique', icon: 'bi-grid-1x2-fill' },
     { href: 'dashboard-professional.html#patients', label: 'Patients', icon: 'bi-people-fill' },
@@ -49,40 +73,64 @@ function isActiveLink(href) {
   return currentHash === `#${targetHash}`;
 }
 
-export function renderSidebar() {
-  const user = getUserData() || { role: ROLES.PATIENT, name: 'Utilisateur' };
+function renderPatientSections(patientState) {
+  const counts = {
+    messages: patientState?.messages?.length || 0
+  };
+
+  return PATIENT_MENU_SECTIONS.map((section) => `
+    <div class="patient-sidebar-group">
+      <div class="patient-sidebar-group-title">${section.title}</div>
+      <div class="patient-sidebar-group-links">
+        ${section.items.map((item) => `
+          <a href="${item.href}" class="${isActiveLink(item.href) ? 'active' : ''}">
+            <i class="bi ${item.icon}"></i>
+            <span>${item.label}</span>
+            ${item.countKey && counts[item.countKey] ? `<span class="patient-sidebar-count">${counts[item.countKey]}</span>` : ''}
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+export function renderSidebar(options = {}) {
+  const baseUser = getUserData() || { role: ROLES.PATIENT, name: 'Utilisateur' };
+  const user = {
+    ...baseUser,
+    ...(options.user || {})
+  };
+  const patientState = options.patientState || null;
   const links = linksByRole[user.role] || linksByRole[ROLES.PATIENT];
   const isPatient = user.role === ROLES.PATIENT;
 
   if (isPatient) {
+    const patientName = patientState?.profile?.name || user.name || 'Patient';
+    const patientId = patientState?.profile?.cmuNumber || user.cmuNumber || 'Non renseigne';
+
     return `
       <aside class="sidebar patient-sidebar">
-        <div class="brand">
-          <img class="patient-sidebar-logo" src="../assets/img/sika-sante-mark.svg" alt="Logo Sika-Sante">
-          <div class="brand-copy">
-            <strong>Sika-Sante</strong>
+        <div class="patient-sidebar-top">
+          <div class="brand">
+            <img class="patient-sidebar-logo" src="../assets/img/sika-sante-mark.svg" alt="Logo Sika-Sante">
+            <div class="brand-copy">
+              <strong>Sika-Sante</strong>
+              <small>Carnet medical electronique</small>
+            </div>
+          </div>
+
+          <div class="patient-sidebar-user">
+            <img class="patient-sidebar-avatar" src="../assets/img/Patient.jpg" alt="Photo du patient">
+            <div>
+              <strong>${patientName}</strong>
+              <small>CMU ${patientId}</small>
+            </div>
           </div>
         </div>
 
         <nav class="patient-sidebar-nav">
-          ${links.map(link => `
-            <a href="${link.href}" class="${isActiveLink(link.href) ? 'active' : ''}" ${link.action ? `data-patient-action="${link.action}"` : ''}>
-              <i class="bi ${link.icon}"></i>
-              <span>${link.label}</span>
-            </a>
-          `).join('')}
+          ${renderPatientSections(patientState)}
         </nav>
-
-        <div class="patient-sidebar-footer">
-          <a href="#" data-patient-action="settings">
-            <i class="bi bi-gear"></i>
-            <span>Parametres</span>
-          </a>
-          <a href="#" data-patient-action="help">
-            <i class="bi bi-question-circle"></i>
-            <span>Aide</span>
-          </a>
-        </div>
       </aside>
     `;
   }

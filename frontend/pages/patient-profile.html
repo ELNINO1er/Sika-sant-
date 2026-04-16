@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon Profil | Sika-Sante</title>
+  <title>Profil Patient | Sika-Sante</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
@@ -20,21 +20,45 @@
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Informations personnelles</span>
-                <h3 class="patient-module-title">Informations personnelles</h3>
+                <span class="small-label">Profil patient</span>
+                <h3 class="patient-module-title">Informations personnelles modifiables</h3>
               </div>
             </div>
-            <div id="profilePersonal" class="patient-profile-grid"></div>
-          </article>
-
-          <article class="card-surface section-card patient-module">
-            <div class="section-header">
-              <div>
-                <span class="small-label">Coordonnees</span>
-                <h3 class="patient-module-title">Coordonnees</h3>
+            <form id="patientProfileForm" class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nom complet</label>
+                <input id="profileName" class="form-control" type="text" readonly>
               </div>
-            </div>
-            <div id="profileContact" class="patient-profile-grid"></div>
+              <div class="col-md-6">
+                <label class="form-label">Numero patient / CMU</label>
+                <input id="profileCmu" class="form-control" type="text" readonly>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Telephone</label>
+                <input id="profilePhone" class="form-control" type="text" placeholder="Ajoutez votre numero">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input id="profileEmail" class="form-control" type="email" placeholder="Ajoutez votre email">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Adresse</label>
+                <input id="profileAddress" class="form-control" type="text" placeholder="Ajoutez votre adresse">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Contact d urgence</label>
+                <input id="profileEmergencyName" class="form-control" type="text" placeholder="Nom du contact">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Telephone urgence</label>
+                <input id="profileEmergencyPhone" class="form-control" type="text" placeholder="Numero du contact">
+              </div>
+              <div class="col-12">
+                <div class="patient-inline-actions">
+                  <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                </div>
+              </div>
+            </form>
           </article>
         </div>
 
@@ -42,34 +66,21 @@
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Identifiants sante</span>
-                <h3 class="patient-module-title">CMU et identifiants</h3>
+                <span class="small-label">Identite protegee</span>
+                <h3 class="patient-module-title">Champs non modifiables par le patient</h3>
               </div>
             </div>
-            <div id="profileIdentifiers" class="patient-profile-grid"></div>
+            <div id="profileLockedFields" class="patient-profile-grid"></div>
           </article>
 
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Contact d urgence</span>
-                <h3 class="patient-module-title">Contact d urgence</h3>
-              </div>
-            </div>
-            <div id="profileEmergency" class="patient-profile-grid"></div>
-          </article>
-
-          <article class="card-surface section-card patient-module">
-            <div class="section-header">
-              <div>
-                <span class="small-label">Resume medical</span>
-                <h3 class="patient-module-title">Resume medical</h3>
+                <span class="small-label">Resume personnel</span>
+                <h3 class="patient-module-title">Vue rapide du profil</h3>
               </div>
             </div>
             <div id="profileSummary" class="patient-summary-grid"></div>
-            <div class="patient-inline-actions">
-              <button type="button" class="btn btn-outline-primary btn-sm" data-patient-action="profile">Demander une mise a jour</button>
-            </div>
           </article>
         </div>
       </section>
@@ -80,30 +91,48 @@
     import {
       initializePatientPage,
       renderProfileGrid,
-      renderSummaryGrid,
-      bindPatientActionButtons
+      renderSummaryGrid
     } from '../assets/js/patient-portal.js';
+    import { showToast } from '../utils/helpers.js';
 
     const state = await initializePatientPage({
-      pageTitle: 'Mon Profil',
+      pageTitle: 'Profil patient',
       showNavbar: false,
       heroBadge: 'Profil',
-      heroTitle: 'Profile patient et informations de contact',
-      heroDescription: 'Consultez votre identite, vos coordonnees et les informations utiles reliees a votre dossier.',
+      heroTitle: 'Coordonnees et profil patient',
+      heroDescription: 'Mettez a jour vos informations personnelles autorisees sans toucher aux donnees medicales protegees par le centre.',
       heroStats: (data) => [
-        { label: 'CMU', value: data.profile.cmuNumber || '-', description: 'Identifiant patient visible' },
-        { label: 'Contact', value: data.profile.phone || 'A completer', description: 'Telephone principal' },
+        { label: 'CMU', value: data.profile.cmuNumber || '-', description: 'Identifiant de sante protege' },
+        { label: 'Telephone', value: data.profile.phone || 'A completer', description: 'Coordonnee modifiable' },
         { label: 'Email', value: data.profile.email || 'A completer', description: 'Adresse de contact' },
-        { label: 'Urgence', value: 'A completer', description: 'Personne a prevenir en cas de besoin' }
+        { label: 'Urgence', value: 'A completer', description: 'Personne de confiance' }
       ]
     });
 
-    renderProfileGrid(document.getElementById('profilePersonal'), state.profileSections.personal);
-    renderProfileGrid(document.getElementById('profileContact'), state.profileSections.contact);
-    renderProfileGrid(document.getElementById('profileIdentifiers'), state.profileSections.identifiers);
-    renderProfileGrid(document.getElementById('profileEmergency'), state.profileSections.emergency);
-    renderSummaryGrid(document.getElementById('profileSummary'), state.summaryItems.slice(0, 6));
-    bindPatientActionButtons();
+    const form = document.getElementById('patientProfileForm');
+    document.getElementById('profileName').value = state.profile.name || '';
+    document.getElementById('profileCmu').value = state.profile.cmuNumber || '';
+    document.getElementById('profilePhone').value = state.profile.phone || '';
+    document.getElementById('profileEmail').value = state.profile.email || '';
+
+    renderProfileGrid(document.getElementById('profileLockedFields'), [
+      ['Nom officiel', state.profile.name || 'Non renseigne'],
+      ['Numero patient / CMU', state.profile.cmuNumber || 'Non renseigne'],
+      ['Donnees medicales', 'Non modifiables par le patient'],
+      ['Historique et diagnostics', 'Proteges par les regles institutionnelles']
+    ]);
+
+    renderSummaryGrid(document.getElementById('profileSummary'), [
+      { label: 'Telephone', value: state.profile.phone || 'A completer' },
+      { label: 'Email', value: state.profile.email || 'A completer' },
+      { label: 'Adresse', value: 'A completer' },
+      { label: 'Contact urgence', value: 'A completer' }
+    ]);
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      showToast('Le profil patient sera enregistre via PUT /api/v1/patient/profile.', 'success');
+    });
   </script>
 </body>
 </html>

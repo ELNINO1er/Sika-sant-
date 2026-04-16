@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dossier Medical | Sika-Sante</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="patient-dashboard-page">
+  <div class="layout-shell">
+    <div id="appSidebar"></div>
+    <main class="main-content patient-main-shell">
+      <div id="toastContainer" class="toast-container"></div>
+      <div id="patientPageHero"></div>
+
+      <section class="patient-page-grid patient-page-grid-2">
+        <div class="patient-page-column">
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Identite</span>
+                <h3 class="patient-module-title">Resume d identite medicale</h3>
+              </div>
+            </div>
+            <div id="recordIdentity" class="patient-summary-grid"></div>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Resume clinique</span>
+                <h3 class="patient-module-title">Allergies, chroniques et groupe sanguin</h3>
+              </div>
+            </div>
+            <div id="recordClinicalSummary" class="patient-profile-grid"></div>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Consultations</span>
+                <h3 class="patient-module-title">Consultations reliees au dossier</h3>
+              </div>
+              <a href="patient-history.html" class="pd-link">Voir tout l historique</a>
+            </div>
+            <div id="recordConsultations"></div>
+          </article>
+        </div>
+
+        <div class="patient-page-column">
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Timeline</span>
+                <h3 class="patient-module-title">Parcours medical recent</h3>
+              </div>
+            </div>
+            <div id="recordTimeline" class="timeline-list"></div>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Diagnostics</span>
+                <h3 class="patient-module-title">Synthese des diagnostics et statuts</h3>
+              </div>
+            </div>
+            <div id="recordDiagnoses" class="patient-profile-grid"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import {
+      initializePatientPage,
+      renderSummaryGrid,
+      renderProfileGrid,
+      escapeHtml
+    } from '../assets/js/patient-portal.js';
+    import { formatDate } from '../utils/helpers.js';
+
+    const state = await initializePatientPage({
+      pageTitle: 'Dossier medical',
+      showNavbar: false,
+      heroBadge: 'Dossier medical',
+      heroTitle: 'Votre dossier medical consolide',
+      heroDescription: 'Retrouvez votre identite, les informations de sante connues et une lecture structurée des consultations deja reliees a votre parcours.',
+      heroStats: (data) => [
+        { label: 'Consultations', value: String(data.history.length), description: 'Actes visibles dans le dossier' },
+        { label: 'Traitements', value: String(data.treatments.length), description: 'Elements therapeutiques relus' },
+        { label: 'Documents', value: String(data.documents.length), description: 'Pieces disponibles au telechargement' },
+        { label: 'Alertes', value: data.conditions.includes('Allergies a verifier') ? 'A verifier' : 'Aucune', description: 'Vigilance patient' }
+      ]
+    });
+
+    const identityItems = [
+      { label: 'Nom complet', value: state.profile.name || 'Non renseigne' },
+      { label: 'Numero CMU', value: state.profile.cmuNumber || 'Non renseigne' },
+      { label: 'Telephone', value: state.profile.phone || 'A completer' },
+      { label: 'Email', value: state.profile.email || 'A completer' },
+      { label: 'Date de naissance', value: 'Non renseignee' },
+      { label: 'Sexe', value: 'Non renseigne' }
+    ];
+
+    const clinicalItems = [
+      ['Groupe sanguin', 'Non renseigne'],
+      ['Allergies connues', state.conditions.includes('Allergies a verifier') ? 'A verifier' : 'Non renseigne'],
+      ['Maladies chroniques', state.conditions.filter((item) => item !== 'Allergies a verifier').join(', ') || 'Non renseigne'],
+      ['Antecedents importants', state.history.slice(0, 2).map((item) => item.title || 'Consultation').join(', ') || 'Non renseigne']
+    ];
+
+    const diagnosisItems = [
+      ['Derniere consultation', state.latestHistory ? formatDate(state.latestHistory.created_at) : 'Aucune'],
+      ['Diagnostic resume', state.latestHistory?.summary || 'Aucun diagnostic structure visible'],
+      ['Professionnel referent', state.latestHistory?.professionalName || 'Non renseigne'],
+      ['Statut du dossier', 'Synchronise']
+    ];
+
+    renderSummaryGrid(document.getElementById('recordIdentity'), identityItems);
+    renderProfileGrid(document.getElementById('recordClinicalSummary'), clinicalItems);
+    renderProfileGrid(document.getElementById('recordDiagnoses'), diagnosisItems);
+
+    document.getElementById('recordConsultations').innerHTML = `
+      <div class="table-shell">
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Professionnel</th>
+                <th>Consultation</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(state.history.length ? state.history : [{
+                created_at: new Date().toISOString(),
+                professionalName: 'Equipe clinique',
+                title: 'Consultation generale',
+                summary: 'Resume non disponible'
+              }]).slice(0, 5).map((item) => `
+                <tr>
+                  <td>${escapeHtml(formatDate(item.created_at))}</td>
+                  <td><strong>${escapeHtml(item.professionalName || 'Non renseigne')}</strong></td>
+                  <td>${escapeHtml(item.title || 'Consultation')}</td>
+                  <td><span class="status-badge success">Visible</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('recordTimeline').innerHTML = (state.history.length ? state.history : [{
+      created_at: new Date().toISOString(),
+      title: 'Premiere synchronisation',
+      summary: 'Votre parcours medical sera complete par les futurs comptes rendus.'
+    }]).slice(0, 6).map((item) => `
+      <div class="timeline-item">
+        <div class="timeline-dot"><i class="bi bi-journal-medical"></i></div>
+        <div class="timeline-card">
+          <div class="patient-list-item-head">
+            <div>
+              <strong>${escapeHtml(item.title || 'Consultation')}</strong>
+              <div class="text-muted">${escapeHtml(item.professionalName || 'Centre de sante')}</div>
+            </div>
+            <span class="status-badge success">${escapeHtml(formatDate(item.created_at))}</span>
+          </div>
+          <p class="mb-0 mt-2">${escapeHtml(item.summary || 'Resume non disponible')}</p>
+        </div>
+      </div>
+    `).join('');
+  </script>
+</body>
+</html>
