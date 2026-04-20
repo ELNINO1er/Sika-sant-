@@ -9,6 +9,7 @@ const {
   overviewSchema,
   createPatientSchema,
   patientIdParamsSchema,
+  consultationDetailSchema,
   createConsultationSchema
 } = require('../validation/patientValidation');
 const { ROLES, PERMISSIONS } = require('../constants/access');
@@ -19,6 +20,22 @@ router.get(
   authorizeRoles(ROLES.PATIENT),
   validateRequest(overviewSchema),
   patientController.getOverview
+);
+
+router.get(
+  '/medical-record',
+  verifyToken,
+  authorizeRoles(ROLES.PATIENT),
+  validateRequest(overviewSchema),
+  patientController.getMedicalRecord
+);
+
+router.get(
+  '/consultations/:consultationId',
+  verifyToken,
+  authorizeRoles(ROLES.PATIENT),
+  validateRequest(consultationDetailSchema),
+  patientController.getConsultationDetails
 );
 
 router.get(

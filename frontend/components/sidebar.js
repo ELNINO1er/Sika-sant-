@@ -120,7 +120,7 @@ export function renderSidebar(options = {}) {
           </div>
 
           <div class="patient-sidebar-user">
-            <img class="patient-sidebar-avatar" src="../assets/img/Patient.jpg" alt="Photo du patient">
+            <img class="patient-sidebar-avatar" src="../assets/img/Patient-web.jpg" alt="Photo du patient" loading="lazy" decoding="async">
             <div>
               <strong>${patientName}</strong>
               <small>CMU ${patientId}</small>

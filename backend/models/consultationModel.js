@@ -15,6 +15,20 @@ async function getConsultationsByPatientUserId(patientUserId, { limit = 20 } = {
   return rows;
 }
 
+async function getConsultationByIdForPatient(patientUserId, consultationId) {
+  const [rows] = await db.query(
+    `SELECT c.id, c.patient_user_id AS patientUserId, c.professional_user_id AS professionalUserId,
+            c.title, c.summary, c.created_at,
+            u.name AS professionalName
+     FROM consultations c
+     LEFT JOIN users u ON u.id = c.professional_user_id
+     WHERE c.patient_user_id = ? AND c.id = ?
+     LIMIT 1`,
+    [patientUserId, consultationId]
+  );
+  return rows[0] || null;
+}
+
 async function createConsultation({ patientUserId, professionalUserId, title, summary }) {
   const [result] = await db.query(
     `INSERT INTO consultations (patient_user_id, professional_user_id, title, summary)
@@ -32,5 +46,6 @@ async function createConsultation({ patientUserId, professionalUserId, title, su
 
 module.exports = {
   getConsultationsByPatientUserId,
+  getConsultationByIdForPatient,
   createConsultation
 };

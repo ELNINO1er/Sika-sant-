@@ -22,6 +22,27 @@ async function getOverview(req, res, next) {
   }
 }
 
+async function getMedicalRecord(req, res, next) {
+  try {
+    const record = await patientService.getPatientMedicalRecord(req.user.id);
+    return res.formatResponse(record, 'Dossier medical charge');
+  } catch (error) {
+    logger.error('getMedicalRecord error: %o', error);
+    return next(new AppError(error.message || 'Impossible de recuperer le dossier medical', error.statusCode || 500));
+  }
+}
+
+async function getConsultationDetails(req, res, next) {
+  try {
+    const { consultationId } = req.validated.params;
+    const consultation = await patientService.getPatientConsultationDetails(req.user.id, consultationId);
+    return res.formatResponse(consultation, 'Detail de consultation charge');
+  } catch (error) {
+    logger.error('getConsultationDetails error: %o', error);
+    return next(new AppError(error.message || 'Impossible de recuperer le detail de consultation', error.statusCode || 500));
+  }
+}
+
 async function createPatient(req, res, next) {
   try {
     const newPatient = await patientService.createPatient(req.validated.body);
@@ -61,6 +82,8 @@ async function createConsultation(req, res, next) {
 module.exports = {
   listPatients,
   getOverview,
+  getMedicalRecord,
+  getConsultationDetails,
   createPatient,
   listConsultations,
   createConsultation

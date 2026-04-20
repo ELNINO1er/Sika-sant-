@@ -261,8 +261,9 @@ textarea.form-control {
   background: #ffffff;
   border: 1px solid #e7ebf3;
   border-radius: 1rem;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+  align-items: start;
 }
 
 .sidebar {
@@ -338,6 +339,14 @@ body.dark .sidebar {
 }
 
 .patient-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: calc(100vh - 1rem);
+  min-height: calc(100vh - 1rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   display: flex;
   flex-direction: column;
   gap: 1.35rem;
@@ -517,10 +526,36 @@ body.dark .sidebar-note {
 
 .main-content {
   padding: 1.5rem;
+  min-width: 0;
 }
 
 .patient-dashboard-page .main-content {
   padding: 1.15rem 1.7rem 1.7rem;
+}
+
+@media (min-width: 993px) {
+  .patient-dashboard-page .layout-shell {
+    display: block;
+    position: relative;
+    min-height: calc(100vh - 1rem);
+  }
+
+  .patient-dashboard-page .sidebar.patient-sidebar {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    width: 268px;
+    height: calc(100vh - 1rem);
+    min-height: calc(100vh - 1rem);
+    z-index: 40;
+    overflow-y: auto;
+  }
+
+  .patient-dashboard-page .main-content {
+    margin-left: 268px;
+    width: calc(100% - 268px);
+    min-height: calc(100vh - 1rem);
+  }
 }
 
 .topbar {
@@ -1469,6 +1504,91 @@ body.dark .loading-state {
 
 .patient-link-item i {
   color: var(--primary);
+}
+
+.patient-record-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  border: 1px solid #e7ebf3;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
+}
+
+.patient-record-toolbar-main {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.6fr) minmax(180px, 0.9fr) minmax(160px, 0.8fr);
+  gap: 0.9rem;
+  flex: 1;
+}
+
+.patient-record-toolbar-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.patient-record-filter {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.patient-record-input-wrap {
+  position: relative;
+}
+
+.patient-record-input-wrap i {
+  position: absolute;
+  top: 50%;
+  left: 0.9rem;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.patient-record-input-wrap .form-control {
+  padding-left: 2.4rem;
+}
+
+.patient-record-count {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.patient-record-consultation-cell {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.patient-record-consultation-cell small {
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+@media (max-width: 1200px) {
+  .patient-record-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .patient-record-toolbar-main {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .patient-record-toolbar-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-record-toolbar-main {
+    grid-template-columns: 1fr;
+  }
 }
 
 .patient-overview-board {

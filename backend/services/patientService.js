@@ -180,6 +180,89 @@ function buildAlerts({ activeTreatments, unreadMessages, nextAppointment }) {
   return alerts;
 }
 
+function extractMedicalFlags(consultations) {
+  const source = consultations.map((item) => cleanText(`${item.title} ${item.summary}`)).join(' ').toLowerCase();
+  const chronicConditions = [];
+  const allergies = [];
+
+  if (source.includes('cardio') || source.includes('tension')) {
+    chronicConditions.push('Suivi cardiovasculaire');
+  }
+  if (source.includes('gly') || source.includes('diab')) {
+    chronicConditions.push('Suivi glycemique');
+  }
+  if (source.includes('allerg')) {
+    allergies.push('Allergies a verifier');
+  }
+
+  return {
+    bloodGroup: 'Non renseigne',
+    allergies,
+    chronicConditions,
+    importantHistory: consultations.slice(0, 3).map(item => cleanText(item.title, 'Consultation'))
+  };
+}
+
+function buildRecordConsultations(consultations) {
+  return consultations.map((consultation) => ({
+    id: consultation.id,
+    title: cleanText(consultation.title, 'Consultation'),
+    summary: cleanText(consultation.summary, 'Resume non disponible'),
+    date: toIsoDate(consultation.created_at),
+    professionalName: cleanText(consultation.professionalName, 'Professionnel non renseigne'),
+    status: 'DISPONIBLE',
+    diagnosisSummary: cleanText(consultation.summary, 'A completer par le centre'),
+    documentLabel: `Compte rendu - ${cleanText(consultation.title, 'Consultation')}.pdf`
+  }));
+}
+
+function buildTimeline(consultations) {
+  return consultations.slice(0, 8).map((consultation) => ({
+    id: consultation.id,
+    title: cleanText(consultation.title, 'Consultation'),
+    professionalName: cleanText(consultation.professionalName, 'Centre de sante'),
+    summary: cleanText(consultation.summary, 'Resume non disponible'),
+    date: toIsoDate(consultation.created_at),
+    status: 'DISPONIBLE'
+  }));
+}
+
+function buildDiagnosticSummary(consultations) {
+  const latest = consultations[0];
+
+  if (!latest) {
+    return {
+      lastConsultationDate: null,
+      latestDiagnosis: 'Aucun diagnostic disponible',
+      currentStatus: 'Stable',
+      referringProfessional: 'Non renseigne'
+    };
+  }
+
+  return {
+    lastConsultationDate: toIsoDate(latest.created_at),
+    latestDiagnosis: cleanText(latest.summary, 'A completer par le centre'),
+    currentStatus: 'Suivi',
+    referringProfessional: cleanText(latest.professionalName, 'Non renseigne')
+  };
+}
+
+function buildRecordFilters(consultations) {
+  const types = [...new Set(consultations.map(item => cleanText(item.title, 'Consultation')))].slice(0, 10);
+  const dates = consultations
+    .map(item => new Date(item.created_at))
+    .filter(date => !Number.isNaN(date.getTime()))
+    .sort((a, b) => a - b);
+
+  return {
+    consultationTypes: types,
+    dateRange: {
+      min: dates[0] ? dates[0].toISOString().slice(0, 10) : null,
+      max: dates[dates.length - 1] ? dates[dates.length - 1].toISOString().slice(0, 10) : null
+    }
+  };
+}
+
 async function getAllPatients(options) {
   return patientModel.getAllPatients(options);
 }
@@ -238,6 +321,90 @@ async function getPatientOverview(patientUserId) {
   };
 }
 
+async function getPatientMedicalRecord(patientUserId) {
+  const [user, patient, consultations] = await Promise.all([
+    userModel.findUserById(patientUserId),
+    patientModel.findPatientByUserId(patientUserId),
+    consultationModel.getConsultationsByPatientUserId(patientUserId, {
+      limit: 50
+    })
+  ]);
+
+  if (!user || user.role !== ROLES.PATIENT || !patient) {
+    const error = new Error('Patient introuvable');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const normalizedConsultations = buildRecordConsultations(consultations);
+  const clinicalSummary = extractMedicalFlags(consultations);
+  const diagnosticSummary = buildDiagnosticSummary(consultations);
+  const timeline = buildTimeline(consultations);
+  const activeTreatments = buildCurrentTreatments(consultations);
+  const documentsCount = normalizedConsultations.length;
+  const alertCount = clinicalSummary.allergies.length;
+
+  return {
+    patient: {
+      id: user.id,
+      name: cleanText(user.name, 'Patient'),
+      cmuNumber: patient.cmu_number,
+      phone: user.phone || null,
+      email: user.email || null,
+      birthDate: null,
+      gender: null,
+      avatarUrl: null
+    },
+    metrics: {
+      consultations: normalizedConsultations.length,
+      treatments: activeTreatments.length,
+      documents: documentsCount,
+      alerts: alertCount
+    },
+    identity: {
+      fullName: cleanText(user.name, 'Patient'),
+      cmuNumber: patient.cmu_number,
+      phone: user.phone || 'A completer',
+      email: user.email || 'A completer',
+      birthDate: 'Non renseignee',
+      gender: 'Non renseigne',
+      profileStatus: (!user.email || !user.phone) ? 'Profil incomplet' : 'Profil complet'
+    },
+    clinicalSummary,
+    consultations: normalizedConsultations,
+    timeline,
+    diagnosticSummary,
+    globalStatus: diagnosticSummary.currentStatus,
+    filters: buildRecordFilters(consultations)
+  };
+}
+
+async function getPatientConsultationDetails(patientUserId, consultationId) {
+  const consultation = await consultationModel.getConsultationByIdForPatient(patientUserId, consultationId);
+  if (!consultation) {
+    const error = new Error('Consultation introuvable');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const professional = consultation.professionalUserId
+    ? await professionalModel.findProfessionalByUserId(consultation.professionalUserId)
+    : null;
+
+  return {
+    id: consultation.id,
+    title: cleanText(consultation.title, 'Consultation'),
+    summary: cleanText(consultation.summary, 'Resume non disponible'),
+    date: toIsoDate(consultation.created_at),
+    professionalName: cleanText(consultation.professionalName, 'Professionnel non renseigne'),
+    professionalSpecialty: cleanText(professional?.specialty, 'Professionnel de sante'),
+    diagnosis: cleanText(consultation.summary, 'A completer par le centre'),
+    prescriptionStatus: 'Visible depuis la page Traitements',
+    relatedDocument: `Compte rendu - ${cleanText(consultation.title, 'Consultation')}.pdf`,
+    status: 'DISPONIBLE'
+  };
+}
+
 async function createPatient(patientData) {
   const { name, phone, cmuNumber, password } = patientData;
 
@@ -284,6 +451,8 @@ async function createConsultation(patientUserId, professionalUserId, consultatio
 module.exports = {
   getAllPatients,
   getPatientOverview,
+  getPatientMedicalRecord,
+  getPatientConsultationDetails,
   createPatient,
   getConsultationsForPatient,
   createConsultation

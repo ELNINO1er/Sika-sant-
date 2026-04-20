@@ -15,12 +15,45 @@
       <div id="toastContainer" class="toast-container"></div>
       <div id="patientPageHero"></div>
 
+      <section class="patient-record-toolbar pd-card">
+        <div class="patient-record-toolbar-main">
+          <div class="patient-record-filter">
+            <label for="recordSearch" class="small-label">Recherche</label>
+            <div class="patient-record-input-wrap">
+              <i class="bi bi-search"></i>
+              <input id="recordSearch" type="search" class="form-control" placeholder="Rechercher une consultation ou un soignant">
+            </div>
+          </div>
+
+          <div class="patient-record-filter">
+            <label for="recordTypeFilter" class="small-label">Type</label>
+            <select id="recordTypeFilter" class="form-select">
+              <option value="">Tous les types</option>
+            </select>
+          </div>
+
+          <div class="patient-record-filter">
+            <label for="recordDateFrom" class="small-label">Depuis</label>
+            <input id="recordDateFrom" type="date" class="form-control">
+          </div>
+        </div>
+
+        <div class="patient-record-toolbar-actions">
+          <button type="button" id="recordRefresh" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-clockwise"></i> Actualiser le dossier
+          </button>
+          <button type="button" id="recordExport" class="btn btn-outline-primary">
+            <i class="bi bi-download"></i> Exporter PDF
+          </button>
+        </div>
+      </section>
+
       <section class="patient-page-grid patient-page-grid-2">
         <div class="patient-page-column">
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Identite</span>
+                <span class="small-label">Identite medicale</span>
                 <h3 class="patient-module-title">Resume d identite medicale</h3>
               </div>
             </div>
@@ -31,7 +64,7 @@
             <div class="section-header">
               <div>
                 <span class="small-label">Resume clinique</span>
-                <h3 class="patient-module-title">Allergies, chroniques et groupe sanguin</h3>
+                <h3 class="patient-module-title">Allergies, chroniques et antecedents</h3>
               </div>
             </div>
             <div id="recordClinicalSummary" class="patient-profile-grid"></div>
@@ -43,7 +76,7 @@
                 <span class="small-label">Consultations</span>
                 <h3 class="patient-module-title">Consultations reliees au dossier</h3>
               </div>
-              <a href="patient-history.html" class="pd-link">Voir tout l historique</a>
+              <span class="patient-record-count" id="recordCountLabel">0 consultation</span>
             </div>
             <div id="recordConsultations"></div>
           </article>
@@ -63,11 +96,21 @@
           <article class="card-surface section-card patient-module">
             <div class="section-header">
               <div>
-                <span class="small-label">Diagnostics</span>
-                <h3 class="patient-module-title">Synthese des diagnostics et statuts</h3>
+                <span class="small-label">Synthese diagnostique</span>
+                <h3 class="patient-module-title">Etat global et derniere consultation</h3>
               </div>
             </div>
             <div id="recordDiagnoses" class="patient-profile-grid"></div>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Detail consultation</span>
+                <h3 class="patient-module-title">Lecture complete de la consultation</h3>
+              </div>
+            </div>
+            <div id="recordDetail"></div>
           </article>
         </div>
       </section>
@@ -77,106 +120,394 @@
   <script type="module">
     import {
       initializePatientPage,
+      createHeroMarkup,
+      createMetricCardsMarkup,
       renderSummaryGrid,
       renderProfileGrid,
       escapeHtml,
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
-    import { formatDate } from '../utils/helpers.js';
+    import { formatDate, formatDateTime, showToast } from '../utils/helpers.js';
+    import { apiGet } from '../services/api.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Dossier medical',
-      showNavbar: false,
-      heroBadge: 'Dossier medical',
-      heroTitle: 'Votre dossier medical consolide',
-      heroDescription: 'Retrouvez votre identite, les informations de sante connues et une lecture structurée des consultations deja reliees a votre parcours.',
-      heroStats: (data) => [
-        { label: 'Consultations', value: String(data.history.length), description: 'Actes visibles dans le dossier' },
-        { label: 'Traitements', value: String(data.treatments.length), description: 'Elements therapeutiques relus' },
-        { label: 'Documents', value: String(data.documents.length), description: 'Pieces disponibles au telechargement' },
-        { label: 'Alertes', value: data.conditions.includes('Allergies a verifier') ? 'A verifier' : 'Aucune', description: 'Vigilance patient' }
-      ]
+      showNavbar: false
     });
 
-    const identityItems = [
-      { label: 'Nom complet', value: state.profile.name || 'Non renseigne' },
-      { label: 'Numero CMU', value: state.profile.cmuNumber || 'Non renseigne' },
-      { label: 'Telephone', value: state.profile.phone || 'A completer' },
-      { label: 'Email', value: state.profile.email || 'A completer' },
-      { label: 'Date de naissance', value: 'Non renseignee' },
-      { label: 'Sexe', value: 'Non renseigne' }
-    ];
+    const heroContainer = document.getElementById('patientPageHero');
+    const identityContainer = document.getElementById('recordIdentity');
+    const clinicalContainer = document.getElementById('recordClinicalSummary');
+    const timelineContainer = document.getElementById('recordTimeline');
+    const diagnosesContainer = document.getElementById('recordDiagnoses');
+    const consultationsContainer = document.getElementById('recordConsultations');
+    const detailContainer = document.getElementById('recordDetail');
+    const typeFilter = document.getElementById('recordTypeFilter');
+    const searchInput = document.getElementById('recordSearch');
+    const dateFromInput = document.getElementById('recordDateFrom');
+    const refreshButton = document.getElementById('recordRefresh');
+    const exportButton = document.getElementById('recordExport');
+    const recordCountLabel = document.getElementById('recordCountLabel');
 
-    const clinicalItems = [
-      ['Groupe sanguin', 'Non renseigne'],
-      ['Allergies connues', state.conditions.includes('Allergies a verifier') ? 'A verifier' : 'Non renseigne'],
-      ['Maladies chroniques', state.conditions.filter((item) => item !== 'Allergies a verifier').join(', ') || 'Non renseigne'],
-      ['Antecedents importants', state.history.slice(0, 2).map((item) => item.title || 'Consultation').join(', ') || 'Non renseigne']
-    ];
+    function deriveFallbackRecord() {
+      const latest = state.latestHistory;
+      const allergies = state.conditions.includes('Allergies a verifier') ? ['Allergies a verifier'] : [];
+      const chronic = state.conditions.filter((item) => item !== 'Allergies a verifier');
+      const consultations = (state.history || []).map((item) => ({
+        id: item.id,
+        title: item.title || 'Consultation',
+        summary: item.summary || 'Resume non disponible',
+        date: item.created_at,
+        professionalName: item.professionalName || 'Centre de sante',
+        status: 'DISPONIBLE',
+        diagnosisSummary: item.summary || 'A completer par le centre',
+        documentLabel: `Compte rendu - ${item.title || 'Consultation'}.pdf`
+      }));
 
-    const diagnosisItems = [
-      ['Derniere consultation', state.latestHistory ? formatDate(state.latestHistory.created_at) : 'Aucune'],
-      ['Diagnostic resume', state.latestHistory?.summary || 'Aucun diagnostic structure visible'],
-      ['Professionnel referent', state.latestHistory?.professionalName || 'Non renseigne'],
-      ['Statut du dossier', 'Synchronise']
-    ];
+      return {
+        patient: {
+          name: state.profile.name || 'Patient',
+          cmuNumber: state.profile.cmuNumber || 'Non renseigne',
+          phone: state.profile.phone || 'A completer',
+          email: state.profile.email || 'A completer'
+        },
+        metrics: {
+          consultations: consultations.length,
+          treatments: state.treatments.length,
+          documents: state.documents.length,
+          alerts: allergies.length
+        },
+        identity: {
+          fullName: state.profile.name || 'Patient',
+          cmuNumber: state.profile.cmuNumber || 'Non renseigne',
+          phone: state.profile.phone || 'A completer',
+          email: state.profile.email || 'A completer',
+          birthDate: 'Non renseignee',
+          gender: 'Non renseigne',
+          profileStatus: (!state.profile.email || !state.profile.phone) ? 'Profil incomplet' : 'Profil complet'
+        },
+        clinicalSummary: {
+          bloodGroup: 'Non renseigne',
+          allergies,
+          chronicConditions: chronic,
+          importantHistory: consultations.slice(0, 2).map((item) => item.title)
+        },
+        consultations,
+        timeline: consultations.slice(0, 6),
+        diagnosticSummary: {
+          lastConsultationDate: latest?.created_at || null,
+          latestDiagnosis: latest?.summary || 'Aucun diagnostic structure visible',
+          currentStatus: consultations.length ? 'Suivi' : 'Stable',
+          referringProfessional: latest?.professionalName || 'Non renseigne'
+        },
+        globalStatus: consultations.length ? 'Suivi' : 'Stable',
+        filters: {
+          consultationTypes: [...new Set(consultations.map((item) => item.title))],
+          dateRange: { min: null, max: null }
+        }
+      };
+    }
 
-    renderSummaryGrid(document.getElementById('recordIdentity'), identityItems);
-    renderProfileGrid(document.getElementById('recordClinicalSummary'), clinicalItems);
-    renderProfileGrid(document.getElementById('recordDiagnoses'), diagnosisItems);
+    async function loadMedicalRecord() {
+      try {
+        const response = await apiGet('/patient/medical-record');
+        return response.data;
+      } catch (error) {
+        showToast(error.message || 'Impossible de charger le dossier medical. Affichage des donnees locales.', 'warning');
+        return deriveFallbackRecord();
+      }
+    }
 
-    document.getElementById('recordConsultations').innerHTML = `
-      <div class="table-shell">
-        <div class="table-responsive">
-          <table class="table mb-0">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Professionnel</th>
-                <th>Consultation</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${(state.history.length ? state.history : [{
-                created_at: new Date().toISOString(),
-                professionalName: 'Equipe clinique',
-                title: 'Consultation generale',
-                summary: 'Resume non disponible'
-              }]).slice(0, 5).map((item) => `
-                <tr>
-                  <td>${escapeHtml(formatDate(item.created_at))}</td>
-                  <td><strong>${escapeHtml(item.professionalName || 'Non renseigne')}</strong></td>
-                  <td>${escapeHtml(item.title || 'Consultation')}</td>
-                  <td><span class="status-badge success">Visible</span></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+    async function loadConsultationDetails(id) {
+      try {
+        const response = await apiGet(`/patient/consultations/${id}`);
+        return response.data;
+      } catch (error) {
+        const local = currentRecord.consultations.find((item) => String(item.id) === String(id));
+        if (!local) {
+          showToast(error.message || 'Impossible de charger le detail de consultation.', 'danger');
+          return null;
+        }
+
+        return {
+          id: local.id,
+          title: local.title,
+          summary: local.summary,
+          date: local.date,
+          professionalName: local.professionalName,
+          professionalSpecialty: 'Professionnel de sante',
+          diagnosis: local.diagnosisSummary || 'A completer par le centre',
+          prescriptionStatus: 'Visible depuis la page Traitements',
+          relatedDocument: local.documentLabel || 'Compte rendu medical.pdf',
+          status: local.status || 'DISPONIBLE'
+        };
+      }
+    }
+
+    let currentRecord = await loadMedicalRecord();
+    let selectedConsultationId = currentRecord.consultations[0]?.id || null;
+
+    function buildHero(record) {
+      heroContainer.innerHTML = createHeroMarkup(
+        {
+          profile: {
+            name: record.patient.name,
+            cmuNumber: record.patient.cmuNumber
+          }
+        },
+        {
+          badge: 'Dossier medical',
+          title: 'Votre dossier medical consolide',
+          description: 'Retrouvez votre historique de soins, vos informations cliniques et les consultations deja reliees a votre parcours.',
+          stats: [
+            { label: 'Consultations', value: String(record.metrics.consultations), description: 'Actes visibles dans le dossier' },
+            { label: 'Traitements', value: String(record.metrics.treatments), description: 'Elements therapeutiques relus' },
+            { label: 'Documents', value: String(record.metrics.documents), description: 'Pieces disponibles au telechargement' },
+            { label: 'Alertes', value: String(record.metrics.alerts), description: 'Vigilances patient a surveiller' }
+          ]
+        }
+      );
+    }
+
+    function buildIdentity(record) {
+      renderSummaryGrid(identityContainer, [
+        { label: 'Nom complet', value: record.identity.fullName },
+        { label: 'Numero CMU', value: record.identity.cmuNumber },
+        { label: 'Telephone', value: record.identity.phone },
+        { label: 'Email', value: record.identity.email },
+        { label: 'Date de naissance', value: record.identity.birthDate },
+        { label: 'Sexe', value: record.identity.gender },
+        { label: 'Statut profil', value: record.identity.profileStatus }
+      ]);
+    }
+
+    function buildClinicalSummary(record) {
+      renderProfileGrid(clinicalContainer, [
+        ['Groupe sanguin', record.clinicalSummary.bloodGroup || 'Non renseigne'],
+        ['Allergies connues', (record.clinicalSummary.allergies || []).join(', ') || 'Aucune connue'],
+        ['Maladies chroniques', (record.clinicalSummary.chronicConditions || []).join(', ') || 'Aucune renseignee'],
+        ['Antecedents importants', (record.clinicalSummary.importantHistory || []).join(', ') || 'Non renseignes']
+      ]);
+    }
+
+    function buildTimeline(record) {
+      const timelineRows = record.timeline?.length ? record.timeline : [{
+        id: 'empty',
+        title: 'Premiere synchronisation',
+        professionalName: 'Centre de sante',
+        summary: 'Votre dossier medical se completera avec vos futures consultations.',
+        date: new Date().toISOString(),
+        status: 'DISPONIBLE'
+      }];
+
+      timelineContainer.innerHTML = timelineRows.map((item) => `
+        <div class="timeline-item">
+          <div class="timeline-dot"><i class="bi bi-journal-medical"></i></div>
+          <div class="timeline-card">
+            <div class="patient-list-item-head">
+              <div>
+                <strong>${escapeHtml(item.title || 'Consultation')}</strong>
+                <div class="text-muted">${escapeHtml(item.professionalName || 'Centre de sante')}</div>
+              </div>
+              <span class="status-badge success">${escapeHtml(formatDate(item.date))}</span>
+            </div>
+            <p class="mb-0 mt-2">${escapeHtml(item.summary || 'Resume non disponible')}</p>
+          </div>
         </div>
-      </div>
-    `;
+      `).join('');
+    }
 
-    document.getElementById('recordTimeline').innerHTML = (state.history.length ? state.history : [{
-      created_at: new Date().toISOString(),
-      title: 'Premiere synchronisation',
-      summary: 'Votre parcours medical sera complete par les futurs comptes rendus.'
-    }]).slice(0, 6).map((item) => `
-      <div class="timeline-item">
-        <div class="timeline-dot"><i class="bi bi-journal-medical"></i></div>
-        <div class="timeline-card">
+    function buildDiagnoses(record) {
+      renderProfileGrid(diagnosesContainer, [
+        ['Derniere consultation', record.diagnosticSummary.lastConsultationDate ? formatDate(record.diagnosticSummary.lastConsultationDate) : 'Aucune'],
+        ['Dernier diagnostic', record.diagnosticSummary.latestDiagnosis || 'Aucun'],
+        ['Etat global du patient', record.globalStatus || record.diagnosticSummary.currentStatus || 'Stable'],
+        ['Professionnel referent', record.diagnosticSummary.referringProfessional || 'Non renseigne']
+      ]);
+    }
+
+    function getFilteredConsultations() {
+      const query = searchInput.value.trim().toLowerCase();
+      const selectedType = typeFilter.value;
+      const selectedDateFrom = dateFromInput.value;
+
+      return (currentRecord.consultations || []).filter((item) => {
+        const matchesQuery = !query || `${item.title} ${item.summary} ${item.professionalName}`.toLowerCase().includes(query);
+        const matchesType = !selectedType || item.title === selectedType;
+        const matchesDate = !selectedDateFrom || (item.date && item.date.slice(0, 10) >= selectedDateFrom);
+        return matchesQuery && matchesType && matchesDate;
+      });
+    }
+
+    async function renderDetail(id) {
+      const detail = id ? await loadConsultationDetails(id) : null;
+      if (!detail) {
+        detailContainer.innerHTML = `
+          <div class="patient-empty-card">
+            <strong>Aucun detail disponible</strong>
+            <p>Selectionnez une consultation pour lire le detail medical.</p>
+          </div>
+        `;
+        return;
+      }
+
+      detailContainer.innerHTML = `
+        <div class="patient-detail-card">
           <div class="patient-list-item-head">
             <div>
-              <strong>${escapeHtml(item.title || 'Consultation')}</strong>
-              <div class="text-muted">${escapeHtml(item.professionalName || 'Centre de sante')}</div>
+              <span class="small-label">Consultation selectionnee</span>
+              <strong>${escapeHtml(detail.title)}</strong>
             </div>
-            <span class="status-badge success">${escapeHtml(formatDate(item.created_at))}</span>
+            <span class="status-badge success">${escapeHtml(formatDate(detail.date))}</span>
           </div>
-          <p class="mb-0 mt-2">${escapeHtml(item.summary || 'Resume non disponible')}</p>
+          <div class="patient-detail-list">
+            <div class="patient-profile-item">
+              <span>Professionnel</span>
+              <strong>${escapeHtml(detail.professionalName)}</strong>
+            </div>
+            <div class="patient-profile-item">
+              <span>Specialite</span>
+              <strong>${escapeHtml(detail.professionalSpecialty || 'Professionnel de sante')}</strong>
+            </div>
+            <div class="patient-profile-item">
+              <span>Date</span>
+              <strong>${escapeHtml(formatDateTime(detail.date))}</strong>
+            </div>
+            <div class="patient-profile-item">
+              <span>Resume medical</span>
+              <strong>${escapeHtml(detail.summary)}</strong>
+            </div>
+            <div class="patient-profile-item">
+              <span>Diagnostic</span>
+              <strong>${escapeHtml(detail.diagnosis || 'A completer par le centre')}</strong>
+            </div>
+            <div class="patient-profile-item">
+              <span>Prescription liee</span>
+              <strong>${escapeHtml(detail.prescriptionStatus || 'Visible depuis la page Traitements')}</strong>
+            </div>
+            <div class="patient-profile-item">
+              <span>Document associe</span>
+              <strong>${escapeHtml(detail.relatedDocument || 'Aucun document associe')}</strong>
+            </div>
+          </div>
+          <div class="patient-inline-actions">
+            <button type="button" class="btn btn-outline-primary btn-sm" id="detailDownloadButton">
+              <i class="bi bi-download"></i> Telecharger la consultation
+            </button>
+            <a href="patient-documents.html" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-file-earmark-medical"></i> Voir documents associes
+            </a>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
 
+      document.getElementById('detailDownloadButton')?.addEventListener('click', () => {
+        showToast('Le telechargement PDF complet sera relie au stockage final du dossier.', 'primary');
+      });
+    }
+
+    async function renderConsultations() {
+      const rows = getFilteredConsultations();
+      recordCountLabel.textContent = `${rows.length} consultation${rows.length > 1 ? 's' : ''}`;
+
+      if (!rows.length) {
+        consultationsContainer.innerHTML = `
+          <div class="patient-empty-card">
+            <strong>Aucune consultation ne correspond aux filtres</strong>
+            <p>Modifiez vos criteres pour retrouver l historique souhaite.</p>
+          </div>
+        `;
+        await renderDetail(null);
+        return;
+      }
+
+      if (!rows.some((item) => String(item.id) === String(selectedConsultationId))) {
+        selectedConsultationId = rows[0].id;
+      }
+
+      consultationsContainer.innerHTML = `
+        <div class="table-shell">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Professionnel</th>
+                  <th>Consultation</th>
+                  <th>Statut</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map((item) => `
+                  <tr>
+                    <td>${escapeHtml(formatDate(item.date))}</td>
+                    <td>
+                      <strong>${escapeHtml(item.professionalName)}</strong>
+                    </td>
+                    <td>
+                      <div class="patient-record-consultation-cell">
+                        <strong>${escapeHtml(item.title)}</strong>
+                        <small>${escapeHtml(item.summary)}</small>
+                      </div>
+                    </td>
+                    <td><span class="status-badge success">${escapeHtml(item.status === 'DISPONIBLE' ? 'Disponible' : item.status)}</span></td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-outline-primary" data-consultation-id="${escapeHtml(item.id)}">Voir detail</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      consultationsContainer.querySelectorAll('[data-consultation-id]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          selectedConsultationId = button.dataset.consultationId;
+          await renderDetail(selectedConsultationId);
+        });
+      });
+
+      await renderDetail(selectedConsultationId);
+    }
+
+    function hydrateFilters(record) {
+      typeFilter.innerHTML = `
+        <option value="">Tous les types</option>
+        ${(record.filters?.consultationTypes || []).map((type) => `
+          <option value="${escapeHtml(type)}">${escapeHtml(type)}</option>
+        `).join('')}
+      `;
+    }
+
+    async function renderRecord(record) {
+      buildHero(record);
+      buildIdentity(record);
+      buildClinicalSummary(record);
+      buildTimeline(record);
+      buildDiagnoses(record);
+      hydrateFilters(record);
+      await renderConsultations();
+    }
+
+    async function refreshRecord() {
+      currentRecord = await loadMedicalRecord();
+      selectedConsultationId = currentRecord.consultations[0]?.id || null;
+      await renderRecord(currentRecord);
+      showToast('Dossier medical actualise.', 'success');
+    }
+
+    searchInput.addEventListener('input', () => { renderConsultations(); });
+    typeFilter.addEventListener('change', () => { renderConsultations(); });
+    dateFromInput.addEventListener('change', () => { renderConsultations(); });
+    refreshButton.addEventListener('click', refreshRecord);
+    exportButton.addEventListener('click', () => {
+      showToast('L export PDF du dossier sera relie au backend de documents dans la prochaine iteration.', 'primary');
+    });
+
+    await renderRecord(currentRecord);
     completePatientPageLoading();
   </script>
 </body>

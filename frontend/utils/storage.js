@@ -1,6 +1,7 @@
 const TOKEN_KEY = 'sika_access_token';
 const REFRESH_TOKEN_KEY = 'sika_refresh_token';
 const USER_KEY = 'sika_user_data';
+const USER_CACHE_TIMESTAMP_KEY = 'sika_user_data_cached_at';
 const DARK_MODE_KEY = 'sika_dark_mode';
 const EXPIRATION_KEY = 'sika_token_expiration';
 
@@ -42,16 +43,33 @@ export function removeTokens() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(USER_CACHE_TIMESTAMP_KEY);
   localStorage.removeItem(EXPIRATION_KEY);
 }
 
 export function getUserData() {
   const raw = localStorage.getItem(USER_KEY);
-  return raw ? JSON.parse(raw) : null;
+  try {
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(USER_CACHE_TIMESTAMP_KEY);
+    return null;
+  }
 }
 
 export function setUserData(user) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+  localStorage.setItem(USER_CACHE_TIMESTAMP_KEY, String(Date.now()));
+}
+
+export function hasFreshUserData(maxAgeMs = 300000) {
+  const raw = localStorage.getItem(USER_CACHE_TIMESTAMP_KEY);
+  if (!raw || !getUserData()) {
+    return false;
+  }
+
+  return Date.now() - Number(raw) <= maxAgeMs;
 }
 
 export function getDarkMode() {

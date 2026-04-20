@@ -29,6 +29,12 @@ const patientIdParamsSchema = {
   }).required()
 };
 
+const consultationDetailSchema = {
+  params: Joi.object({
+    consultationId: Joi.number().integer().min(1).required()
+  }).required()
+};
+
 const createConsultationSchema = {
   params: Joi.object({
     patientUserId: Joi.number().integer().min(1).required()
@@ -44,5 +50,6 @@ module.exports = {
   overviewSchema,
   createPatientSchema,
   patientIdParamsSchema,
+  consultationDetailSchema,
   createConsultationSchema
 };

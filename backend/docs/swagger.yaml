@@ -403,6 +403,74 @@ paths:
           description: Non authentifie
         '403':
           description: Reserve au role patient
+  /patient/medical-record:
+    get:
+      tags: [Patients]
+      summary: Recupere le dossier medical consolide du patient connecte
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dossier medical charge
+        '401':
+          description: Non authentifie
+        '403':
+          description: Reserve au role patient
+  /patients/medical-record:
+    get:
+      tags: [Patients]
+      summary: Alias du dossier medical consolide du patient connecte
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Meme reponse que /patient/medical-record
+        '401':
+          description: Non authentifie
+        '403':
+          description: Reserve au role patient
+  /patient/consultations/{consultationId}:
+    get:
+      tags: [Patients]
+      summary: Recupere le detail d'une consultation du patient connecte
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: consultationId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detail de consultation charge
+        '401':
+          description: Non authentifie
+        '403':
+          description: Reserve au role patient
+        '404':
+          description: Consultation introuvable
+  /patients/consultations/{consultationId}:
+    get:
+      tags: [Patients]
+      summary: Alias du detail d'une consultation du patient connecte
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: consultationId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Meme reponse que /patient/consultations/{consultationId}
+        '401':
+          description: Non authentifie
+        '403':
+          description: Reserve au role patient
+        '404':
+          description: Consultation introuvable
   /patients:
     get:
       tags: [Patients]

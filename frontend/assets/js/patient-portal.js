@@ -51,7 +51,7 @@ export function ensurePatientPageLoading() {
   return loadingScreen;
 }
 
-export function completePatientPageLoading(delay = 260) {
+export function completePatientPageLoading(delay = 90) {
   const loadingScreen = document.getElementById('pdLoadingScreen');
   window.requestAnimationFrame(() => {
     window.setTimeout(() => {
@@ -405,7 +405,7 @@ export function createHeroMarkup(state, { badge, title, description, stats = [] 
         </div>
 
         <div class="patient-account-pill">
-          <img class="pd-avatar-image" src="../assets/img/Patient.jpg" alt="Photo du patient">
+          <img class="pd-avatar-image" src="../assets/img/Patient-web.jpg" alt="Photo du patient" loading="lazy" decoding="async">
           <div>
             <strong>${escapeHtml(state.profile.name || 'Patient')}</strong>
             <div class="text-muted">CMU ${escapeHtml(state.profile.cmuNumber || '-')}</div>

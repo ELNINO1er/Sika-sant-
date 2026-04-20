@@ -23,7 +23,7 @@
 
         <div class="pd-header-right">
           <button type="button" id="pdProfileTrigger" class="pd-profile-pill" aria-expanded="false" aria-haspopup="true">
-            <img class="pd-avatar-image" src="../assets/img/Patient.jpg" alt="Photo du patient">
+            <img class="pd-avatar-image" src="../assets/img/Patient-web.jpg" alt="Photo du patient" loading="lazy" decoding="async">
             <div class="pd-profile-info">
               <strong id="pdProfileName"></strong>
               <small id="pdProfileId"></small>
@@ -384,7 +384,7 @@
         <div class="pd-appt-row"><i class="bi bi-clock"></i><span>${escapeHtml(appointment.time || '10:30')} - ${escapeHtml(appointment.durationMinutes ? `${appointment.durationMinutes} min` : '30 min')}</span></div>
         <div class="pd-appt-row"><i class="bi bi-geo-alt"></i><span>${escapeHtml(appointment.location || 'Centre Sika-Sante, Abidjan')}</span></div>
         <div class="pd-appt-doctor">
-          <img class="pd-avatar-image sm" src="../assets/img/Docteur.jpg" alt="Professionnel de sante">
+          <img class="pd-avatar-image sm" src="../assets/img/Docteur-web.jpg" alt="Professionnel de sante" loading="lazy" decoding="async">
           <div>
             <strong>${escapeHtml(appointment.professionalName || 'Professionnel de sante')}</strong>
             <small>${escapeHtml(appointment.specialty || 'Professionnel de sante')}</small>
@@ -418,7 +418,7 @@
 
       messageList.innerHTML = rows.map((item, index) => `
         <div class="pd-msg-card">
-          <img class="pd-avatar-image sm" src="../assets/img/Docteur.jpg" alt="Auteur du message">
+          <img class="pd-avatar-image sm" src="../assets/img/Docteur-web.jpg" alt="Auteur du message" loading="lazy" decoding="async">
           <div class="pd-msg-body">
             <div class="pd-msg-head">
               <strong>${escapeHtml(item.sender)}</strong>
@@ -427,7 +427,7 @@
             <p>${escapeHtml(item.preview)}</p>
             ${index === 1 || item.attachment?.name || item.attachment ? `
               <div class="pd-msg-attachment">
-                <img class="pd-attachment-thumb" src="../assets/img/seka01.jpg" alt="Piece jointe">
+                <img class="pd-attachment-thumb" src="../assets/img/seka01-web.jpg" alt="Piece jointe" loading="lazy" decoding="async">
                 <div>
                   <strong>${escapeHtml(item.attachment?.name || item.attachment || 'Resultats_Biologie.pdf')}</strong>
                   <small>Document medical</small>

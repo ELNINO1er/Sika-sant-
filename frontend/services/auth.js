@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from './api.js';
-import { getAccessToken, getRefreshToken, getUserData, isTokenExpired, removeTokens, setAccessToken, setRefreshToken, setUserData } from '../utils/storage.js';
+import { getAccessToken, getRefreshToken, getUserData, hasFreshUserData, isTokenExpired, removeTokens, setAccessToken, setRefreshToken, setUserData } from '../utils/storage.js';
 
 export function isAuthenticated() {
   const token = getAccessToken();
@@ -56,7 +56,11 @@ export function roleGuard(requiredRoles) {
   return true;
 }
 
-export async function loadUserProfile() {
+export async function loadUserProfile({ force = false, maxAgeMs = 300000 } = {}) {
+  if (!force && hasFreshUserData(maxAgeMs)) {
+    return getUserData();
+  }
+
   const response = await apiGet('/user/profile');
   if (!response.data) {
     throw new Error('Profil introuvable');
