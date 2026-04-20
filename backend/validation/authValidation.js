@@ -45,13 +45,13 @@ const resendMfaSchema = {
 
 const refreshTokenSchema = {
   body: Joi.object({
-    refreshToken: Joi.string().required()
+    refreshToken: Joi.string().optional()
   }).required()
 };
 
 const logoutSchema = {
   body: Joi.object({
-    refreshToken: Joi.string().required()
+    refreshToken: Joi.string().optional()
   }).required()
 };
 

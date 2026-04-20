@@ -14,17 +14,22 @@ function cleanText(value, fallback = '') {
     return fallback;
   }
 
-  return value
-    .replace(/g\?\?n\?\?rale/gi, 'generale')
-    .replace(/contr\?\?le/gi, 'controle')
-    .replace(/r\?\?sum\?\?/gi, 'resume')
-    .replace(/Ã©/g, 'e')
-    .replace(/Ã¨/g, 'e')
-    .replace(/Ãª/g, 'e')
-    .replace(/Ã /g, 'a')
-    .replace(/Ã§/g, 'c')
-    .replace(/â€™/g, "'")
-    .replace(/â€œ|â€/g, '"')
+  // Mojibake patterns: UTF-8 bytes decoded as latin1/windows-1252
+  const mojibakeMap = [
+    [/Ã©/g, 'é'], [/Ã¨/g, 'è'], [/Ãª/g, 'ê'], [/Ã«/g, 'ë'],
+    [/Ã /g, 'à'], [/Ã¢/g, 'â'], [/Ã§/g, 'ç'], [/Ã®/g, 'î'],
+    [/Ã¯/g, 'ï'], [/Ã´/g, 'ô'], [/Ã¹/g, 'ù'], [/Ã»/g, 'û'],
+    [/Ã¼/g, 'ü'], [/Ã/g, 'É'], [/Ã/g, 'À'],
+    [/â€™/g, "'"], [/â€œ/g, '"'], [/â€/g, '"'],
+    [/â€“/g, '–'], [/â€”/g, '—']
+  ];
+
+  let result = value;
+  for (const [pattern, replacement] of mojibakeMap) {
+    result = result.replace(pattern, replacement);
+  }
+
+  return result
     .replace(/\?\?/g, '')
     .replace(/\s+/g, ' ')
     .trim();

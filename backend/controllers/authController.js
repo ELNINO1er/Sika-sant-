@@ -1,6 +1,7 @@
 const logger = require('../config/logger');
 const AppError = require('../utils/appError');
 const authService = require('../services/authService');
+const { setAuthCookies, clearAuthCookies, REFRESH_TOKEN_COOKIE } = require('../utils/cookies');
 
 async function requestOtp(req, res, next) {
   try {
@@ -28,6 +29,7 @@ async function verifyOtp(req, res, next) {
       return next(new AppError('Code invalide ou expiré', 401));
     }
 
+    setAuthCookies(res, tokenResult.accessToken, tokenResult.refreshToken);
     return res.formatResponse(tokenResult, 'OTP vérifié avec succès');
   } catch (error) {
     logger.error('verifyOtp error: %o', error);
@@ -58,6 +60,7 @@ async function verifyMfa(req, res, next) {
       return next(new AppError('Code MFA invalide ou expiré', 401));
     }
 
+    setAuthCookies(res, tokenResult.accessToken, tokenResult.refreshToken);
     return res.formatResponse(tokenResult, 'MFA vérifiée');
   } catch (error) {
     logger.error('verifyMfa error: %o', error);
@@ -67,12 +70,16 @@ async function verifyMfa(req, res, next) {
 
 async function refreshToken(req, res, next) {
   try {
-    const { refreshToken } = req.validated.body;
-    const result = await authService.refreshTokens(refreshToken, req.ip);
+    const token = req.validated?.body?.refreshToken || req.cookies?.[REFRESH_TOKEN_COOKIE];
+    if (!token) {
+      return next(new AppError('Token de rafraîchissement manquant', 401));
+    }
+    const result = await authService.refreshTokens(token, req.ip);
     if (!result) {
+      clearAuthCookies(res);
       return next(new AppError('Token de rafraîchissement invalide', 401));
     }
-
+    setAuthCookies(res, result.accessToken, result.refreshToken);
     return res.formatResponse(result, 'Token rafraîchi');
   } catch (error) {
     logger.error('refreshToken error: %o', error);
@@ -100,9 +107,12 @@ async function resendMfa(req, res, next) {
 
 async function logout(req, res, next) {
   try {
-    const { refreshToken } = req.validated.body;
-    const result = await authService.logout(refreshToken, req.ip);
-    return res.formatResponse(result, 'Session révoquée');
+    const token = req.validated?.body?.refreshToken || req.cookies?.[REFRESH_TOKEN_COOKIE];
+    if (token) {
+      await authService.logout(token, req.ip);
+    }
+    clearAuthCookies(res);
+    return res.formatResponse({ success: true }, 'Session révoquée');
   } catch (error) {
     logger.error('logout error: %o', error);
     return next(new AppError('Impossible de fermer la session', 500));

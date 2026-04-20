@@ -2,23 +2,31 @@ const crypto = require('crypto');
 const AppError = require('../utils/appError');
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const TOKEN_LENGTH = 32;
 
-function ensureCsrfToken(req) {
-  const existingToken = req.cookies['XSRF-TOKEN'];
-  const csrfToken = existingToken || crypto.randomBytes(32).toString('hex');
-  req.csrfToken = () => csrfToken;
-  return csrfToken;
+function generateCsrfToken() {
+  return crypto.randomBytes(TOKEN_LENGTH).toString('hex');
 }
 
 function csrfProtection(req, res, next) {
-  const csrfToken = ensureCsrfToken(req);
+  let csrfToken = req.cookies['XSRF-TOKEN'];
+
+  if (!csrfToken) {
+    csrfToken = generateCsrfToken();
+  }
+
+  req.csrfToken = () => csrfToken;
 
   if (SAFE_METHODS.has(req.method)) {
     return next();
   }
 
   const providedToken = req.headers['x-xsrf-token'] || req.body?._csrf || req.query?._csrf;
-  if (!providedToken || providedToken !== csrfToken) {
+
+  const providedBuf = Buffer.from(String(providedToken || ''), 'utf8');
+  const expectedBuf = Buffer.from(csrfToken, 'utf8');
+
+  if (!providedToken || providedBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(providedBuf, expectedBuf)) {
     return next(new AppError('invalid csrf token', 403));
   }
 

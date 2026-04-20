@@ -10,6 +10,12 @@ import {
 import { setAccessToken, setRefreshToken, setUserData } from '../../utils/storage.js';
 import { setAlertMessage, showToast } from '../../utils/helpers.js';
 
+function validateField(value, pattern, errorMessage) {
+  if (!pattern.test(value)) {
+    throw new Error(errorMessage);
+  }
+}
+
 const profiles = {
   patient: {
     badgeIcon: 'bi-person-heart',
@@ -211,6 +217,7 @@ async function handlePrimarySubmit() {
 
   if (profile === 'patient') {
     const cmuNumber = document.getElementById('cmuNumber').value.trim();
+    validateField(cmuNumber, /^[0-9]{10}$/, 'Le numero CMU doit contenir exactement 10 chiffres.');
     const response = await requestOtp(cmuNumber);
     state.requestId = response.data.otpRequestId;
     state.phase = 'verify';
@@ -223,14 +230,20 @@ async function handlePrimarySubmit() {
   if (profile === 'professional') {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
+    validateField(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Adresse email invalide.');
+    if (password.length < 12) throw new Error('Le mot de passe doit contenir au moins 12 caracteres.');
     response = await loginProfessional(email, password);
   } else if (profile === 'admin') {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
+    validateField(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Adresse email invalide.');
+    if (password.length < 12) throw new Error('Le mot de passe doit contenir au moins 12 caracteres.');
     response = await loginAdmin(email, password);
   } else {
     const institutionId = document.getElementById('institutionId').value.trim();
     const password = document.getElementById('password').value.trim();
+    validateField(institutionId, /^GOV-[A-Z]+-\d{4}$/i, 'Identifiant institutionnel invalide (format: GOV-XXXX-0000).');
+    if (password.length < 12) throw new Error('Le mot de passe doit contenir au moins 12 caracteres.');
     response = await loginInstitution(institutionId, password);
   }
 
@@ -246,12 +259,14 @@ async function handleVerificationSubmit() {
 
   if (state.activeProfile === 'patient') {
     const otpCode = document.getElementById('otpCode').value.trim();
+    validateField(otpCode, /^[0-9]{6}$/, 'Le code OTP doit contenir 6 chiffres.');
     const response = await verifyOtp(state.requestId, otpCode);
     finalizeAuth(response, profile.dashboard);
     return;
   }
 
   const mfaCode = document.getElementById('mfaCode').value.trim();
+  validateField(mfaCode, /^[0-9]{6}$/, 'Le code MFA doit contenir 6 chiffres.');
   const response = await verifyMfa(state.requestId, mfaCode);
   finalizeAuth(response, profile.dashboard);
 }

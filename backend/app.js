@@ -20,6 +20,7 @@ const errorHandler = require('./middlewares/errorHandler');
 const enforceHttps = require('./middlewares/httpsMiddleware');
 const { csrfProtection } = require('./middlewares/csrfMiddleware');
 const { authLimiter, generalLimiter } = require('./middlewares/rateLimitMiddleware');
+const requestTimeout = require('./middlewares/timeoutMiddleware');
 const { ROLES } = require('./constants/access');
 const env = require('./config/env');
 
@@ -52,6 +53,7 @@ app.use(express.json({ limit: '20kb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(xss());
+app.use(requestTimeout(30000));
 app.use(requestLogger);
 app.use(responseFormatter);
 
@@ -84,15 +86,31 @@ app.get('/api/v1/health', (req, res) => {
   );
 });
 
-app.get('/api/v1/metrics', verifyToken, authorizeRoles(ROLES.ADMIN, ROLES.INSTITUTION), (req, res) => {
-  res.formatResponse(
-    {
-      uptime: process.uptime(),
-      memoryUsage: process.memoryUsage(),
-      monitoring: 'placeholder'
-    },
-    'Métriques applicatives'
-  );
+app.get('/api/v1/metrics', verifyToken, authorizeRoles(ROLES.ADMIN, ROLES.INSTITUTION), async (req, res, next) => {
+  try {
+    const pool = require('./config/db');
+    const [[userCount]] = await pool.query('SELECT COUNT(*) AS count FROM users');
+    const [[patientCount]] = await pool.query('SELECT COUNT(*) AS count FROM patients');
+    const [[consultationCount]] = await pool.query('SELECT COUNT(*) AS count FROM consultations');
+    const [[auditCount]] = await pool.query('SELECT COUNT(*) AS count FROM audit_logs');
+    const [roleCounts] = await pool.query('SELECT role, COUNT(*) AS count FROM users GROUP BY role');
+
+    res.formatResponse(
+      {
+        uptime: process.uptime(),
+        memoryUsage: process.memoryUsage(),
+        users: userCount.count,
+        patients: patientCount.count,
+        consultations: consultationCount.count,
+        auditLogs: auditCount.count,
+        roleDistribution: Object.fromEntries(roleCounts.map(r => [r.role, r.count])),
+        timestamp: new Date().toISOString()
+      },
+      'Metriques applicatives'
+    );
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get('/api/v1/csrf-token', (req, res) => {

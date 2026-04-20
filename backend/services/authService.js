@@ -45,7 +45,7 @@ function createTokenPayload(user) {
 
 async function persistRefreshToken(userId, refreshToken, ip, replacedToken = null) {
   const refreshTokenHash = hashToken(refreshToken);
-  const replacedByHash = replacedToken ? hashToken(refreshToken) : null;
+  const replacedByHash = replacedToken ? hashToken(replacedToken) : null;
 
   if (replacedToken) {
     await refreshTokenModel.revokeRefreshToken(hashToken(replacedToken), {
