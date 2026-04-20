@@ -164,3 +164,4 @@
     at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:659:7
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
     at C:\wamp64\www\Sika-sant-\backend\node_modules\express-rate-limit\dist\index.cjs:576:5 
+2026-04-20T15:38:08.909Z [error] : Unable to connect to database: Accès refusé pour l'utilisateur: 'root'@'@localhost' (mot de passe: OUI) 

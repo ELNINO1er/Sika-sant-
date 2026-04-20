@@ -3,432 +3,1537 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIKA SANTE | Carnet de sant&eacute; &eacute;lectronique</title>
+  <title>Sika Santé | Carnet de santé électronique</title>
   <link rel="icon" type="image/svg+xml" href="./assets/img/sika-sante-mark.svg">
   <link rel="shortcut icon" href="./assets/img/sika-sante-mark.svg">
   <link rel="apple-touch-icon" href="./assets/img/sika-sante-mark.svg">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #ede9fe;
+      --dark: #1a1a2e;
+      --muted: #6b7280;
+      --light-bg: #f8f9fa;
+      --white: #ffffff;
+      --border: #e5e7eb;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: var(--dark);
+      background: var(--white);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .section-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-label {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section-heading {
+      font-size: 2.2rem;
+      color: var(--dark);
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 600px;
+      font-weight: 300;
+    }
+
+    .btn-primary-custom {
+      background: var(--primary);
+      color: var(--white);
+      border: 2px solid var(--primary);
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+
+    .btn-primary-custom:hover {
+      background: #6d28d9;
+      border-color: #6d28d9;
+      color: var(--white);
+    }
+
+    .btn-outline-custom {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+
+    .btn-outline-custom:hover {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    /* NAVBAR */
+    .navbar-main {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--dark);
+    }
+
+    .navbar-brand img {
+      width: 36px;
+      height: 36px;
+    }
+
+    .navbar-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .navbar-links a {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+
+    .navbar-links a:hover,
+    .navbar-links a.active {
+      color: var(--primary);
+    }
+
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .navbar-actions .nav-link-login {
+      color: var(--dark);
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 8px 4px;
+    }
+
+    .navbar-actions .nav-link-login:hover {
+      color: var(--primary);
+    }
+
+    .navbar-actions .btn-signup {
+      border: 2px solid var(--primary);
+      background: var(--primary);
+      color: var(--white);
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .navbar-actions .btn-signup:hover {
+      background: #6d28d9;
+      border-color: #6d28d9;
+      color: var(--white);
+    }
+
+    .nav-lang {
+      color: var(--dark);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* HERO */
+    .hero-section {
+      background: var(--white);
+      padding: 50px 0 60px;
+    }
+
+    .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .hero-text h1 {
+      font-size: 2.6rem;
+      color: var(--dark);
+      margin-bottom: 16px;
+      line-height: 1.18;
+      font-weight: 800;
+    }
+
+    .hero-text h1 span {
+      color: var(--primary);
+      font-style: normal;
+    }
+
+    .hero-text .hero-subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 28px;
+      font-weight: 300;
+      max-width: 420px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .hero-buttons .btn-primary-custom {
+      padding: 10px 24px;
+      font-size: 0.9rem;
+      border-radius: 6px;
+    }
+
+    .hero-buttons .btn-play {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--dark);
+      font-weight: 500;
+      font-size: 0.9rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .hero-buttons .btn-play-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hero-buttons .btn-play-icon i {
+      font-size: 1rem;
+      color: var(--white);
+      margin-left: 2px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 36px;
+    }
+
+    .hero-stat {
+      text-align: left;
+    }
+
+    .hero-stat strong {
+      display: block;
+      font-size: 1.35rem;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .hero-stat span {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .hero-visual-bg {
+      background: var(--light-bg);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 4/5;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-visual-bg img {
+      width: 90%;
+      height: 95%;
+      object-fit: cover;
+      object-position: top center;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .hero-badge {
+      position: absolute;
+      bottom: 40%;
+      left: -30px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .hero-badge-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hero-badge-icon i {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+
+    .hero-badge-text strong {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--dark);
+      line-height: 1;
+    }
+
+    .hero-badge-text span {
+      font-size: 0.8rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    /* SERVICES */
+    .services-section {
+      padding: 100px 0;
+      background: var(--light-bg);
+      border-top: 1px solid var(--border);
+    }
+
+    .services-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .services-header .section-subtitle {
+      margin: 0 auto;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .service-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px 30px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .service-card:hover {
+      border-color: var(--primary);
+    }
+
+    .service-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .service-icon i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .service-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+      color: var(--dark);
+    }
+
+    .service-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .services-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      text-align: center;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    .services-stat i {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .services-stat strong {
+      display: block;
+      font-size: 1.3rem;
+      color: var(--dark);
+    }
+
+    .services-stat span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .section-label-text {
+      display: block;
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    /* ABOUT */
+    .about-section {
+      padding: 100px 0;
+      background: var(--white);
+    }
+
+    .about-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .about-image {
+      position: relative;
+    }
+
+    .about-image-bg {
+      background: var(--light-bg);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .about-image-bg img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      max-height: 380px;
+    }
+
+    .about-image-accent {
+      position: absolute;
+      top: -8px;
+      right: 40%;
+      width: 16px;
+      height: 16px;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
+    .about-stats-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--white);
+      border-radius: 14px;
+      padding: 16px 28px;
+      display: flex;
+      gap: 32px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .about-stats-bar .about-stat {
+      text-align: center;
+    }
+
+    .about-stats-bar .about-stat strong {
+      display: block;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .about-stats-bar .about-stat span {
+      font-size: 0.75rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .about-text .section-heading {
+      font-size: 2rem;
+    }
+
+    .about-text p {
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .about-checks {
+      margin-bottom: 32px;
+    }
+
+    .about-checks .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      color: var(--dark);
+    }
+
+    .about-checks .check-item i {
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    /* STEPS */
+    .steps-section {
+      padding: 100px 0;
+    }
+
+    .steps-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .steps-header .section-subtitle {
+      margin: 0 auto;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .step-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .step-card.highlighted {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+
+    .step-card.highlighted .step-number {
+      background: rgba(255,255,255,0.2);
+      color: var(--white);
+    }
+
+    .step-card.highlighted .step-icon i {
+      color: var(--white);
+    }
+
+    .step-card.highlighted p {
+      color: rgba(255,255,255,0.8);
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin: 0 auto 16px;
+    }
+
+    .step-icon {
+      margin-bottom: 16px;
+    }
+
+    .step-icon i {
+      font-size: 1.8rem;
+      color: var(--primary);
+    }
+
+    .step-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .step-card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* SPECIALISTS */
+    .specialists-section {
+      padding: 100px 0;
+      background: var(--white);
+    }
+
+    .specialists-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .specialists-header .section-subtitle {
+      margin: 0 auto;
+    }
+
+    .specialists-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .specialist-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .specialist-card:hover {
+      border-color: var(--primary);
+    }
+
+    .specialist-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .specialist-info {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .specialist-info h4 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .specialist-info .specialty {
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .specialist-info .rating {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .specialist-info .rating i {
+      color: #f59e0b;
+      font-size: 0.75rem;
+    }
+
+    /* HEALTHCARE GRID */
+    .healthcare-section {
+      padding: 100px 0;
+    }
+
+    .healthcare-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .healthcare-header .section-subtitle {
+      margin: 0 auto;
+    }
+
+    .healthcare-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .healthcare-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 30px 24px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .healthcare-item:hover {
+      border-color: var(--primary);
+    }
+
+    .healthcare-item-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .healthcare-item-icon i {
+      font-size: 1.3rem;
+      color: var(--primary);
+    }
+
+    .healthcare-item h4 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .healthcare-item p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* FAQ */
+    .faq-section {
+      padding: 100px 0;
+      background: var(--white);
+    }
+
+    .faq-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .faq-header .section-subtitle {
+      margin: 0 auto;
+    }
+
+    .faq-list {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .faq-item .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--dark);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .faq-item .faq-question:hover {
+      color: var(--primary);
+    }
+
+    .faq-item .faq-question i {
+      font-size: 1.2rem;
+      transition: transform 0.2s;
+    }
+
+    .faq-item .faq-answer {
+      padding: 0 24px 20px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    /* CTA */
+    .cta-section {
+      padding: 100px 0;
+    }
+
+    .cta-box {
+      background: var(--dark);
+      border-radius: 20px;
+      padding: 60px;
+      text-align: center;
+      color: var(--white);
+    }
+
+    .cta-box h2 {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      color: var(--white);
+    }
+
+    .cta-box p {
+      color: rgba(255,255,255,0.7);
+      font-size: 1rem;
+      max-width: 500px;
+      margin: 0 auto 32px;
+    }
+
+    .cta-box .btn-primary-custom {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .cta-box .btn-primary-custom:hover {
+      background: #6d28d9;
+      border-color: #6d28d9;
+    }
+
+    /* FOOTER */
+    .footer-main {
+      background: var(--dark);
+      color: rgba(255,255,255,0.7);
+      padding: 80px 0 30px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 50px;
+    }
+
+    .footer-brand p {
+      font-size: 0.9rem;
+      margin: 16px 0 20px;
+      line-height: 1.7;
+    }
+
+    .footer-brand .social-icons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .footer-brand .social-icons a {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.7);
+      transition: all 0.2s;
+    }
+
+    .footer-brand .social-icons a:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+
+    .footer-col h4 {
+      color: var(--white);
+      font-size: 1rem;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .footer-col a {
+      display: block;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover {
+      color: var(--primary);
+    }
+
+    .footer-newsletter {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .footer-newsletter input {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--white);
+      font-size: 0.85rem;
+    }
+
+    .footer-newsletter input::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+
+    .footer-newsletter button {
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: var(--white);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .footer-newsletter button:hover {
+      background: #6d28d9;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 992px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .hero-visual-bg {
+        max-width: 100%;
+        aspect-ratio: auto;
+      }
+
+      .hero-badge {
+        left: 10px;
+        bottom: 30%;
+      }
+
+      .hero-text h1 {
+        font-size: 2.2rem;
+      }
+
+      .about-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .about-stats-bar {
+        gap: 20px;
+        padding: 12px 20px;
+      }
+
+      .services-grid,
+      .healthcare-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .steps-grid,
+      .specialists-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .navbar-links {
+        display: none;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .hero-text h1 {
+        font-size: 1.8rem;
+      }
+
+      .hero-stats {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .services-grid,
+      .healthcare-grid,
+      .steps-grid,
+      .specialists-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-box {
+        padding: 40px 24px;
+      }
+
+      .section-heading {
+        font-size: 1.7rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main class="landing-premium" id="accueil">
-    <nav class="landing-premium-nav">
-      <a class="landing-premium-brand" href="#accueil" aria-label="Retour &agrave; l'accueil SIKA SANTE">
-        <span class="landing-premium-brand-badge">
-          <img src="./assets/img/sika-sante-mark.svg" alt="Logo SIKA SANTE">
-        </span>
-        <span>SIKA SANTE</span>
+
+  <!-- NAVBAR -->
+  <nav class="navbar-main">
+    <div class="navbar-inner">
+      <a href="#accueil" class="navbar-brand">
+        <img src="./assets/img/sika-sante-mark.svg" alt="Logo Sika Santé">
+        <span>Sika Santé</span>
       </a>
-      <div class="landing-premium-menu">
-        <a href="#accueil">Accueil</a>
-        <a href="#fonctionnalites">Fonctionnalit&eacute;s</a>
+      <div class="navbar-links">
+        <a href="#accueil" class="active">Accueil</a>
+        <a href="#services">Services</a>
+        <a href="#apropos">À propos</a>
         <a href="#parcours">Parcours</a>
-        <a href="#apropos">&Agrave; propos</a>
-        <a href="#chiffres">Chiffres</a>
       </div>
-      <div class="d-flex flex-wrap gap-2">
-        <a class="btn btn-outline-primary" href="#parcours">Voir les parcours</a>
-        <a class="btn btn-primary" href="/pages/connexion.html">Se connecter</a>
+      <div class="navbar-actions">
+        <a href="/pages/connexion.html" class="nav-link-login">Connexion</a>
+        <a href="/pages/connexion.html" class="btn-signup">S'inscrire</a>
+        <span class="nav-lang">FR <i class="bi bi-chevron-down" style="font-size:0.7rem"></i></span>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <section class="landing-premium-hero">
-      <div class="landing-premium-copy">
-        <div class="landing-premium-grid"></div>
-        <span class="landing-premium-badge">
-          <i class="bi bi-shield-check"></i>
-          Sant&eacute; connect&eacute;e, lisible et fiable
-        </span>
-
-        <h1 class="landing-premium-title">
-          Le carnet de sant&eacute;
-          <span class="landing-premium-gradient">mieux reli&eacute;</span>
-          entre patient, soignant et institution
-        </h1>
-
-        <p class="landing-premium-description">
-          SIKA SANTE est un carnet de sant&eacute; &eacute;lectronique premium con&ccedil;u pour centraliser
-          l'historique m&eacute;dical, structurer la coordination clinique et offrir une lecture
-          claire du parcours de soins &agrave; chaque acteur du syst&egrave;me.
-        </p>
-
-        <div class="landing-premium-actions">
-          <a class="btn btn-primary btn-lg" href="/pages/connexion.html">Se connecter</a>
-          <a class="btn btn-outline-secondary btn-lg" href="#parcours">Voir les parcours</a>
+  <!-- HERO -->
+  <section class="hero-section" id="accueil">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <h1>Votre <span>carnet de santé</span> électronique centralisé et sécurisé</h1>
+        <p class="hero-subtitle">Sika Santé centralise votre historique médical et facilite la coordination entre patient, soignant et institution.</p>
+        <div class="hero-buttons">
+          <a href="/pages/connexion.html" class="btn-primary-custom">Accéder à mon dossier</a>
+          <a href="#parcours" class="btn-play">
+            <span class="btn-play-icon"><i class="bi bi-play-fill"></i></span>
+            Découvrir le parcours
+          </a>
         </div>
-
-        <div class="landing-premium-trust">
-          <div class="landing-premium-avatars" aria-hidden="true">
-            <span><i class="bi bi-hospital"></i></span>
-            <span><i class="bi bi-heart-pulse"></i></span>
-            <span><i class="bi bi-clipboard2-pulse"></i></span>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <strong>300K+</strong>
+            <span>Dossiers patients</span>
           </div>
-          <div>
-            <strong>Utilis&eacute; par cliniques et h&ocirc;pitaux</strong>
-            <p class="mb-0">Une exp&eacute;rience produit rassurante pour les soins, la coordination et la gouvernance sanitaire.</p>
+          <div class="hero-stat">
+            <strong>92+</strong>
+            <span>Praticiens</span>
+          </div>
+          <div class="hero-stat">
+            <strong>250K+</strong>
+            <span>Structures</span>
           </div>
         </div>
       </div>
-
-      <div class="landing-premium-visual">
-        <div class="landing-premium-visual-glow"></div>
-
-        <div class="landing-premium-image-card">
-          <img src="./assets/img/home-web.jpg" alt="Infirmi&egrave;re SIKA SANTE en page d'accueil" fetchpriority="high" decoding="async">
+      <div class="hero-visual">
+        <div class="hero-visual-bg">
+          <img src="./assets/img/home-web.jpg" alt="Professionnelle de santé Sika Santé" fetchpriority="high" decoding="async">
         </div>
-
-        <div class="landing-floating-card landing-floating-analytics">
-          <div class="landing-floating-icon">
-            <i class="bi bi-activity"></i>
+        <div class="hero-badge">
+          <div class="hero-badge-icon">
+            <i class="bi bi-telephone-fill"></i>
           </div>
-          <div>
-            <small>Analyse clinique</small>
-            <strong>82%</strong>
-          </div>
-          <span class="landing-floating-pill">Explorer</span>
-        </div>
-
-        <div class="landing-floating-card landing-floating-note">
-          <i class="bi bi-stars"></i>
-          <div>
-            <strong>Parcours plus lisible</strong>
-            <p class="mb-0">Le dossier garde l'essentiel &agrave; port&eacute;e de lecture pour mieux soigner et mieux suivre.</p>
+          <div class="hero-badge-text">
+            <strong>24/7</strong>
+            <span>Services</span>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section id="fonctionnalites" class="landing-feature-section">
-      <div class="landing-section-heading">
-        <span class="landing-premium-badge">
-          <i class="bi bi-stars"></i>
-          Fonctionnalit&eacute;s cl&eacute;s
-        </span>
-        <h2>Une base m&eacute;dicale solide pour lire, suivre et coordonner chaque dossier</h2>
-        <p>SIKA SANTE transforme le carnet de sant&eacute; &eacute;lectronique en exp&eacute;rience produit simple, visuelle et exploitable sur tout le parcours.</p>
+  <!-- SERVICES -->
+  <section class="services-section" id="services">
+    <div class="section-container">
+      <div class="services-header">
+        <span class="section-label-text">Nos fonctionnalités</span>
+        <h2 class="section-heading">Un dossier médical complet à portée de main</h2>
+        <p class="section-subtitle">Consultez, partagez et suivez votre historique de santé en toute sécurité.</p>
       </div>
 
-      <div class="landing-feature-grid">
-        <article class="landing-feature-card">
-          <div class="landing-feature-media">
-            <img src="./assets/img/seka01-web.jpg" alt="Carnet de sant&eacute; num&eacute;rique et outils de suivi" loading="lazy" decoding="async">
-          </div>
-          <div class="landing-feature-icon">
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">
             <i class="bi bi-journal-medical"></i>
           </div>
-          <h3>Historique patient</h3>
-          <p>Conservez les consultations, notes cliniques, traitements, observations et signaux de suivi dans une lecture continue, rassurante et exploitable dans le temps.</p>
-        </article>
-
-        <article class="landing-feature-card">
-          <div class="landing-feature-media">
-            <img src="./assets/img/seka2-web.jpg" alt="Coordination clinique autour du dossier patient" loading="lazy" decoding="async">
+          <h3>Historique médical</h3>
+          <p>Retrouvez toutes vos consultations, diagnostics et traitements dans un dossier unique.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <i class="bi bi-shield-lock"></i>
           </div>
-          <div class="landing-feature-icon landing-feature-icon-secondary">
-            <i class="bi bi-stethoscope"></i>
+          <h3>Partage sécurisé</h3>
+          <p>Partagez votre dossier avec vos praticiens grâce à un accès contrôlé par rôle.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <i class="bi bi-graph-up"></i>
           </div>
-          <h3>Coordination clinique</h3>
-          <p>Le soignant retrouve le bon contexte plus vite, ouvre l'historique utile, comprend la trajectoire du patient et documente la consultation sans rupture.</p>
-        </article>
-
-        <article class="landing-feature-card">
-          <div class="landing-feature-media">
-            <img src="./assets/img/seka03-web.jpg" alt="Vision de gouvernance sanitaire et pilotage m&eacute;dical" loading="lazy" decoding="async">
-          </div>
-          <div class="landing-feature-icon landing-feature-icon-accent">
-            <i class="bi bi-building-check"></i>
-          </div>
-          <h3>Gouvernance sanitaire</h3>
-          <p>L'institution acc&egrave;de &agrave; une lecture plus globale des tendances, des priorit&eacute;s, des alertes de pilotage et de la qualit&eacute; du suivi dans le r&eacute;seau de soin.</p>
-        </article>
-      </div>
-    </section>
-
-    <section id="parcours" class="landing-journey-section">
-      <div class="landing-section-heading">
-        <span class="landing-premium-badge">
-          <i class="bi bi-signpost-split"></i>
-          Parcours utilisateurs
-        </span>
-        <h2>Un meilleur parcours pour chaque r&ocirc;le, sans perdre la coh&eacute;rence d'ensemble</h2>
-        <p>SIKA SANTE ne montre pas les m&ecirc;mes choses &agrave; tout le monde. La plateforme adapte la lecture, les priorit&eacute;s et les actions &agrave; chaque profil tout en gardant un socle d'information unique.</p>
-      </div>
-
-      <div class="landing-journey-grid">
-        <article class="landing-journey-card">
-          <div class="landing-journey-head">
-            <div class="landing-feature-icon">
-              <i class="bi bi-person-heart"></i>
-            </div>
-            <div>
-              <h3>Espace patient</h3>
-              <p>Un parcours simple pour relire son dossier et comprendre son suivi.</p>
-            </div>
-          </div>
-          <div class="landing-journey-steps">
-            <div class="landing-journey-step">
-              <span>1</span>
-              <div>
-                <strong>Se connecter rapidement</strong>
-                <p>Le patient entre avec son CMU et un code OTP, sans complexit&eacute; inutile.</p>
-              </div>
-            </div>
-            <div class="landing-journey-step">
-              <span>2</span>
-              <div>
-                <strong>Retrouver son historique</strong>
-                <p>Consultations, traitements et informations utiles restent visibles dans un seul carnet.</p>
-              </div>
-            </div>
-            <div class="landing-journey-step">
-              <span>3</span>
-              <div>
-                <strong>Suivre les signaux importants</strong>
-                <p>Le patient comprend mieux son parcours, ses alertes et les prochaines actions &agrave; suivre.</p>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <article class="landing-journey-card">
-          <div class="landing-journey-head">
-            <div class="landing-feature-icon landing-feature-icon-secondary">
-              <i class="bi bi-stethoscope"></i>
-            </div>
-            <div>
-              <h3>Espace professionnel</h3>
-              <p>Un parcours clinique fluide, centr&eacute; sur la lecture et l'action.</p>
-            </div>
-          </div>
-          <div class="landing-journey-steps">
-            <div class="landing-journey-step">
-              <span>1</span>
-              <div>
-                <strong>Rechercher le bon dossier</strong>
-                <p>Le praticien trouve rapidement un patient par nom ou CMU avec une lecture imm&eacute;diate.</p>
-              </div>
-            </div>
-            <div class="landing-journey-step">
-              <span>2</span>
-              <div>
-                <strong>Lire le contexte utile</strong>
-                <p>L'historique r&eacute;cent, les notes et les points de vigilance restent &agrave; port&eacute;e de vue.</p>
-              </div>
-            </div>
-            <div class="landing-journey-step">
-              <span>3</span>
-              <div>
-                <strong>Documenter la consultation</strong>
-                <p>La nouvelle prise en charge est saisie dans la m&ecirc;me interface, sans perte d'information.</p>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <article class="landing-journey-card">
-          <div class="landing-journey-head">
-            <div class="landing-feature-icon landing-feature-icon-accent">
-              <i class="bi bi-bank"></i>
-            </div>
-            <div>
-              <h3>Espace institution</h3>
-              <p>Un parcours de gouvernance pour lire les tendances et prioriser les d&eacute;cisions.</p>
-            </div>
-          </div>
-          <div class="landing-journey-steps">
-            <div class="landing-journey-step">
-              <span>1</span>
-              <div>
-                <strong>Observer l'activit&eacute; globale</strong>
-                <p>La structure lit les volumes, les alertes et les signaux de pilotage en une vue.</p>
-              </div>
-            </div>
-            <div class="landing-journey-step">
-              <span>2</span>
-              <div>
-                <strong>Rep&eacute;rer les priorit&eacute;s</strong>
-                <p>Les zones sensibles, &eacute;checs, anomalies ou points de friction ressortent plus clairement.</p>
-              </div>
-            </div>
-            <div class="landing-journey-step">
-              <span>3</span>
-              <div>
-                <strong>Piloter avec plus de clart&eacute;</strong>
-                <p>Les &eacute;quipes disposent d'une base plus lisible pour arbitrer, organiser et suivre.</p>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section id="apropos" class="landing-about-section">
-      <div class="landing-about-copy">
-        <span class="landing-premium-badge">
-          <i class="bi bi-heart"></i>
-          &Agrave; propos de SIKA SANTE
-        </span>
-        <h2>Un carnet de sant&eacute; &eacute;lectronique pens&eacute; pour la r&eacute;alit&eacute; du soin</h2>
-        <p>
-          SIKA SANTE relie le patient, le praticien et l'institution au sein d'une m&ecirc;me
-          exp&eacute;rience. Le produit ne cherche pas seulement &agrave; stocker de la donn&eacute;e m&eacute;dicale :
-          il cherche &agrave; la rendre lisible, actionnable et utile &agrave; chaque &eacute;tape du parcours.
-        </p>
-        <p>
-          La promesse est simple : mieux lire l'historique, mieux comprendre la situation
-          clinique, mieux transmettre l'information utile et mieux piloter les trajectoires
-          de soins sans multiplier les interfaces ou perdre le contexte.
-        </p>
-        <div class="landing-about-highlights">
-          <div class="landing-about-pill">
-            <i class="bi bi-check2-circle"></i>
-            <span>Un seul dossier, une lecture continue</span>
-          </div>
-          <div class="landing-about-pill">
-            <i class="bi bi-check2-circle"></i>
-            <span>Une interface claire pour chaque r&ocirc;le</span>
-          </div>
-          <div class="landing-about-pill">
-            <i class="bi bi-check2-circle"></i>
-            <span>Une gouvernance m&eacute;dicale plus lisible</span>
-          </div>
+          <h3>Suivi continu</h3>
+          <p>Suivez l'évolution de vos soins et recevez des alertes sur votre parcours de santé.</p>
         </div>
       </div>
 
-      <div class="landing-about-visual">
-        <div class="landing-about-panel">
-          <div class="landing-about-panel-head">
-            <span class="small-label">Vue produit</span>
-            <strong>Lecture m&eacute;dicale partag&eacute;e</strong>
-          </div>
-          <div class="landing-about-photo-stack">
-            <div class="landing-about-photo-main">
-              <img src="./assets/img/seka2-web.jpg" alt="Soin document&eacute; dans le carnet m&eacute;dical &eacute;lectronique" loading="lazy" decoding="async">
-              <div class="landing-about-visual-badge">
-                <i class="bi bi-heart-pulse-fill"></i>
-                <div>
-                  <strong>Parcours unifi&eacute;</strong>
-                  <small>Lecture rapide du dossier, m&ecirc;me contexte pour tous les acteurs.</small>
-                </div>
+      <div class="services-stats">
+        <div class="services-stat">
+          <i class="bi bi-person-check"></i>
+          <strong>120</strong>
+          <span>Praticiens enregistrés</span>
+        </div>
+        <div class="services-stat">
+          <i class="bi bi-people"></i>
+          <strong>12K</strong>
+          <span>Dossiers actifs</span>
+        </div>
+        <div class="services-stat">
+          <i class="bi bi-hand-thumbs-up"></i>
+          <strong>98.5%</strong>
+          <span>Satisfaction utilisateurs</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-section" id="apropos">
+    <div class="section-container">
+      <div class="about-inner">
+        <div class="about-image">
+          <div class="about-image-accent"></div>
+          <div class="about-image-bg">
+            <img src="./assets/img/Docteur-web.jpg" alt="Médecin Sika Santé" loading="lazy" decoding="async">
+            <div class="about-stats-bar">
+              <div class="about-stat">
+                <strong>120</strong>
+                <span>Praticiens enregistrés</span>
               </div>
-            </div>
-            <div class="landing-about-photo-row">
-              <div class="landing-about-photo-secondary">
-                <img src="./assets/img/seka01-web.jpg" alt="Support mobile pour le dossier de sant&eacute;" loading="lazy" decoding="async">
+              <div class="about-stat">
+                <strong>12K</strong>
+                <span>Dossiers actifs</span>
               </div>
-              <div class="landing-about-photo-secondary">
-                <img src="./assets/img/seka03-web.jpg" alt="Suivi sanitaire et gouvernance m&eacute;dicale" loading="lazy" decoding="async">
+              <div class="about-stat">
+                <strong>98.5%</strong>
+                <span>Satisfaction</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section id="chiffres" class="landing-stats-section">
-      <div class="landing-section-heading">
-        <span class="landing-premium-badge">
-          <i class="bi bi-bar-chart-line"></i>
-          Chiffres cl&eacute;s
-        </span>
-        <h2>Des indicateurs pens&eacute;s comme une vitrine produit, pas comme un tableau froid</h2>
-        <p>Cette section met en sc&egrave;ne la valeur de SIKA SANTE &agrave; travers des chiffres simples, m&eacute;morables et tr&egrave;s lisibles.</p>
-      </div>
-
-      <div class="landing-stats-grid">
-        <article class="landing-stat-card">
-          <small>Continuit&eacute; de suivi</small>
-          <strong>+82%</strong>
-          <p>Une lecture plus compl&egrave;te du parcours et une meilleure circulation de l'information utile.</p>
-        </article>
-        <article class="landing-stat-card">
-          <small>Acc&egrave;s dossier</small>
-          <strong>3x plus rapide</strong>
-          <p>Le praticien retrouve les informations essentielles sans friction dans l'interface.</p>
-        </article>
-        <article class="landing-stat-card">
-          <small>Coordination</small>
-          <strong>4 espaces reli&eacute;s</strong>
-          <p>Patient, professionnel, admin et institution s'appuient sur le m&ecirc;me produit.</p>
-        </article>
-        <article class="landing-stat-card">
-          <small>Structures accompagn&eacute;es</small>
-          <strong>24+</strong>
-          <p>Cliniques, centres et partenaires de sant&eacute; peuvent lire et piloter avec plus de clart&eacute;.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="landing-cta-section">
-      <div class="landing-cta-card">
-        <div>
-          <span class="landing-premium-badge">
-            <i class="bi bi-rocket-takeoff"></i>
-            D&eacute;marrer avec SIKA SANTE
-          </span>
-          <h2>Donnez &agrave; votre syst&egrave;me de sant&eacute; une interface plus claire, plus &eacute;l&eacute;gante et plus utile</h2>
-          <p>Un carnet de sant&eacute; &eacute;lectronique premium pour mieux relier les parcours, les professionnels et les institutions.</p>
-        </div>
-        <div class="landing-cta-actions">
-          <a class="btn btn-light btn-lg" href="/pages/connexion.html">Acc&eacute;der &agrave; la plateforme</a>
-          <a class="btn btn-outline-light btn-lg" href="#fonctionnalites">Explorer les fonctionnalit&eacute;s</a>
+        <div class="about-text">
+          <span class="section-label-text">À propos</span>
+          <h2 class="section-heading">La qualité des soins commence par la qualité du suivi</h2>
+          <p>Sika Santé relie le patient, le praticien et l'institution au sein d'une même expérience. Le produit ne cherche pas seulement à stocker de la donnée médicale : il cherche à la rendre lisible, actionnable et utile à chaque étape du parcours.</p>
+          <p>La promesse est simple : mieux lire l'historique, mieux comprendre la situation clinique, mieux transmettre l'information utile et mieux piloter les trajectoires de soins.</p>
+          <div class="about-checks">
+            <div class="check-item">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Un historique médical continu et fiable</span>
+            </div>
+            <div class="check-item">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Un accès simplifié aux informations de santé</span>
+            </div>
+          </div>
+          <a href="#services" class="btn-primary-custom">En savoir plus</a>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <footer class="landing-footer">
-      <div class="landing-footer-top">
-        <div class="landing-footer-brand">
-          <span class="landing-premium-brand-badge">
-            <img src="./assets/img/sika-sante-mark.svg" alt="Logo SIKA SANTE">
-          </span>
-          <div>
-            <strong>SIKA SANTE</strong>
-            <p class="mb-0">Carnet de sant&eacute; &eacute;lectronique et coordination m&eacute;dicale premium.</p>
+  <!-- STEPS -->
+  <section class="steps-section" id="parcours">
+    <div class="section-container">
+      <div class="steps-header">
+        <span class="section-label-text">Comment ça marche</span>
+        <h2 class="section-heading">Accédez à votre carnet en quelques étapes</h2>
+        <p class="section-subtitle">Un processus simple pour centraliser et consulter votre dossier médical.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-icon"><i class="bi bi-person-plus"></i></div>
+          <h3>Créer son compte</h3>
+          <p>Inscrivez-vous avec votre numéro CMU pour accéder à votre espace patient.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-icon"><i class="bi bi-shield-check"></i></div>
+          <h3>Vérifier son identité</h3>
+          <p>Confirmez votre accès avec un code OTP envoyé sur votre téléphone.</p>
+        </div>
+        <div class="step-card highlighted">
+          <div class="step-number">3</div>
+          <div class="step-icon"><i class="bi bi-journal-medical"></i></div>
+          <h3>Consulter son dossier</h3>
+          <p>Retrouvez votre historique médical, vos traitements et vos comptes rendus.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <div class="step-icon"><i class="bi bi-arrow-repeat"></i></div>
+          <h3>Suivre son parcours</h3>
+          <p>Recevez des alertes et suivez l'évolution de votre prise en charge.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPECIALISTS -->
+  <section class="specialists-section" id="specialistes">
+    <div class="section-container">
+      <div class="specialists-header">
+        <span class="section-label-text">Équipe médicale</span>
+        <h2 class="section-heading">Des praticiens qui utilisent Sika Santé</h2>
+        <p class="section-subtitle">Ils consultent et enrichissent les dossiers de leurs patients via la plateforme.</p>
+      </div>
+
+      <div class="specialists-grid">
+        <div class="specialist-card">
+          <img src="./assets/img/Docteur-web.jpg" alt="Dr. Kouamé Aya" loading="lazy" decoding="async">
+          <div class="specialist-info">
+            <h4>Dr. Kouamé Aya</h4>
+            <p class="specialty">Médecine générale</p>
+            <div class="rating">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <span>5.0 (48 avis)</span>
+            </div>
           </div>
         </div>
-        <a class="btn btn-primary" href="/pages/connexion.html">Acc&eacute;der &agrave; la plateforme</a>
+        <div class="specialist-card">
+          <img src="./assets/img/Docteur-web.jpg" alt="Dr. Traoré Mamadou" loading="lazy" decoding="async">
+          <div class="specialist-info">
+            <h4>Dr. Traoré Mamadou</h4>
+            <p class="specialty">Cardiologie</p>
+            <div class="rating">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-half"></i>
+              <span>4.8 (36 avis)</span>
+            </div>
+          </div>
+        </div>
+        <div class="specialist-card">
+          <img src="./assets/img/Docteur-web.jpg" alt="Dr. Diallo Fatou" loading="lazy" decoding="async">
+          <div class="specialist-info">
+            <h4>Dr. Diallo Fatou</h4>
+            <p class="specialty">Pédiatrie</p>
+            <div class="rating">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <span>5.0 (52 avis)</span>
+            </div>
+          </div>
+        </div>
+        <div class="specialist-card">
+          <img src="./assets/img/Docteur-web.jpg" alt="Dr. N'Guessan Koffi" loading="lazy" decoding="async">
+          <div class="specialist-info">
+            <h4>Dr. N'Guessan Koffi</h4>
+            <p class="specialty">Dermatologie</p>
+            <div class="rating">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star"></i>
+              <span>4.6 (29 avis)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HEALTHCARE SERVICES GRID -->
+  <section class="healthcare-section">
+    <div class="section-container">
+      <div class="healthcare-header">
+        <span class="section-label-text">Modules du carnet</span>
+        <h2 class="section-heading">Tout votre parcours médical en un seul endroit</h2>
+        <p class="section-subtitle">Chaque module de votre carnet de santé est conçu pour une lecture claire et un accès rapide.</p>
       </div>
 
-      <div class="landing-footer-grid">
-        <div>
-          <h3>Le produit</h3>
-          <p>SIKA SANTE aide &agrave; mieux lire, mieux transmettre et mieux piloter l'information de sant&eacute; autour d'un dossier unique et partag&eacute;.</p>
+      <div class="healthcare-grid">
+        <div class="healthcare-item">
+          <div class="healthcare-item-icon"><i class="bi bi-folder2-open"></i></div>
+          <h4>Dossier médical</h4>
+          <p>Historique complet des consultations, diagnostics et observations cliniques.</p>
         </div>
+        <div class="healthcare-item">
+          <div class="healthcare-item-icon"><i class="bi bi-file-earmark-medical"></i></div>
+          <h4>Comptes rendus</h4>
+          <p>Accédez aux résumés de chaque consultation et aux notes du praticien.</p>
+        </div>
+        <div class="healthcare-item">
+          <div class="healthcare-item-icon"><i class="bi bi-capsule"></i></div>
+          <h4>Traitements</h4>
+          <p>Suivez vos prescriptions en cours, posologies et renouvellements.</p>
+        </div>
+        <div class="healthcare-item">
+          <div class="healthcare-item-icon"><i class="bi bi-heart-pulse"></i></div>
+          <h4>Suivi de santé</h4>
+          <p>Indicateurs de santé, alertes et évolution de votre état clinique.</p>
+        </div>
+        <div class="healthcare-item">
+          <div class="healthcare-item-icon"><i class="bi bi-people"></i></div>
+          <h4>Coordination</h4>
+          <p>Partage du dossier entre praticiens pour une prise en charge continue.</p>
+        </div>
+        <div class="healthcare-item">
+          <div class="healthcare-item-icon"><i class="bi bi-shield-lock"></i></div>
+          <h4>Sécurité</h4>
+          <p>Chiffrement des données, contrôle d'accès par rôle et audit de chaque action.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <div>
-          <h3>Navigation</h3>
-          <div class="landing-footer-links">
-            <a href="#accueil">Accueil</a>
-            <a href="#fonctionnalites">Fonctionnalit&eacute;s</a>
-            <a href="#parcours">Parcours</a>
-            <a href="#apropos">&Agrave; propos</a>
-            <a href="#chiffres">Chiffres</a>
+  <!-- FAQ -->
+  <section class="faq-section" id="faq">
+    <div class="section-container">
+      <div class="faq-header">
+        <span class="section-label-text">FAQ</span>
+        <h2 class="section-heading">Questions fréquentes</h2>
+        <p class="section-subtitle">Trouvez les réponses aux questions les plus courantes.</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="false">
+            <span>Qu'est-ce que Sika Santé ?</span>
+            <i class="bi bi-plus-lg"></i>
+          </button>
+          <div id="faq1" class="collapse">
+            <div class="faq-answer">
+              Sika Santé est un carnet de santé électronique qui centralise l'historique médical, structure la coordination clinique et offre une lecture claire du parcours de soins à chaque acteur du système de santé.
+            </div>
           </div>
         </div>
 
-        <div>
-          <h3>Parcours couverts</h3>
-          <div class="landing-footer-links">
-            <a href="/pages/connexion-patient.html">Patient</a>
-            <a href="/pages/connexion-professionnel.html">Professionnel</a>
-            <a href="/pages/connexion-admin.html">Admin</a>
-            <a href="/pages/connexion-institution.html">Institution</a>
+        <div class="faq-item">
+          <button class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false">
+            <span>Comment accéder à mon dossier médical ?</span>
+            <i class="bi bi-plus-lg"></i>
+          </button>
+          <div id="faq2" class="collapse">
+            <div class="faq-answer">
+              Connectez-vous avec votre numéro CMU et un code OTP reçu par SMS. Vous accéderez ensuite à votre espace patient où votre historique médical complet est disponible : consultations, traitements, analyses et observations.
+            </div>
           </div>
         </div>
 
-        <div>
-          <h3>Promesse</h3>
-          <p>Une plateforme plus lisible pour la continuit&eacute; des soins, la coordination des acteurs et la gouvernance sanitaire.</p>
+        <div class="faq-item">
+          <button class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false">
+            <span>Quels sont les rôles disponibles ?</span>
+            <i class="bi bi-plus-lg"></i>
+          </button>
+          <div id="faq3" class="collapse">
+            <div class="faq-answer">
+              La plateforme propose quatre espaces distincts : Patient (consultation de son dossier), Professionnel (gestion clinique), Administrateur (gestion de la structure) et Institution (gouvernance et pilotage sanitaire).
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false">
+            <span>Mes données sont-elles sécurisées ?</span>
+            <i class="bi bi-plus-lg"></i>
+          </button>
+          <div id="faq4" class="collapse">
+            <div class="faq-answer">
+              Oui, la sécurité de vos données est notre priorité. Toutes les informations sont chiffrées, les accès sont contrôlés par rôle et chaque action est tracée. La plateforme respecte les normes de confidentialité des données de santé.
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="landing-footer-bottom">
-        <span>SIKA SANTE - Healthcare SaaS medical</span>
-        <span>Con&ccedil;u pour relier patient, soignant et institution</span>
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="section-container">
+      <div class="cta-box">
+        <h2>Prêt à centraliser votre dossier médical ?</h2>
+        <p>Accédez à votre carnet de santé électronique et retrouvez tout votre historique en un seul endroit.</p>
+        <a href="/pages/connexion.html" class="btn-primary-custom">Accéder à mon carnet</a>
       </div>
-    </footer>
-  </main>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer-main">
+    <div class="section-container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+            <img src="./assets/img/sika-sante-mark.svg" alt="Logo Sika Santé" width="32" height="32">
+            <strong style="color:#fff;font-size:1.1rem;">Sika Santé</strong>
+          </div>
+          <p>Carnet de santé électronique et coordination médicale. Une plateforme pensée pour relier patient, soignant et institution.</p>
+          <div class="social-icons">
+            <a href="#"><i class="bi bi-facebook"></i></a>
+            <a href="#"><i class="bi bi-twitter-x"></i></a>
+            <a href="#"><i class="bi bi-linkedin"></i></a>
+            <a href="#"><i class="bi bi-instagram"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Fonctionnalités</h4>
+          <a href="#services">Historique médical</a>
+          <a href="#services">Partage sécurisé</a>
+          <a href="#services">Suivi continu</a>
+          <a href="#services">Comptes rendus</a>
+        </div>
+        <div class="footer-col">
+          <h4>Liens utiles</h4>
+          <a href="#accueil">Accueil</a>
+          <a href="#apropos">À propos</a>
+          <a href="#faq">FAQ</a>
+          <a href="/pages/connexion.html">Connexion</a>
+        </div>
+        <div class="footer-col">
+          <h4>Parcours</h4>
+          <a href="/pages/connexion.html">Patient</a>
+          <a href="/pages/connexion.html">Professionnel</a>
+          <a href="/pages/connexion.html">Administrateur</a>
+          <a href="/pages/connexion.html">Institution</a>
+          <div class="footer-newsletter">
+            <input type="email" placeholder="Votre email">
+            <button><i class="bi bi-send"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Sika Santé. Tous droits réservés.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Toggle FAQ icon rotation
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        const target = document.querySelector(this.getAttribute('data-bs-target'));
+        target.addEventListener('shown.bs.collapse', () => {
+          icon.classList.replace('bi-plus-lg', 'bi-dash-lg');
+        });
+        target.addEventListener('hidden.bs.collapse', () => {
+          icon.classList.replace('bi-dash-lg', 'bi-plus-lg');
+        });
+      });
+    });
+  </script>
 </body>
 </html>
