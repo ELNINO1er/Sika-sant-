@@ -1,0 +1,788 @@
+/* ═══════════════════════════════════════════
+   Dashboard Patient — MediCare layout
+   Palette: #7c4dff / #6735f2 (violet Sika)
+   Layout: sidebar | center + right panel
+   ═══════════════════════════════════════════ */
+
+/* ── Top bar ── */
+
+.pd-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0 1rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.2rem;
+}
+
+.pd-page-title {
+  margin: 0;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.pd-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+}
+
+.pd-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.75rem;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: border-color 0.2s ease;
+}
+
+.pd-search-box:focus-within {
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.1);
+}
+
+.pd-search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.88rem;
+  color: var(--text);
+  width: 160px;
+}
+
+.pd-search-box input::placeholder {
+  color: var(--text-muted);
+}
+
+.pd-search-sm {
+  width: auto;
+}
+
+.pd-search-sm input {
+  width: 140px;
+}
+
+.pd-topbar-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--text-soft);
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.pd-topbar-icon:hover {
+  background: rgba(124, 77, 255, 0.08);
+  border-color: rgba(124, 77, 255, 0.2);
+  color: #7c4dff;
+}
+
+.pd-notif-dot {
+  display: none;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid var(--surface-strong);
+}
+
+.pd-notif-dot.visible {
+  display: block;
+}
+
+/* ── Content grid ── */
+
+.pd-content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1.2rem;
+  align-items: start;
+}
+
+.pd-center {
+  display: grid;
+  gap: 1.2rem;
+}
+
+/* ── Welcome bar ── */
+
+.pd-welcome-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pd-welcome {
+  margin: 0;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.pd-summary {
+  margin: 0.3rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ── Section headers ── */
+
+.pd-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pd-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pd-section-header h3 {
+  margin: 0;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pd-see-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #7c4dff;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.pd-see-all:hover {
+  color: #6735f2;
+}
+
+/* ── Appointment cards row (horizontal like MediCare) ── */
+
+.pd-appointments-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.pd-appt-card {
+  padding: 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pd-appt-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.pd-appt-card-active {
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.06), rgba(103, 53, 242, 0.03));
+  border-color: rgba(124, 77, 255, 0.25);
+  box-shadow: 0 8px 24px rgba(124, 77, 255, 0.08);
+}
+
+.pd-appt-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pd-appt-card-top strong {
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.pd-appt-status {
+  display: inline-flex;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.pd-appt-status-upcoming {
+  background: rgba(124, 77, 255, 0.12);
+  color: #7c4dff;
+}
+
+.pd-appt-status-done {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.pd-appt-card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pd-appt-card-bottom div {
+  flex: 1;
+  min-width: 0;
+}
+
+.pd-appt-card-bottom span {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pd-appt-card-bottom small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.pd-appt-arrow {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.pd-appt-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* ── KPI cards ── */
+
+.pd-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.pd-kpi-card {
+  display: block;
+  padding: 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pd-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.pd-kpi-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+
+.pd-kpi-icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 0.65rem;
+  font-size: 1rem;
+}
+
+.pd-kpi-card strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.pd-kpi-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.pd-kpi-card-primary .pd-kpi-icon {
+  background: rgba(124, 77, 255, 0.12);
+  color: #7c4dff;
+}
+
+.pd-kpi-card-violet .pd-kpi-icon {
+  background: rgba(124, 77, 255, 0.12);
+  color: #7c4dff;
+}
+
+.pd-kpi-card-green .pd-kpi-icon {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.pd-kpi-card-orange .pd-kpi-icon {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+/* ── Table card ── */
+
+.pd-table-card {
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  overflow: hidden;
+}
+
+.pd-table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.pd-filter-select {
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.pd-filter-select:focus {
+  border-color: #7c4dff;
+}
+
+.pd-table-wrap {
+  overflow-x: auto;
+}
+
+.pd-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pd-table thead th {
+  padding: 0.7rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.pd-table tbody td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  vertical-align: middle;
+}
+
+.pd-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.pd-table tbody tr:hover {
+  background: rgba(124, 77, 255, 0.04);
+}
+
+.pd-table-person {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.pd-table-person strong {
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.pd-table-summary {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pd-table-status {
+  display: inline-flex;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+/* ── Right panel ── */
+
+.pd-right-panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.pd-panel-card {
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  padding: 1rem;
+}
+
+.pd-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.pd-panel-header h3 {
+  margin: 0;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pd-panel-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: rgba(124, 77, 255, 0.12);
+  color: #7c4dff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.pd-panel-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.pd-panel-footer a {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #7c4dff;
+  text-decoration: none;
+}
+
+.pd-panel-footer a:hover {
+  color: #6735f2;
+}
+
+/* ── Medication rows (right panel) ── */
+
+.pd-med-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.pd-med-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  transition: background 0.15s;
+}
+
+.pd-med-row:hover {
+  background: rgba(124, 77, 255, 0.03);
+}
+
+.pd-med-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pd-med-dot.active {
+  background: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.2);
+}
+
+.pd-med-dot.ended {
+  background: var(--text-muted);
+  opacity: 0.4;
+}
+
+.pd-med-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pd-med-info strong {
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.pd-med-info small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pd-pill-badge {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.pd-pill-badge.actif {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.pd-pill-badge.termine {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+}
+
+/* ── Message rows (right panel) ── */
+
+.pd-msg-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.pd-msg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.65rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+}
+
+.pd-msg-row:hover {
+  background: rgba(124, 77, 255, 0.03);
+}
+
+.pd-msg-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pd-msg-info strong {
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.pd-msg-info p {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pd-msg-row > small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* ── Quick Stats ── */
+
+.pd-quick-stats h3 {
+  margin: 0 0 0.85rem;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pd-stats-grid {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.pd-stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.6rem;
+  background: var(--surface-muted);
+}
+
+.pd-stat-item span {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.pd-stat-item strong {
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #7c4dff;
+}
+
+/* ── Empty hints ── */
+
+.pd-empty-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.2rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+/* ── Skeleton ── */
+
+.pd-skeleton-line {
+  display: block;
+  height: 0.85rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  animation: pdSkeletonPulse 1.4s ease-in-out infinite;
+}
+
+.pd-skeleton-line.w-25 { width: 25%; }
+.pd-skeleton-line.w-50 { width: 50%; }
+.pd-skeleton-line.w-75 { width: 75%; }
+.pd-skeleton-line.w-100 { width: 100%; }
+
+.pd-table-skeleton {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+}
+
+@keyframes pdSkeletonPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 1100px) {
+  .pd-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-right-panel {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .pd-appointments-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-right-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pd-topbar-right {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .pd-search-box input {
+    width: 120px;
+  }
+}
+
+@media (max-width: 576px) {
+  .pd-welcome {
+    font-size: 1.4rem;
+  }
+
+  .pd-search-box {
+    display: none;
+  }
+}

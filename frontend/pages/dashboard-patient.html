@@ -4,9 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Patient | Sika-Sante</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.0.20/400.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.0.20/600.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.0.20/700.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.18/400.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.18/500.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.18/700.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/dashboard-patient.css">
 </head>
 <body class="patient-dashboard-page">
   <div class="layout-shell">
@@ -15,13 +23,23 @@
     <main class="main-content patient-main-shell">
       <div id="toastContainer" class="toast-container"></div>
 
-      <header class="pd-header">
-        <div class="pd-header-left">
-          <h1 class="pd-welcome" id="pdWelcome"></h1>
-          <p class="pd-summary" id="pdSummary"></p>
+      <!-- Top bar -->
+      <header class="pd-topbar">
+        <div class="pd-topbar-left">
+          <h1 class="pd-page-title">Espace Patient</h1>
         </div>
-
-        <div class="pd-header-right">
+        <div class="pd-topbar-right">
+          <div class="pd-search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Rechercher..." id="pdSearch">
+          </div>
+          <button type="button" class="pd-topbar-icon" id="pdThemeToggle" title="Mode sombre">
+            <i class="bi bi-moon-stars"></i>
+          </button>
+          <button type="button" class="pd-topbar-icon pd-notif-btn" title="Notifications">
+            <i class="bi bi-bell"></i>
+            <span class="pd-notif-dot" id="pdNotifDot"></span>
+          </button>
           <button type="button" id="pdProfileTrigger" class="pd-profile-pill" aria-expanded="false" aria-haspopup="true">
             <img class="pd-avatar-image" src="../assets/img/Patient-web.jpg" alt="Photo du patient" loading="lazy" decoding="async">
             <div class="pd-profile-info">
@@ -32,140 +50,142 @@
               <i class="bi bi-chevron-down"></i>
             </span>
           </button>
-
           <div id="pdProfileDropdown" class="pd-profile-dropdown" role="menu">
             <a href="patient-profile.html" role="menuitem"><i class="bi bi-person"></i> Mon profil</a>
             <a href="patient-appointments.html" role="menuitem"><i class="bi bi-calendar-event"></i> Mes rendez-vous</a>
             <a href="patient-documents.html" role="menuitem"><i class="bi bi-file-earmark-medical"></i> Mes documents</a>
             <hr>
-            <button type="button" id="pdThemeToggle" role="menuitem"><i class="bi bi-moon-stars"></i> <span>Mode sombre</span></button>
             <button type="button" id="pdLogout" role="menuitem"><i class="bi bi-box-arrow-right"></i> Deconnexion</button>
           </div>
         </div>
       </header>
 
-      <section class="pd-kpi-row" id="pdKpiRow">
-        <article class="pd-kpi-card pd-card skeleton-card">
-          <div class="pd-kpi-top">
-            <span class="pd-kpi-icon"><i class="bi bi-capsule-pill"></i></span>
-            <span class="small-label">Traitements actifs</span>
-          </div>
-          <strong class="pd-skeleton-line w-25"></strong>
-          <p class="pd-skeleton-line w-75"></p>
-        </article>
-        <article class="pd-kpi-card pd-card skeleton-card">
-          <div class="pd-kpi-top">
-            <span class="pd-kpi-icon"><i class="bi bi-chat-dots"></i></span>
-            <span class="small-label">Messages non lus</span>
-          </div>
-          <strong class="pd-skeleton-line w-25"></strong>
-          <p class="pd-skeleton-line w-75"></p>
-        </article>
-        <article class="pd-kpi-card pd-card skeleton-card">
-          <div class="pd-kpi-top">
-            <span class="pd-kpi-icon"><i class="bi bi-calendar-check"></i></span>
-            <span class="small-label">Prochain rendez-vous</span>
-          </div>
-          <strong class="pd-skeleton-line w-50"></strong>
-          <p class="pd-skeleton-line w-75"></p>
-        </article>
-        <article class="pd-kpi-card pd-card skeleton-card">
-          <div class="pd-kpi-top">
-            <span class="pd-kpi-icon"><i class="bi bi-heart-pulse"></i></span>
-            <span class="small-label">Etat global</span>
-          </div>
-          <strong class="pd-skeleton-line w-50"></strong>
-          <p class="pd-skeleton-line w-75"></p>
-        </article>
-      </section>
-
-      <section class="pd-main-row">
-        <article class="pd-card pd-card-medications">
-          <div class="pd-card-header">
+      <!-- Content grid: center + right panel -->
+      <div class="pd-content-grid">
+        <!-- Center content -->
+        <div class="pd-center">
+          <!-- Welcome -->
+          <div class="pd-welcome-bar">
             <div>
-              <span class="small-label">Traitements en cours</span>
-              <h2 class="pd-card-title">Traitements actuels <span class="pd-count" id="pdMedicationCount">(0)</span></h2>
+              <h2 class="pd-welcome" id="pdWelcome"></h2>
+              <p class="pd-summary" id="pdSummary"></p>
             </div>
           </div>
-          <p class="pd-card-copy">Retrouvez vos traitements actifs, leur statut et les actions rapides disponibles cote patient.</p>
-          <div class="pd-med-list" id="pdMedicationList">
-            <div class="pd-med-row skeleton-card"><span class="pd-skeleton-line w-75"></span></div>
-            <div class="pd-med-row skeleton-card"><span class="pd-skeleton-line w-50"></span></div>
-          </div>
-          <div class="pd-card-footer">
-            <a href="patient-medications.html">Voir tous les traitements</a>
-            <button type="button" data-patient-action="refill"><i class="bi bi-arrow-repeat"></i> Demander renouvellement</button>
-          </div>
-        </article>
 
-        <article class="pd-card pd-card-appointment pd-card-spotlight">
-          <div class="pd-card-header">
-            <div>
-              <span class="small-label">A venir</span>
-              <h2 class="pd-card-title">Prochain rendez-vous</h2>
+          <!-- Appointments row (horizontal scroll like MediCare) -->
+          <section class="pd-section">
+            <div class="pd-section-header">
+              <h3>Prochains rendez-vous</h3>
+              <a href="patient-appointments.html" class="pd-see-all">Voir tout <i class="bi bi-arrow-right"></i></a>
             </div>
-          </div>
-          <div id="pdAppointmentContent">
-            <div class="pd-skeleton-stack">
-              <span class="pd-skeleton-line w-50"></span>
-              <span class="pd-skeleton-line w-75"></span>
-              <span class="pd-skeleton-line w-75"></span>
+            <div class="pd-appointments-row" id="pdAppointmentsRow">
+              <div class="pd-appt-card pd-appt-card-skeleton skeleton-card">
+                <span class="pd-skeleton-line w-50"></span>
+                <span class="pd-skeleton-line w-75"></span>
+              </div>
+              <div class="pd-appt-card pd-appt-card-skeleton skeleton-card">
+                <span class="pd-skeleton-line w-50"></span>
+                <span class="pd-skeleton-line w-75"></span>
+              </div>
+              <div class="pd-appt-card pd-appt-card-skeleton skeleton-card">
+                <span class="pd-skeleton-line w-50"></span>
+                <span class="pd-skeleton-line w-75"></span>
+              </div>
             </div>
-          </div>
-        </article>
+          </section>
 
-        <article class="pd-card pd-card-messages">
-          <div class="pd-card-header">
-            <div>
-              <span class="small-label">Messages recents</span>
-              <h2 class="pd-card-title">Nouveaux messages <span class="pd-badge" id="pdMessageBadge">0</span></h2>
-            </div>
-          </div>
-          <div class="pd-msg-list" id="pdMessageList">
-            <div class="pd-msg-card skeleton-card"><span class="pd-skeleton-line w-100"></span></div>
-            <div class="pd-msg-card skeleton-card"><span class="pd-skeleton-line w-75"></span></div>
-          </div>
-          <div class="pd-card-footer">
-            <a href="patient-messages.html">Voir tous les messages</a>
-          </div>
-        </article>
-      </section>
+          <!-- KPI row (3 cards like MediCare) -->
+          <section class="pd-kpi-row" id="pdKpiRow">
+            <article class="pd-kpi-card skeleton-card">
+              <div class="pd-kpi-top"><span class="pd-kpi-icon"><i class="bi bi-capsule-pill"></i></span><span class="small-label">Traitements actifs</span></div>
+              <strong class="pd-skeleton-line w-25"></strong>
+              <p class="pd-skeleton-line w-75"></p>
+            </article>
+            <article class="pd-kpi-card skeleton-card">
+              <div class="pd-kpi-top"><span class="pd-kpi-icon"><i class="bi bi-chat-dots"></i></span><span class="small-label">Messages</span></div>
+              <strong class="pd-skeleton-line w-25"></strong>
+              <p class="pd-skeleton-line w-75"></p>
+            </article>
+            <article class="pd-kpi-card skeleton-card">
+              <div class="pd-kpi-top"><span class="pd-kpi-icon"><i class="bi bi-heart-pulse"></i></span><span class="small-label">Etat global</span></div>
+              <strong class="pd-skeleton-line w-50"></strong>
+              <p class="pd-skeleton-line w-75"></p>
+            </article>
+          </section>
 
-      <section class="pd-health-row">
-        <article class="pd-card pd-card-health">
-          <div class="pd-card-header">
-            <div>
-              <span class="small-label">Etat de sante</span>
-              <h2 class="pd-card-title">Etat general</h2>
+          <!-- Medical history table -->
+          <section class="pd-section">
+            <div class="pd-section-header">
+              <h3>Historique medical</h3>
+              <a href="patient-history.html" class="pd-see-all">Voir tout <i class="bi bi-arrow-right"></i></a>
             </div>
-          </div>
-          <div id="pdHealthStatus"></div>
-          <div class="pd-quick-actions">
-            <a class="btn btn-outline-primary btn-sm" href="patient-record.html"><i class="bi bi-journal-medical"></i> Voir le dossier</a>
-            <a class="btn btn-outline-primary btn-sm" href="patient-medications.html"><i class="bi bi-capsule-pill"></i> Voir les traitements</a>
-            <a class="btn btn-outline-primary btn-sm" href="patient-appointments.html"><i class="bi bi-calendar-check"></i> Gerer le rendez-vous</a>
-          </div>
-        </article>
-      </section>
+            <div class="pd-table-card">
+              <div class="pd-table-toolbar">
+                <div class="pd-search-box pd-search-sm">
+                  <i class="bi bi-search"></i>
+                  <input type="text" placeholder="Rechercher..." id="pdHistorySearch">
+                </div>
+                <select class="pd-filter-select" id="pdHistoryFilter">
+                  <option value="">Tout type</option>
+                  <option value="consultation">Consultation</option>
+                  <option value="controle">Controle</option>
+                  <option value="suivi">Suivi</option>
+                </select>
+              </div>
+              <div class="pd-table-wrap" id="pdHistoryTable">
+                <div class="pd-table-skeleton">
+                  <span class="pd-skeleton-line w-100"></span>
+                  <span class="pd-skeleton-line w-100"></span>
+                  <span class="pd-skeleton-line w-100"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
 
-      <section class="pd-history-row">
-        <article class="pd-card pd-card-table">
-          <div class="pd-card-header">
-            <div>
-              <span class="small-label">Historique recent</span>
-              <h2 class="pd-card-title">Historique medical recent</h2>
+        <!-- Right panel (tasks + quick stats like MediCare) -->
+        <aside class="pd-right-panel">
+          <!-- Treatments / Tasks -->
+          <div class="pd-panel-card">
+            <div class="pd-panel-header">
+              <h3>Traitements en cours</h3>
+              <span class="pd-panel-badge" id="pdMedicationBadge">0</span>
             </div>
-            <a href="patient-history.html" class="pd-link">Voir tout le dossier</a>
-          </div>
-          <div class="pd-table-wrap" id="pdHistoryTable">
-            <div class="pd-table-skeleton">
-              <span class="pd-skeleton-line w-100"></span>
-              <span class="pd-skeleton-line w-100"></span>
-              <span class="pd-skeleton-line w-100"></span>
+            <div class="pd-med-list" id="pdMedicationList">
+              <div class="pd-med-row skeleton-card"><span class="pd-skeleton-line w-75"></span></div>
+              <div class="pd-med-row skeleton-card"><span class="pd-skeleton-line w-50"></span></div>
+            </div>
+            <div class="pd-panel-footer">
+              <a href="patient-medications.html">Voir tous les traitements</a>
             </div>
           </div>
-        </article>
-      </section>
+
+          <!-- Messages -->
+          <div class="pd-panel-card">
+            <div class="pd-panel-header">
+              <h3>Messages recents</h3>
+              <span class="pd-panel-badge" id="pdMessageBadge">0</span>
+            </div>
+            <div class="pd-msg-list" id="pdMessageList">
+              <div class="pd-msg-row skeleton-card"><span class="pd-skeleton-line w-100"></span></div>
+              <div class="pd-msg-row skeleton-card"><span class="pd-skeleton-line w-75"></span></div>
+            </div>
+            <div class="pd-panel-footer">
+              <a href="patient-messages.html">Voir tous les messages</a>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="pd-panel-card pd-quick-stats">
+            <h3>Resume du jour</h3>
+            <div class="pd-stats-grid" id="pdQuickStats">
+              <div class="pd-stat-item"><span>Consultations</span><strong id="pdStatConsultations">0</strong></div>
+              <div class="pd-stat-item"><span>Documents</span><strong id="pdStatDocuments">0</strong></div>
+              <div class="pd-stat-item"><span>Traitements</span><strong id="pdStatTreatments">0</strong></div>
+            </div>
+          </div>
+        </aside>
+      </div>
     </main>
   </div>
 
@@ -190,14 +210,13 @@
     const summary = document.getElementById('pdSummary');
     const profileName = document.getElementById('pdProfileName');
     const profileId = document.getElementById('pdProfileId');
-    const medicationCount = document.getElementById('pdMedicationCount');
     const medicationList = document.getElementById('pdMedicationList');
-    const appointmentContent = document.getElementById('pdAppointmentContent');
+    const medicationBadge = document.getElementById('pdMedicationBadge');
+    const appointmentsRow = document.getElementById('pdAppointmentsRow');
     const messageBadge = document.getElementById('pdMessageBadge');
     const messageList = document.getElementById('pdMessageList');
     const historyTable = document.getElementById('pdHistoryTable');
     const kpiRow = document.getElementById('pdKpiRow');
-    const healthStatus = document.getElementById('pdHealthStatus');
 
     function deriveFallbackOverview() {
       const profile = state.profile;
@@ -210,35 +229,20 @@
         : null;
 
       const status = state.conditions.includes('Allergies a verifier')
-        ? {
-            label: 'A surveiller',
-            tone: 'critical',
-            description: 'Des elements de vigilance necessitent une verification par le centre.'
-          }
+        ? { label: 'A surveiller', tone: 'critical', description: 'Des elements de vigilance necessitent une verification.' }
         : (treatments.filter((item) => item.status === 'Actif').length > 0 || messages.length > 0)
-          ? {
-              label: 'Suivi',
-              tone: 'info',
-              description: 'Votre suivi est actif avec des traitements ou messages a consulter.'
-            }
-          : {
-              label: 'Stable',
-              tone: 'success',
-              description: 'Aucun signal prioritaire n apparait dans les informations actuellement visibles.'
-            };
+          ? { label: 'Suivi', tone: 'info', description: 'Votre suivi est actif avec des traitements ou messages a consulter.' }
+          : { label: 'Stable', tone: 'success', description: 'Aucun signal prioritaire.' };
 
       return {
-        patient: {
-          name: profile.name || 'Patient',
-          cmuNumber: profile.cmuNumber || 'Non attribue'
-        },
+        patient: { name: profile.name || 'Patient', cmuNumber: profile.cmuNumber || 'Non attribue' },
         summary: {
           activeTreatments: treatments.filter((item) => item.status === 'Actif').length,
           unreadMessages: messages.length,
           nextAppointmentDate: nextDate ? nextDate.toISOString().slice(0, 10) : null,
           globalStatus: status.label
         },
-        currentTreatments: treatments.slice(0, 3).map((item) => ({
+        currentTreatments: treatments.slice(0, 4).map((item) => ({
           label: item.label,
           description: item.dosage || item.detail,
           status: (item.status || '').toUpperCase() === 'TERMINE' ? 'TERMINE' : 'ACTIF'
@@ -252,13 +256,13 @@
           professionalName: latestHistory?.professionalName || 'Dr Jean KOUASSI',
           specialty: 'Professionnel de sante'
         } : null,
-        recentMessages: messages.slice(0, 2).map((item) => ({
+        recentMessages: messages.slice(0, 3).map((item) => ({
           sender: item.sender,
           preview: item.preview,
           date: item.date,
           attachment: item.attachment ? { name: item.attachment } : null
         })),
-        recentHistory: history.slice(0, 4).map((item) => ({
+        recentHistory: history.slice(0, 5).map((item) => ({
           professionalName: item.professionalName,
           consultationType: item.title,
           date: item.created_at,
@@ -269,55 +273,82 @@
       };
     }
 
+    // ── Appointments row (horizontal cards like MediCare) ──
+    function buildAppointmentsRow(overview) {
+      const appointment = overview.nextAppointment;
+      const history = overview.recentHistory || [];
+
+      const cards = [];
+
+      if (appointment?.date) {
+        const d = new Date(appointment.date);
+        const dateLabel = d.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
+        cards.push({
+          title: 'Controle de suivi',
+          status: 'A venir',
+          statusClass: 'upcoming',
+          professional: appointment.professionalName,
+          time: `${appointment.time || '10:30'} - ${appointment.durationMinutes || 30} min`,
+          date: dateLabel
+        });
+      }
+
+      history.slice(0, 2).forEach((item) => {
+        const d = new Date(item.date);
+        const dateLabel = d.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
+        cards.push({
+          title: item.consultationType || 'Consultation',
+          status: 'Realise',
+          statusClass: 'done',
+          professional: item.professionalName || 'Equipe clinique',
+          time: dateLabel,
+          date: ''
+        });
+      });
+
+      if (!cards.length) {
+        appointmentsRow.innerHTML = `
+          <div class="pd-appt-card pd-appt-empty">
+            <i class="bi bi-calendar-x"></i>
+            <p>Aucun rendez-vous planifie</p>
+          </div>
+        `;
+        return;
+      }
+
+      appointmentsRow.innerHTML = cards.map((card, i) => `
+        <a href="patient-appointments.html" class="pd-appt-card ${i === 0 ? 'pd-appt-card-active' : ''}">
+          <div class="pd-appt-card-top">
+            <strong>${escapeHtml(card.title)}</strong>
+            <span class="pd-appt-status pd-appt-status-${card.statusClass}">${escapeHtml(card.status)}</span>
+          </div>
+          <div class="pd-appt-card-bottom">
+            <img class="pd-avatar-image sm" src="../assets/img/Docteur-web.jpg" alt="" loading="lazy">
+            <div>
+              <span>${escapeHtml(card.professional)}</span>
+              <small>${escapeHtml(card.time)}</small>
+            </div>
+            <i class="bi bi-arrow-up-right pd-appt-arrow"></i>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    // ── KPI cards (3 cards like MediCare) ──
     function buildKpiCards(overview) {
-      const nextAppointmentDate = overview.summary?.nextAppointmentDate
-        ? formatDate(overview.summary.nextAppointmentDate)
-        : 'A planifier';
       const activeTreatments = overview.summary?.activeTreatments || 0;
       const unreadMessages = overview.summary?.unreadMessages || 0;
-      const status = overview.healthStatus || {
-        label: overview.summary?.globalStatus || 'Stable',
-        tone: 'success',
-        description: 'Aucun signal prioritaire n apparait dans les informations actuellement visibles.'
-      };
+      const status = overview.healthStatus || { label: 'Stable', tone: 'success', description: 'Aucun signal prioritaire.' };
 
+      const toneMap = { success: 'green', info: 'violet', critical: 'orange', warning: 'orange' };
       const cards = [
-        {
-          href: 'patient-medications.html',
-          icon: 'bi-capsule-pill',
-          label: 'Traitements actifs',
-          value: String(activeTreatments),
-          helper: 'Traitements en cours a suivre',
-          tone: 'primary'
-        },
-        {
-          href: 'patient-messages.html',
-          icon: 'bi-chat-dots',
-          label: 'Messages non lus',
-          value: String(unreadMessages),
-          helper: 'Informations utiles a consulter',
-          tone: 'violet'
-        },
-        {
-          href: 'patient-appointments.html',
-          icon: 'bi-calendar-check',
-          label: 'Prochain rendez-vous',
-          value: nextAppointmentDate,
-          helper: 'Date de suivi estimee',
-          tone: 'green'
-        },
-        {
-          href: 'patient-record.html',
-          icon: 'bi-heart-pulse',
-          label: 'Etat global',
-          value: status.label,
-          helper: status.description,
-          tone: status.tone
-        }
+        { href: 'patient-medications.html', icon: 'bi-capsule-pill', label: 'Traitements actifs', value: String(activeTreatments), helper: 'En cours de suivi', tone: 'primary' },
+        { href: 'patient-messages.html', icon: 'bi-chat-dots', label: 'Messages non lus', value: String(unreadMessages), helper: 'A consulter', tone: 'violet' },
+        { href: 'patient-record.html', icon: 'bi-heart-pulse', label: 'Etat global', value: status.label, helper: status.description, tone: toneMap[status.tone] || 'green' }
       ];
 
       kpiRow.innerHTML = cards.map((card) => `
-        <a href="${card.href}" class="pd-kpi-card pd-card pd-kpi-card-${card.tone}">
+        <a href="${card.href}" class="pd-kpi-card pd-kpi-card-${card.tone}">
           <div class="pd-kpi-top">
             <span class="pd-kpi-icon"><i class="bi ${card.icon}"></i></span>
             <span class="small-label">${escapeHtml(card.label)}</span>
@@ -328,175 +359,65 @@
       `).join('');
     }
 
-    function buildMedicationRows(overview) {
-      const rows = overview.currentTreatments?.length ? overview.currentTreatments.slice(0, 3) : [
-        {
-          label: 'Suivi therapeutique',
-          description: 'Selon la prescription du soignant',
-          status: 'ACTIF'
-        },
-        {
-          label: 'Controle cardiologique',
-          description: 'Controle regulier et observance quotidienne',
-          status: 'ACTIF'
-        },
-        {
-          label: 'Prescription recente',
-          description: 'Posologie detaillee dans le dossier',
-          status: 'TERMINE'
-        }
-      ];
+    // ── Treatments (right panel, like Tasks in MediCare) ──
+    function buildMedications(overview) {
+      const rows = overview.currentTreatments?.length ? overview.currentTreatments.slice(0, 4) : [];
+      medicationBadge.textContent = String(rows.length);
+
+      if (!rows.length) {
+        medicationList.innerHTML = `<div class="pd-empty-hint"><i class="bi bi-capsule-pill"></i> Aucun traitement actif</div>`;
+        return;
+      }
 
       medicationList.innerHTML = rows.map((item) => `
-        <a href="patient-medications.html" class="pd-med-row">
-          <i class="bi bi-capsule-pill pd-med-bullet"></i>
+        <div class="pd-med-row">
+          <div class="pd-med-dot ${item.status === 'ACTIF' ? 'active' : 'ended'}"></div>
           <div class="pd-med-info">
             <strong>${escapeHtml(item.label)}</strong>
-            <span>${escapeHtml(item.description)}</span>
+            <small>${escapeHtml(item.description)}</small>
           </div>
-          ${item.status === 'ACTIF' ? '<span class="pd-pill-badge actif">Actif</span>' : '<span class="pd-pill-badge left">Termine</span>'}
-          <i class="bi bi-chevron-right pd-arrow"></i>
+          <span class="pd-pill-badge ${item.status === 'ACTIF' ? 'actif' : 'termine'}">${item.status === 'ACTIF' ? 'Actif' : 'Termine'}</span>
+        </div>
+      `).join('');
+    }
+
+    // ── Messages (right panel) ──
+    function buildMessages(overview) {
+      const rows = overview.recentMessages?.length ? overview.recentMessages.slice(0, 3) : [];
+      messageBadge.textContent = String(overview.summary?.unreadMessages || rows.length);
+
+      if (!rows.length) {
+        messageList.innerHTML = `<div class="pd-empty-hint"><i class="bi bi-chat-dots"></i> Aucun message</div>`;
+        return;
+      }
+
+      messageList.innerHTML = rows.map((item) => `
+        <a href="patient-messages.html" class="pd-msg-row">
+          <img class="pd-avatar-image sm" src="../assets/img/Docteur-web.jpg" alt="" loading="lazy">
+          <div class="pd-msg-info">
+            <strong>${escapeHtml(item.sender)}</strong>
+            <p>${escapeHtml(item.preview)}</p>
+          </div>
+          <small>${escapeHtml(formatDate(item.date))}</small>
         </a>
       `).join('');
     }
 
-    function buildAppointmentCard(overview) {
-      const appointment = overview.nextAppointment;
-      if (!appointment?.date) {
-        appointmentContent.innerHTML = `
-          <div class="patient-empty-card">
-            <strong>Aucun rendez-vous planifie</strong>
-            <p>Un nouveau suivi sera propose par votre centre de sante.</p>
-          </div>
-        `;
+    // ── History table ──
+    function buildHistoryTable(overview) {
+      const rows = overview.recentHistory?.length ? overview.recentHistory.slice(0, 5) : [];
+
+      if (!rows.length) {
+        historyTable.innerHTML = `<div class="pd-empty-hint"><i class="bi bi-clock-history"></i> Aucun historique</div>`;
         return;
       }
-
-      const appointmentDate = new Date(appointment.date);
-      const dateLabel = appointmentDate.toLocaleDateString('fr-FR', {
-        weekday: 'long',
-        day: '2-digit',
-        month: 'long'
-      });
-
-      appointmentContent.innerHTML = `
-        <div class="pd-appt-date">${escapeHtml(dateLabel)}</div>
-        <div class="pd-appt-row"><i class="bi bi-clock"></i><span>${escapeHtml(appointment.time || '10:30')} - ${escapeHtml(appointment.durationMinutes ? `${appointment.durationMinutes} min` : '30 min')}</span></div>
-        <div class="pd-appt-row"><i class="bi bi-geo-alt"></i><span>${escapeHtml(appointment.location || 'Centre Sika-Sante, Abidjan')}</span></div>
-        <div class="pd-appt-doctor">
-          <img class="pd-avatar-image sm" src="../assets/img/Docteur-web.jpg" alt="Professionnel de sante" loading="lazy" decoding="async">
-          <div>
-            <strong>${escapeHtml(appointment.professionalName || 'Professionnel de sante')}</strong>
-            <small>${escapeHtml(appointment.specialty || 'Professionnel de sante')}</small>
-          </div>
-        </div>
-        <a href="patient-appointments.html" class="pd-link">Gerer le rendez-vous</a>
-      `;
-    }
-
-    function buildMessages(overview) {
-      const rows = overview.recentMessages?.length ? overview.recentMessages.slice(0, 2) : [
-        {
-          sender: 'Dr Jean KOUASSI',
-          preview: 'Suivi clinique sans signe de gravite.',
-          date: new Date().toISOString(),
-          attachment: ''
-        },
-        {
-          sender: 'Dr Jean KOUASSI',
-          preview: 'Tension stable, traitement maintenu.',
-          date: new Date().toISOString(),
-          attachment: 'Resultats_Biologie.pdf'
-        },
-        {
-          sender: 'Centre Sika-Sante',
-          preview: 'Rappel de votre prochain rendez-vous de suivi.',
-          date: new Date().toISOString(),
-          attachment: ''
-        }
-      ];
-
-      messageList.innerHTML = rows.map((item, index) => `
-        <div class="pd-msg-card">
-          <img class="pd-avatar-image sm" src="../assets/img/Docteur-web.jpg" alt="Auteur du message" loading="lazy" decoding="async">
-          <div class="pd-msg-body">
-            <div class="pd-msg-head">
-              <strong>${escapeHtml(item.sender)}</strong>
-              <small>${escapeHtml(formatDateTime(item.date))}</small>
-            </div>
-            <p>${escapeHtml(item.preview)}</p>
-            ${index === 1 || item.attachment?.name || item.attachment ? `
-              <div class="pd-msg-attachment">
-                <img class="pd-attachment-thumb" src="../assets/img/seka01-web.jpg" alt="Piece jointe" loading="lazy" decoding="async">
-                <div>
-                  <strong>${escapeHtml(item.attachment?.name || item.attachment || 'Resultats_Biologie.pdf')}</strong>
-                  <small>Document medical</small>
-                </div>
-                <div class="pd-attachment-actions">
-                  <i class="bi bi-box-arrow-down"></i>
-                  <i class="bi bi-download"></i>
-                </div>
-              </div>
-            ` : ''}
-          </div>
-          <button type="button" class="pd-msg-menu"><i class="bi bi-three-dots-vertical"></i></button>
-        </div>
-      `).join('');
-    }
-
-    function buildHealthStatusCard(overview) {
-      const status = overview.healthStatus || {
-        label: 'Stable',
-        tone: 'success',
-        description: 'Aucun signal prioritaire n apparait dans les informations actuellement visibles.'
-      };
-      const tones = {
-        success: { className: 'success', icon: 'bi-heart-pulse' },
-        info: { className: 'info', icon: 'bi-clipboard2-pulse' },
-        critical: { className: 'warning', icon: 'bi-exclamation-circle' },
-        warning: { className: 'warning', icon: 'bi-exclamation-circle' }
-      };
-      const currentTone = tones[status.tone] || tones.info;
-
-      healthStatus.innerHTML = `
-        <div class="pd-health-indicator pd-health-${currentTone.className}">
-          <div class="pd-health-main">
-            <span class="pd-health-icon"><i class="bi ${currentTone.icon}"></i></span>
-            <div>
-              <strong>${escapeHtml(status.label)}</strong>
-              <p>${escapeHtml(status.description)}</p>
-            </div>
-          </div>
-          <div class="pd-health-bars" aria-hidden="true">
-            <span class="is-active"></span>
-            <span class="${status.tone !== 'success' ? 'is-active' : ''}"></span>
-            <span class="${status.tone === 'warning' ? 'is-active' : ''}"></span>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildHistoryTable(overview) {
-      const rows = overview.recentHistory?.length ? overview.recentHistory.slice(0, 4) : [
-        {
-          professionalName: 'Dr Jean KOUASSI',
-          consultationType: 'Consultation generale',
-          date: new Date().toISOString(),
-          summary: 'Suivi clinique sans signe de gravite.'
-        },
-        {
-          professionalName: 'Dr Jean KOUASSI',
-          consultationType: 'Controle cardiologique',
-          date: new Date().toISOString(),
-          summary: 'Tension stable, traitement maintenu.'
-        }
-      ];
 
       historyTable.innerHTML = `
         <table class="pd-table">
           <thead>
             <tr>
               <th>Professionnel</th>
+              <th>Type</th>
               <th>Date</th>
               <th>Resume</th>
               <th>Statut</th>
@@ -506,11 +427,16 @@
             ${rows.map((row) => `
               <tr>
                 <td>
-                  <strong>${escapeHtml(row.professionalName || 'Equipe clinique')}</strong>
-                  <small>${escapeHtml(row.consultationType || 'Consultation')}</small>
+                  <div class="pd-table-person">
+                    <img class="pd-avatar-image sm" src="../assets/img/Docteur-web.jpg" alt="" loading="lazy">
+                    <div>
+                      <strong>${escapeHtml(row.professionalName || 'Equipe clinique')}</strong>
+                    </div>
+                  </div>
                 </td>
+                <td>${escapeHtml(row.consultationType || 'Consultation')}</td>
                 <td>${escapeHtml(formatDate(row.date))}</td>
-                <td>${escapeHtml(row.summary || 'Resume non disponible')}</td>
+                <td class="pd-table-summary">${escapeHtml(row.summary || 'Resume non disponible')}</td>
                 <td><span class="pd-table-status">${escapeHtml((row.status || 'DISPONIBLE').toLowerCase() === 'disponible' ? 'Disponible' : row.status)}</span></td>
               </tr>
             `).join('')}
@@ -519,12 +445,20 @@
       `;
     }
 
+    // ── Quick Stats ──
+    function buildQuickStats(overview) {
+      document.getElementById('pdStatConsultations').textContent = String(overview.recentHistory?.length || 0);
+      document.getElementById('pdStatDocuments').textContent = String(state.documents?.length || 0);
+      document.getElementById('pdStatTreatments').textContent = String(overview.currentTreatments?.length || 0);
+    }
+
+    // ── Load & render ──
     async function loadOverview() {
       try {
         const response = await apiGet('/patient/overview');
         return response.data;
       } catch (error) {
-        showToast(error.message || 'Impossible de charger l apercu sante. Affichage des donnees synchronisees locales.', 'warning');
+        showToast(error.message || 'Affichage des donnees synchronisees locales.', 'warning');
         return deriveFallbackOverview();
       }
     }
@@ -532,20 +466,19 @@
     const overview = await loadOverview();
     const firstName = (overview.patient?.name || state.profile.name || 'Patient').split(' ')[0];
     welcome.textContent = `Bonjour, ${firstName}`;
-    summary.textContent = `Vous avez ${overview.summary?.unreadMessages || 0} nouveau(x) message(s) et ${overview.summary?.activeTreatments || 0} traitement(s) a suivre.`;
+    summary.textContent = `Vous avez ${overview.summary?.unreadMessages || 0} message(s) et ${overview.summary?.activeTreatments || 0} traitement(s) a suivre.`;
     profileName.textContent = overview.patient?.name || state.profile.name || 'Patient';
-    profileId.textContent = `CMU ${overview.patient?.cmuNumber || state.profile.cmuNumber || 'Non attribue'}`;
-    medicationCount.textContent = `(${overview.currentTreatments?.length || 0})`;
-    messageBadge.textContent = String(overview.summary?.unreadMessages || overview.recentMessages?.length || 0);
+    profileId.textContent = overview.patient?.cmuNumber || state.profile.cmuNumber || '';
 
+    buildAppointmentsRow(overview);
     buildKpiCards(overview);
-    buildMedicationRows(overview);
-    buildAppointmentCard(overview);
-    buildHealthStatusCard(overview);
+    buildMedications(overview);
     buildMessages(overview);
     buildHistoryTable(overview);
+    buildQuickStats(overview);
     completePatientPageLoading();
 
+    // ── Profile dropdown ──
     const trigger = document.getElementById('pdProfileTrigger');
     const dropdown = document.getElementById('pdProfileDropdown');
     const themeToggle = document.getElementById('pdThemeToggle');
@@ -567,12 +500,16 @@
       const enabled = !getDarkMode();
       setDarkMode(enabled);
       toggleDarkMode(enabled);
-      themeToggle.querySelector('span').textContent = enabled ? 'Mode clair' : 'Mode sombre';
       themeToggle.querySelector('i').className = enabled ? 'bi bi-brightness-high' : 'bi bi-moon-stars';
     });
 
     document.getElementById('pdLogout').addEventListener('click', logout);
     bindPatientActionButtons();
+
+    // Notification dot
+    if ((overview.summary?.unreadMessages || 0) > 0) {
+      document.getElementById('pdNotifDot').classList.add('visible');
+    }
   </script>
 </body>
 </html>

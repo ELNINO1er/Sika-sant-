@@ -6,12 +6,20 @@
   <title>Connexion | Sika-Sant&eacute;</title>
   <link rel="icon" type="image/svg+xml" href="../assets/img/sika-sante-mark.svg">
   <link rel="shortcut icon" href="../assets/img/sika-sante-mark.svg">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.0.20/400.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.0.20/600.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.0.20/700.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.18/400.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.18/500.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.18/700.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
   <main class="auth-selector-shell">
+    <!-- Left panel — white, form -->
     <section class="auth-selector-panel">
       <a href="/" class="auth-back-link auth-selector-back-button">
         <i class="bi bi-arrow-left"></i>
@@ -19,7 +27,7 @@
       </a>
 
       <div class="auth-selector-brand">
-        <span class="landing-premium-brand-badge">
+        <span class="auth-selector-brand-logo">
           <img src="../assets/img/sika-sante-mark.svg" alt="Logo SIKA SANTE">
         </span>
         <div>
@@ -28,7 +36,7 @@
         </div>
       </div>
 
-      <span class="landing-premium-badge auth-selector-heading-badge" id="selectorBadge">
+      <span class="auth-selector-badge" id="selectorBadge">
         <i class="bi bi-person-heart"></i>
         Connexion patient
       </span>
@@ -40,7 +48,7 @@
         </p>
       </div>
 
-      <div class="card-surface auth-selector-form-card">
+      <div class="auth-selector-form-card">
         <div class="form-stage" id="selectorStage">
           <strong>Identification patient</strong>
         </div>
@@ -48,18 +56,19 @@
         <div id="selectorMessage" class="alert d-none" role="alert"></div>
         <div id="selectorFormMount"></div>
       </div>
+
+      <div class="auth-selector-footer">
+        <span>Pas encore de compte ?</span>
+        <a href="#" class="auth-selector-signup-link">S'inscrire</a>
+      </div>
     </section>
 
+    <!-- Right panel — violet, profile cards -->
     <section class="auth-selector-showcase">
-      <div class="auth-selector-showcase-glow"></div>
-
-      <div class="auth-selector-showcase-card">
+      <div class="auth-selector-showcase-inner">
         <div class="auth-selector-showcase-head">
-          <span class="landing-premium-badge">
-            <i class="bi bi-grid-1x2"></i>
-            Quatre espaces
-          </span>
-          <h2>Choisissez votre profil</h2>
+          <h2>Bienvenue sur<br><span>Sika-Sant&eacute;</span></h2>
+          <p>Choisissez votre profil pour acc&eacute;der &agrave; votre espace</p>
         </div>
 
         <div class="auth-selector-cards" id="selectorCards">
@@ -88,6 +97,20 @@
           </button>
         </div>
 
+        <div class="auth-selector-showcase-footer">
+          <div class="auth-selector-stat">
+            <strong>300K+</strong>
+            <small>Patients</small>
+          </div>
+          <div class="auth-selector-stat">
+            <strong>92+</strong>
+            <small>Praticiens</small>
+          </div>
+          <div class="auth-selector-stat">
+            <strong>24/7</strong>
+            <small>Support</small>
+          </div>
+        </div>
       </div>
     </section>
   </main>
