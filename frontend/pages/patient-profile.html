@@ -95,6 +95,7 @@
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
     import { showToast } from '../utils/helpers.js';
+    import { updateProfile } from '../services/patient-api.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Profil patient',
@@ -130,9 +131,26 @@
       { label: 'Contact urgence', value: 'A completer' }
     ]);
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      showToast('Le profil patient sera enregistre via PUT /api/v1/patient/profile.', 'success');
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Enregistrement...';
+      try {
+        await updateProfile({
+          phone: document.getElementById('profilePhone').value.trim(),
+          email: document.getElementById('profileEmail').value.trim(),
+          address: (document.getElementById('profileAddress') || {}).value?.trim() || '',
+          emergencyContactName: (document.getElementById('profileEmergencyName') || {}).value?.trim() || '',
+          emergencyContactPhone: (document.getElementById('profileEmergencyPhone') || {}).value?.trim() || ''
+        });
+        showToast('Vos informations ont bien \u00e9t\u00e9 enregistr\u00e9es.', 'success');
+      } catch (error) {
+        showToast(error.message || 'Impossible de mettre \u00e0 jour le profil.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enregistrer les modifications';
+      }
     });
 
     completePatientPageLoading();

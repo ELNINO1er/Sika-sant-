@@ -14,7 +14,8 @@ export const PATIENT_MENU_SECTIONS = [
     items: [
       { href: 'patient-medications.html', label: 'Traitements', icon: 'bi-capsule-pill', key: 'medications' },
       { href: 'patient-appointments.html', label: 'Agenda', icon: 'bi-calendar-check', key: 'appointments' },
-      { href: 'patient-history.html', label: 'Historique medical', icon: 'bi-clock-history', key: 'history' }
+      { href: 'patient-history.html', label: 'Historique medical', icon: 'bi-clock-history', key: 'history' },
+      { href: 'patient-vaccinations.html', label: 'Vaccinations', icon: 'bi-shield-plus', key: 'vaccinations' }
     ]
   },
   {

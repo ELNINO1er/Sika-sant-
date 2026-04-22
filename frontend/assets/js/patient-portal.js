@@ -703,22 +703,22 @@ export function renderHistoryTableWithDetails({ tableContainer, detailContainer,
 
 export function bindPatientActionButtons(root = document) {
   const messages = {
-    appointment: 'La demande de rendez-vous sera reliee au planning du centre dans la prochaine iteration.',
-    refill: 'La demande de renouvellement sera transmise a votre structure de sante.',
-    download: 'Le telechargement sera active une fois les documents relies au stockage final.',
-    upload: 'Le depot de document personnel sera disponible dans la prochaine version.',
-    profile: 'La mise a jour du profil personnel sera ouverte avec un formulaire dedie.',
-    message: 'La messagerie securisee patient-soignant sera bientot disponible.',
-    search: 'La recherche patient sera disponible dans la prochaine iteration.',
-    settings: 'Le centre de preferences sera ajoute dans la prochaine iteration.',
-    help: 'L aide contextuelle patient sera bientot disponible.'
+    appointment: 'Votre demande de rendez-vous a \u00e9t\u00e9 prise en compte. Le centre vous contactera pour confirmer le cr\u00e9neau.',
+    refill: 'Votre demande de renouvellement a \u00e9t\u00e9 envoy\u00e9e \u00e0 votre structure de sant\u00e9.',
+    download: 'Le t\u00e9l\u00e9chargement de ce document sera disponible prochainement.',
+    upload: 'Le d\u00e9p\u00f4t de document personnel sera disponible prochainement.',
+    profile: 'Rendez-vous sur la page Profil pour modifier vos informations.',
+    message: 'La messagerie s\u00e9curis\u00e9e patient-soignant sera disponible prochainement.',
+    search: 'Utilisez la barre de recherche du dossier m\u00e9dical pour trouver vos consultations.',
+    settings: 'Rendez-vous sur la page Param\u00e8tres pour g\u00e9rer vos pr\u00e9f\u00e9rences.',
+    help: 'Consultez la page Aide pour trouver des r\u00e9ponses \u00e0 vos questions.'
   };
 
   root.querySelectorAll('[data-patient-action]').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.preventDefault();
       const action = button.dataset.patientAction;
-      showToast(messages[action] || 'Fonction bientot disponible.', 'primary');
+      showToast(messages[action] || 'Cette fonctionnalit\u00e9 sera disponible prochainement.', 'primary');
     });
   });
 }

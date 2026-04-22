@@ -49,6 +49,7 @@
       renderHistoryTableWithDetails,
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
+    import { apiGet } from '../services/api.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Historique Medical',
@@ -64,10 +65,25 @@
       ]
     });
 
+    // Try loading full medical record from API for richer history
+    let history = state.history;
+    try {
+      const res = await apiGet('/patient/medical-record');
+      if (res.data?.consultations?.length) {
+        history = res.data.consultations.map(c => ({
+          id: c.id,
+          title: c.title,
+          summary: c.summary,
+          professionalName: c.professionalName,
+          created_at: c.date || c.created_at
+        }));
+      }
+    } catch { /* fallback to local state */ }
+
     renderHistoryTableWithDetails({
       tableContainer: document.getElementById('historyTable'),
       detailContainer: document.getElementById('historyDetails'),
-      history: state.history
+      history
     });
 
     completePatientPageLoading();

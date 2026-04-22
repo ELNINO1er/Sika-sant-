@@ -147,6 +147,7 @@
   <script type="module">
     import { initializePatientPage, completePatientPageLoading } from '../assets/js/patient-portal.js';
     import { showToast } from '../utils/helpers.js';
+    import { createSupportRequest } from '../services/patient-api.js';
 
     await initializePatientPage({
       pageTitle: 'Aide',
@@ -162,9 +163,31 @@
       ]
     });
 
-    document.getElementById('supportForm').addEventListener('submit', (event) => {
+    document.getElementById('supportForm').addEventListener('submit', async (event) => {
       event.preventDefault();
-      showToast('La demande de support sera connectee a /api/v1/help/support-request.', 'success');
+      const form = event.target;
+      const requestType = form.querySelector('select')?.value || 'general';
+      const subject = form.querySelector('input[type="text"]')?.value?.trim();
+      const message = form.querySelector('textarea')?.value?.trim();
+
+      if (!subject || !message || message.length < 10) {
+        showToast('Veuillez remplir tous les champs (minimum 10 caract\u00e8res pour le message).', 'warning');
+        return;
+      }
+
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Envoi...';
+      try {
+        await createSupportRequest({ requestType, subject, message });
+        showToast('Votre demande d\'assistance a \u00e9t\u00e9 envoy\u00e9e. Nous vous r\u00e9pondrons dans les plus brefs d\u00e9lais.', 'success');
+        form.reset();
+      } catch (error) {
+        showToast(error.message || 'Impossible d\'envoyer la demande. Veuillez r\u00e9essayer.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Envoyer la demande';
+      }
     });
 
     completePatientPageLoading();

@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(191) UNIQUE,
   phone VARCHAR(50),
   password_hash VARCHAR(255),
+  address VARCHAR(255) DEFAULT NULL,
+  emergency_contact_name VARCHAR(150) DEFAULT NULL,
+  emergency_contact_phone VARCHAR(50) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -56,6 +59,106 @@ CREATE TABLE IF NOT EXISTS consultations (
   FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS prescriptions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  patient_user_id INT NOT NULL,
+  consultation_id INT NULL,
+  professional_user_id INT NULL,
+  label VARCHAR(200) NOT NULL,
+  dosage VARCHAR(500) DEFAULT NULL,
+  duration VARCHAR(100) DEFAULT NULL,
+  status ENUM('ACTIF', 'TERMINE', 'ANNULE') DEFAULT 'ACTIF',
+  started_at DATE DEFAULT NULL,
+  ended_at DATE DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (patient_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (consultation_id) REFERENCES consultations(id) ON DELETE SET NULL,
+  FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS appointments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  patient_user_id INT NOT NULL,
+  professional_user_id INT NULL,
+  title VARCHAR(150) NOT NULL,
+  date DATETIME NOT NULL,
+  duration_minutes INT DEFAULT 30,
+  location VARCHAR(255) DEFAULT 'Centre Sika-Sante, Abidjan',
+  status ENUM('PLANIFIE', 'CONFIRME', 'ANNULE', 'REALISE') DEFAULT 'PLANIFIE',
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (patient_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS documents (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  patient_user_id INT NOT NULL,
+  consultation_id INT NULL,
+  title VARCHAR(200) NOT NULL,
+  kind ENUM('ORDONNANCE', 'RESULTAT', 'COMPTE_RENDU', 'IMAGERIE', 'AUTRE') DEFAULT 'AUTRE',
+  file_path VARCHAR(500) DEFAULT NULL,
+  file_size INT DEFAULT 0,
+  mime_type VARCHAR(100) DEFAULT 'application/pdf',
+  uploaded_by_user_id INT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (patient_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (consultation_id) REFERENCES consultations(id) ON DELETE SET NULL,
+  FOREIGN KEY (uploaded_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  sender_user_id INT NOT NULL,
+  recipient_user_id INT NOT NULL,
+  subject VARCHAR(200) NOT NULL,
+  body TEXT NOT NULL,
+  is_read TINYINT(1) DEFAULT 0,
+  attachment_document_id INT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (sender_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (recipient_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (attachment_document_id) REFERENCES documents(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_settings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL UNIQUE,
+  notify_appointments TINYINT(1) DEFAULT 1,
+  notify_treatments TINYINT(1) DEFAULT 1,
+  notify_documents TINYINT(1) DEFAULT 1,
+  language VARCHAR(5) DEFAULT 'fr',
+  theme VARCHAR(10) DEFAULT 'light',
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS support_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  request_type VARCHAR(50) NOT NULL,
+  subject VARCHAR(200) NOT NULL,
+  message TEXT NOT NULL,
+  status ENUM('OUVERT', 'EN_COURS', 'FERME') DEFAULT 'OUVERT',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS vaccinations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  patient_user_id INT NOT NULL,
+  vaccine_name VARCHAR(200) NOT NULL,
+  dose VARCHAR(50) DEFAULT NULL,
+  administered_at DATE NOT NULL,
+  next_dose_at DATE DEFAULT NULL,
+  location VARCHAR(255) DEFAULT NULL,
+  professional_name VARCHAR(150) DEFAULT NULL,
+  lot_number VARCHAR(100) DEFAULT NULL,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (patient_user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS audit_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NULL,
@@ -79,6 +182,7 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Seed data
 INSERT INTO users (name, role, email, phone, password_hash)
 VALUES
   ('Jean KOUASSI', 'PATIENT', NULL, '0701234567', '$2b$10$qyoiZTFxk3BWhv14jArlMOOgrkQHIiph0QGlpIvFbc6FF2EePXuE6'),
@@ -99,3 +203,8 @@ INSERT INTO consultations (patient_user_id, professional_user_id, title, summary
 VALUES
   (1, 2, 'Consultation générale', 'Suivi clinique sans signe de gravité.'),
   (1, 2, 'Contrôle cardiologie', 'Tension stable, traitement maintenu.');
+
+INSERT INTO prescriptions (patient_user_id, consultation_id, professional_user_id, label, dosage, duration, status, started_at)
+VALUES
+  (1, 1, 2, 'Suivi cardiologique', 'Controle regulier et observance quotidienne', '3 mois', 'ACTIF', CURDATE()),
+  (1, 2, 2, 'Traitement antihypertenseur', 'Amlodipine 5mg - 1 comprime par jour', '6 mois', 'ACTIF', CURDATE());

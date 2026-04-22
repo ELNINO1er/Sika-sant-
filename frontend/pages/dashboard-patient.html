@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Patient | Sika-Sante</title>
+  <title>Dashboard Patient | Sika-Sant&eacute;</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.0.20/400.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/sora@5.0.20/600.css">
@@ -55,7 +55,7 @@
             <a href="patient-appointments.html" role="menuitem"><i class="bi bi-calendar-event"></i> Mes rendez-vous</a>
             <a href="patient-documents.html" role="menuitem"><i class="bi bi-file-earmark-medical"></i> Mes documents</a>
             <hr>
-            <button type="button" id="pdLogout" role="menuitem"><i class="bi bi-box-arrow-right"></i> Deconnexion</button>
+            <button type="button" id="pdLogout" role="menuitem"><i class="bi bi-box-arrow-right"></i> D&eacute;connexion</button>
           </div>
         </div>
       </header>
@@ -107,7 +107,7 @@
               <p class="pd-skeleton-line w-75"></p>
             </article>
             <article class="pd-kpi-card skeleton-card">
-              <div class="pd-kpi-top"><span class="pd-kpi-icon"><i class="bi bi-heart-pulse"></i></span><span class="small-label">Etat global</span></div>
+              <div class="pd-kpi-top"><span class="pd-kpi-icon"><i class="bi bi-heart-pulse"></i></span><span class="small-label">&Eacute;tat global</span></div>
               <strong class="pd-skeleton-line w-50"></strong>
               <p class="pd-skeleton-line w-75"></p>
             </article>
@@ -116,7 +116,7 @@
           <!-- Medical history table -->
           <section class="pd-section">
             <div class="pd-section-header">
-              <h3>Historique medical</h3>
+              <h3>Historique m&eacute;dical</h3>
               <a href="patient-history.html" class="pd-see-all">Voir tout <i class="bi bi-arrow-right"></i></a>
             </div>
             <div class="pd-table-card">
@@ -128,7 +128,7 @@
                 <select class="pd-filter-select" id="pdHistoryFilter">
                   <option value="">Tout type</option>
                   <option value="consultation">Consultation</option>
-                  <option value="controle">Controle</option>
+                  <option value="controle">Contr&ocirc;le</option>
                   <option value="suivi">Suivi</option>
                 </select>
               </div>
@@ -163,7 +163,7 @@
           <!-- Messages -->
           <div class="pd-panel-card">
             <div class="pd-panel-header">
-              <h3>Messages recents</h3>
+              <h3>Messages r&eacute;cents</h3>
               <span class="pd-panel-badge" id="pdMessageBadge">0</span>
             </div>
             <div class="pd-msg-list" id="pdMessageList">
@@ -177,7 +177,7 @@
 
           <!-- Quick Stats -->
           <div class="pd-panel-card pd-quick-stats">
-            <h3>Resume du jour</h3>
+            <h3>R&eacute;sum&eacute; du jour</h3>
             <div class="pd-stats-grid" id="pdQuickStats">
               <div class="pd-stat-item"><span>Consultations</span><strong id="pdStatConsultations">0</strong></div>
               <div class="pd-stat-item"><span>Documents</span><strong id="pdStatDocuments">0</strong></div>
@@ -200,11 +200,23 @@
     import { getDarkMode, setDarkMode } from '../utils/storage.js';
     import { logout } from '../services/auth.js';
     import { apiGet } from '../services/api.js';
+    import { startPolling, onNotificationUpdate } from '../services/notifications.js';
 
-    const state = await initializePatientPage({
-      pageTitle: 'Dashboard Patient',
-      showNavbar: false
-    });
+    // ── State ──
+    let state;
+    let overview;
+    let allHistoryRows = [];
+
+    try {
+      state = await initializePatientPage({
+        pageTitle: 'Dashboard Patient',
+        showNavbar: false
+      });
+    } catch (initError) {
+      console.error('[Dashboard] Echec d\'initialisation :', initError);
+      showToast('Impossible d\'initialiser l\'espace patient. Veuillez vous reconnecter.', 'danger');
+      throw initError;
+    }
 
     const welcome = document.getElementById('pdWelcome');
     const summary = document.getElementById('pdSummary');
@@ -229,13 +241,13 @@
         : null;
 
       const status = state.conditions.includes('Allergies a verifier')
-        ? { label: 'A surveiller', tone: 'critical', description: 'Des elements de vigilance necessitent une verification.' }
+        ? { label: '\u00C0 surveiller', tone: 'critical', description: 'Des \u00e9l\u00e9ments de vigilance n\u00e9cessitent une v\u00e9rification.' }
         : (treatments.filter((item) => item.status === 'Actif').length > 0 || messages.length > 0)
-          ? { label: 'Suivi', tone: 'info', description: 'Votre suivi est actif avec des traitements ou messages a consulter.' }
+          ? { label: 'Suivi', tone: 'info', description: 'Votre suivi est actif avec des traitements ou messages \u00e0 consulter.' }
           : { label: 'Stable', tone: 'success', description: 'Aucun signal prioritaire.' };
 
       return {
-        patient: { name: profile.name || 'Patient', cmuNumber: profile.cmuNumber || 'Non attribue' },
+        patient: { name: profile.name || 'Patient', cmuNumber: profile.cmuNumber || 'Non attribu\u00e9' },
         summary: {
           activeTreatments: treatments.filter((item) => item.status === 'Actif').length,
           unreadMessages: messages.length,
@@ -252,9 +264,9 @@
           dateOnly: nextDate.toISOString().slice(0, 10),
           time: '10:30',
           durationMinutes: 30,
-          location: 'Centre Sika-Sante, Abidjan',
+          location: 'Centre Sika-Sant\u00e9, Abidjan',
           professionalName: latestHistory?.professionalName || 'Dr Jean KOUASSI',
-          specialty: 'Professionnel de sante'
+          specialty: 'Professionnel de sant\u00e9'
         } : null,
         recentMessages: messages.slice(0, 3).map((item) => ({
           sender: item.sender,
@@ -273,22 +285,21 @@
       };
     }
 
-    // ── Appointments row (horizontal cards like MediCare) ──
-    function buildAppointmentsRow(overview) {
-      const appointment = overview.nextAppointment;
-      const history = overview.recentHistory || [];
-
+    // ── Appointments row ──
+    function buildAppointmentsRow(data) {
+      const appointment = data.nextAppointment;
+      const history = data.recentHistory || [];
       const cards = [];
 
       if (appointment?.date) {
         const d = new Date(appointment.date);
         const dateLabel = d.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
         cards.push({
-          title: 'Controle de suivi',
-          status: 'A venir',
+          title: 'Contr\u00f4le de suivi',
+          status: '\u00C0 venir',
           statusClass: 'upcoming',
-          professional: appointment.professionalName,
-          time: `${appointment.time || '10:30'} - ${appointment.durationMinutes || 30} min`,
+          professional: appointment.professionalName || 'Professionnel de sant\u00e9',
+          time: `${appointment.time || '10:30'} \u2022 ${appointment.durationMinutes || 30} min`,
           date: dateLabel
         });
       }
@@ -298,9 +309,9 @@
         const dateLabel = d.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
         cards.push({
           title: item.consultationType || 'Consultation',
-          status: 'Realise',
+          status: 'R\u00e9alis\u00e9',
           statusClass: 'done',
-          professional: item.professionalName || 'Equipe clinique',
+          professional: item.professionalName || '\u00c9quipe clinique',
           time: dateLabel,
           date: ''
         });
@@ -310,9 +321,8 @@
         appointmentsRow.innerHTML = `
           <div class="pd-appt-card pd-appt-empty">
             <i class="bi bi-calendar-x"></i>
-            <p>Aucun rendez-vous planifie</p>
-          </div>
-        `;
+            <p>Aucun rendez-vous planifi\u00e9</p>
+          </div>`;
         return;
       }
 
@@ -334,17 +344,17 @@
       `).join('');
     }
 
-    // ── KPI cards (3 cards like MediCare) ──
-    function buildKpiCards(overview) {
-      const activeTreatments = overview.summary?.activeTreatments || 0;
-      const unreadMessages = overview.summary?.unreadMessages || 0;
-      const status = overview.healthStatus || { label: 'Stable', tone: 'success', description: 'Aucun signal prioritaire.' };
+    // ── KPI cards ──
+    function buildKpiCards(data) {
+      const activeTreatments = data.summary?.activeTreatments || 0;
+      const unreadMessages = data.summary?.unreadMessages || 0;
+      const status = data.healthStatus || { label: 'Stable', tone: 'success', description: 'Aucun signal prioritaire.' };
 
       const toneMap = { success: 'green', info: 'violet', critical: 'orange', warning: 'orange' };
       const cards = [
         { href: 'patient-medications.html', icon: 'bi-capsule-pill', label: 'Traitements actifs', value: String(activeTreatments), helper: 'En cours de suivi', tone: 'primary' },
-        { href: 'patient-messages.html', icon: 'bi-chat-dots', label: 'Messages non lus', value: String(unreadMessages), helper: 'A consulter', tone: 'violet' },
-        { href: 'patient-record.html', icon: 'bi-heart-pulse', label: 'Etat global', value: status.label, helper: status.description, tone: toneMap[status.tone] || 'green' }
+        { href: 'patient-messages.html', icon: 'bi-chat-dots', label: 'Messages non lus', value: String(unreadMessages), helper: '\u00C0 consulter', tone: 'violet' },
+        { href: 'patient-record.html', icon: 'bi-heart-pulse', label: '\u00c9tat global', value: status.label, helper: status.description, tone: toneMap[status.tone] || 'green' }
       ];
 
       kpiRow.innerHTML = cards.map((card) => `
@@ -359,9 +369,9 @@
       `).join('');
     }
 
-    // ── Treatments (right panel, like Tasks in MediCare) ──
-    function buildMedications(overview) {
-      const rows = overview.currentTreatments?.length ? overview.currentTreatments.slice(0, 4) : [];
+    // ── Treatments (right panel) ──
+    function buildMedications(data) {
+      const rows = data.currentTreatments?.length ? data.currentTreatments.slice(0, 4) : [];
       medicationBadge.textContent = String(rows.length);
 
       if (!rows.length) {
@@ -376,15 +386,15 @@
             <strong>${escapeHtml(item.label)}</strong>
             <small>${escapeHtml(item.description)}</small>
           </div>
-          <span class="pd-pill-badge ${item.status === 'ACTIF' ? 'actif' : 'termine'}">${item.status === 'ACTIF' ? 'Actif' : 'Termine'}</span>
+          <span class="pd-pill-badge ${item.status === 'ACTIF' ? 'actif' : 'termine'}">${item.status === 'ACTIF' ? 'Actif' : 'Termin\u00e9'}</span>
         </div>
       `).join('');
     }
 
     // ── Messages (right panel) ──
-    function buildMessages(overview) {
-      const rows = overview.recentMessages?.length ? overview.recentMessages.slice(0, 3) : [];
-      messageBadge.textContent = String(overview.summary?.unreadMessages || rows.length);
+    function buildMessages(data) {
+      const rows = data.recentMessages?.length ? data.recentMessages.slice(0, 3) : [];
+      messageBadge.textContent = String(data.summary?.unreadMessages || rows.length);
 
       if (!rows.length) {
         messageList.innerHTML = `<div class="pd-empty-hint"><i class="bi bi-chat-dots"></i> Aucun message</div>`;
@@ -403,12 +413,10 @@
       `).join('');
     }
 
-    // ── History table ──
-    function buildHistoryTable(overview) {
-      const rows = overview.recentHistory?.length ? overview.recentHistory.slice(0, 5) : [];
-
+    // ── History table (with search + filter) ──
+    function renderHistoryRows(rows) {
       if (!rows.length) {
-        historyTable.innerHTML = `<div class="pd-empty-hint"><i class="bi bi-clock-history"></i> Aucun historique</div>`;
+        historyTable.innerHTML = `<div class="pd-empty-hint"><i class="bi bi-clock-history"></i> Aucun r\u00e9sultat trouv\u00e9</div>`;
         return;
       }
 
@@ -419,7 +427,7 @@
               <th>Professionnel</th>
               <th>Type</th>
               <th>Date</th>
-              <th>Resume</th>
+              <th>R\u00e9sum\u00e9</th>
               <th>Statut</th>
             </tr>
           </thead>
@@ -429,44 +437,77 @@
                 <td>
                   <div class="pd-table-person">
                     <img class="pd-avatar-image sm" src="../assets/img/Docteur-web.jpg" alt="" loading="lazy">
-                    <div>
-                      <strong>${escapeHtml(row.professionalName || 'Equipe clinique')}</strong>
-                    </div>
+                    <div><strong>${escapeHtml(row.professionalName || '\u00c9quipe clinique')}</strong></div>
                   </div>
                 </td>
                 <td>${escapeHtml(row.consultationType || 'Consultation')}</td>
                 <td>${escapeHtml(formatDate(row.date))}</td>
-                <td class="pd-table-summary">${escapeHtml(row.summary || 'Resume non disponible')}</td>
+                <td class="pd-table-summary">${escapeHtml(row.summary || 'R\u00e9sum\u00e9 non disponible')}</td>
                 <td><span class="pd-table-status">${escapeHtml((row.status || 'DISPONIBLE').toLowerCase() === 'disponible' ? 'Disponible' : row.status)}</span></td>
               </tr>
             `).join('')}
           </tbody>
-        </table>
-      `;
+        </table>`;
+    }
+
+    function filterHistory() {
+      const searchTerm = (document.getElementById('pdHistorySearch').value || '').toLowerCase().trim();
+      const typeFilter = document.getElementById('pdHistoryFilter').value.toLowerCase();
+
+      const filtered = allHistoryRows.filter((row) => {
+        const matchesSearch = !searchTerm
+          || (row.professionalName || '').toLowerCase().includes(searchTerm)
+          || (row.consultationType || '').toLowerCase().includes(searchTerm)
+          || (row.summary || '').toLowerCase().includes(searchTerm);
+
+        const matchesType = !typeFilter
+          || (row.consultationType || '').toLowerCase().includes(typeFilter);
+
+        return matchesSearch && matchesType;
+      });
+
+      renderHistoryRows(filtered);
+    }
+
+    function buildHistoryTable(data) {
+      allHistoryRows = data.recentHistory?.length ? data.recentHistory.slice(0, 5) : [];
+      renderHistoryRows(allHistoryRows);
     }
 
     // ── Quick Stats ──
-    function buildQuickStats(overview) {
-      document.getElementById('pdStatConsultations').textContent = String(overview.recentHistory?.length || 0);
+    function buildQuickStats(data) {
+      document.getElementById('pdStatConsultations').textContent = String(data.recentHistory?.length || 0);
       document.getElementById('pdStatDocuments').textContent = String(state.documents?.length || 0);
-      document.getElementById('pdStatTreatments').textContent = String(overview.currentTreatments?.length || 0);
+      document.getElementById('pdStatTreatments').textContent = String(data.currentTreatments?.length || 0);
     }
 
     // ── Load & render ──
     async function loadOverview() {
       try {
         const response = await apiGet('/patient/overview');
+        if (!response || !response.data) {
+          throw new Error('R\u00e9ponse invalide du serveur.');
+        }
         return response.data;
       } catch (error) {
-        showToast(error.message || 'Affichage des donnees synchronisees locales.', 'warning');
+        const message = error.statusCode === 404
+          ? 'Profil patient introuvable. V\u00e9rifiez votre compte.'
+          : error.statusCode === 401
+            ? 'Session expir\u00e9e. Veuillez vous reconnecter.'
+            : error.statusCode >= 500
+              ? 'Le serveur est temporairement indisponible. Donn\u00e9es locales affich\u00e9es.'
+              : error.message || 'Impossible de charger les donn\u00e9es. Donn\u00e9es locales affich\u00e9es.';
+
+        showToast(message, error.statusCode === 401 ? 'danger' : 'warning');
+        console.warn('[Dashboard] Erreur API /patient/overview :', error);
         return deriveFallbackOverview();
       }
     }
 
-    const overview = await loadOverview();
+    overview = await loadOverview();
     const firstName = (overview.patient?.name || state.profile.name || 'Patient').split(' ')[0];
     welcome.textContent = `Bonjour, ${firstName}`;
-    summary.textContent = `Vous avez ${overview.summary?.unreadMessages || 0} message(s) et ${overview.summary?.activeTreatments || 0} traitement(s) a suivre.`;
+    summary.textContent = `Vous avez ${overview.summary?.unreadMessages || 0} message(s) et ${overview.summary?.activeTreatments || 0} traitement(s) \u00e0 suivre.`;
     profileName.textContent = overview.patient?.name || state.profile.name || 'Patient';
     profileId.textContent = overview.patient?.cmuNumber || state.profile.cmuNumber || '';
 
@@ -477,6 +518,20 @@
     buildHistoryTable(overview);
     buildQuickStats(overview);
     completePatientPageLoading();
+
+    // ── Actions : recherche historique + filtre ──
+    document.getElementById('pdHistorySearch').addEventListener('input', filterHistory);
+    document.getElementById('pdHistoryFilter').addEventListener('change', filterHistory);
+
+    // ── Action : recherche globale ──
+    document.getElementById('pdSearch').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const query = event.target.value.trim();
+        if (query) {
+          window.location.href = `patient-record.html?search=${encodeURIComponent(query)}`;
+        }
+      }
+    });
 
     // ── Profile dropdown ──
     const trigger = document.getElementById('pdProfileTrigger');
@@ -506,10 +561,24 @@
     document.getElementById('pdLogout').addEventListener('click', logout);
     bindPatientActionButtons();
 
-    // Notification dot
+    // ── Notification dot ──
     if ((overview.summary?.unreadMessages || 0) > 0) {
       document.getElementById('pdNotifDot').classList.add('visible');
     }
+
+    // ── Live polling (every 60s) ──
+    onNotificationUpdate((data) => {
+      const dot = document.getElementById('pdNotifDot');
+      if (data.unreadMessages > 0) {
+        dot.classList.add('visible');
+      } else {
+        dot.classList.remove('visible');
+      }
+      // Update message badge if visible
+      const badge = document.getElementById('pdMessageBadge');
+      if (badge) badge.textContent = String(data.unreadMessages);
+    });
+    startPolling(60000);
   </script>
 </body>
 </html>

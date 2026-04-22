@@ -60,6 +60,23 @@ async function getAllUsers({ page = 1, pageSize = 20 } = {}) {
   };
 }
 
+async function updateUser(id, fields) {
+  const allowed = ['phone', 'email', 'address', 'emergency_contact_name', 'emergency_contact_phone', 'password_hash'];
+  const updates = [];
+  const values = [];
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (allowed.includes(key)) {
+      updates.push(`${key} = ?`);
+      values.push(value);
+    }
+  }
+
+  if (!updates.length) return;
+  values.push(id);
+  await db.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values);
+}
+
 module.exports = {
   ROLES,
   findUserByEmail,
@@ -67,5 +84,6 @@ module.exports = {
   findUserById,
   findUserByPhone,
   saveNewUser,
-  getAllUsers
+  getAllUsers,
+  updateUser
 };

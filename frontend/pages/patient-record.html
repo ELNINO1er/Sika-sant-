@@ -213,7 +213,7 @@
         const response = await apiGet('/patient/medical-record');
         return response.data;
       } catch (error) {
-        showToast(error.message || 'Impossible de charger le dossier medical. Affichage des donnees locales.', 'warning');
+        showToast(error.message || 'Impossible de charger le dossier m\u00e9dical. Donn\u00e9es locales affich\u00e9es.', 'warning');
         return deriveFallbackRecord();
       }
     }
@@ -225,7 +225,7 @@
       } catch (error) {
         const local = currentRecord.consultations.find((item) => String(item.id) === String(id));
         if (!local) {
-          showToast(error.message || 'Impossible de charger le detail de consultation.', 'danger');
+          showToast(error.message || 'Impossible de charger le d\u00e9tail de la consultation.', 'danger');
           return null;
         }
 
@@ -402,7 +402,7 @@
       `;
 
       document.getElementById('detailDownloadButton')?.addEventListener('click', () => {
-        showToast('Le telechargement PDF complet sera relie au stockage final du dossier.', 'primary');
+        window.open('/api/v1/patient/medical-record/export', '_blank');
       });
     }
 
@@ -496,7 +496,7 @@
       currentRecord = await loadMedicalRecord();
       selectedConsultationId = currentRecord.consultations[0]?.id || null;
       await renderRecord(currentRecord);
-      showToast('Dossier medical actualise.', 'success');
+      showToast('Dossier m\u00e9dical actualis\u00e9.', 'success');
     }
 
     searchInput.addEventListener('input', () => { renderConsultations(); });
@@ -504,7 +504,7 @@
     dateFromInput.addEventListener('change', () => { renderConsultations(); });
     refreshButton.addEventListener('click', refreshRecord);
     exportButton.addEventListener('click', () => {
-      showToast('L export PDF du dossier sera relie au backend de documents dans la prochaine iteration.', 'primary');
+      window.open('/api/v1/patient/medical-record/export', '_blank');
     });
 
     await renderRecord(currentRecord);

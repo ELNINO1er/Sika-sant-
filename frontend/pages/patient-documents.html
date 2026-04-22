@@ -69,6 +69,7 @@
       bindPatientActionButtons,
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
+    import { getDocuments } from '../services/patient-api.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Documents',
@@ -84,7 +85,24 @@
       ]
     });
 
-    renderDocumentList(document.getElementById('documentsList'), state.documents);
+    // Try loading real documents from API, fallback to derived
+    let docs = state.documents;
+    try {
+      const res = await getDocuments();
+      if (res.data && res.data.length) {
+        docs = res.data.map(d => ({
+          id: d.id,
+          title: d.title,
+          description: d.uploadedByName || 'Centre de sante',
+          date: d.created_at,
+          kind: (d.kind || 'AUTRE').replace('_', ' '),
+          size: d.file_size ? `${Math.round(d.file_size / 1024)} Ko` : 'N/A',
+          downloadable: !!d.file_path
+        }));
+      }
+    } catch { /* fallback to derived */ }
+
+    renderDocumentList(document.getElementById('documentsList'), docs);
     bindPatientActionButtons();
     completePatientPageLoading();
   </script>

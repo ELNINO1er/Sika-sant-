@@ -3868,7 +3868,7 @@ body.dark .auth-preview {
   position: absolute;
   inset: 0;
   border-radius: 999px;
-  border: 1px solid rgba(79, 70, 229, 0.12);
+  border: 1px solid rgba(124, 77, 255, 0.12);
 }
 
 .pd-loading-orbit-one {
@@ -3877,7 +3877,7 @@ body.dark .auth-preview {
 
 .pd-loading-orbit-two {
   inset: 0.65rem;
-  border-color: rgba(37, 99, 235, 0.16);
+  border-color: rgba(124, 77, 255, 0.16);
   animation: pdOrbitSpinReverse 2s linear infinite;
 }
 
@@ -3929,7 +3929,7 @@ body.is-loading .patient-main-shell > :not(.pd-loading-screen) {
   50% {
     transform: scaleX(1);
     opacity: 1;
-    background: #6366f1;
+    background: #7c4dff;
   }
 }
 
@@ -3943,7 +3943,7 @@ body.is-loading .patient-main-shell > :not(.pd-loading-screen) {
   font-weight: 700;
   font-size: 0.85rem;
   color: #fff;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  background: linear-gradient(135deg, #7c4dff 0%, #6735f2 50%, #9b75ff 100%);
   flex-shrink: 0;
 }
 
@@ -4015,14 +4015,14 @@ body.dark .pd-card {
   height: 1.5rem;
   padding: 0 0.45rem;
   border-radius: 999px;
-  background: #6366f1;
+  background: #7c4dff;
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
 }
 
 .pd-link {
-  color: #6366f1;
+  color: #7c4dff;
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
@@ -4082,13 +4082,13 @@ body.dark .pd-card {
 }
 
 .pd-kpi-card-primary .pd-kpi-icon {
-  background: rgba(37, 99, 235, 0.12);
-  color: #2563eb;
+  background: rgba(124, 77, 255, 0.12);
+  color: #7c4dff;
 }
 
 .pd-kpi-card-violet .pd-kpi-icon {
-  background: rgba(99, 102, 241, 0.12);
-  color: #6366f1;
+  background: rgba(124, 77, 255, 0.12);
+  color: #7c4dff;
 }
 
 .pd-kpi-card-green .pd-kpi-icon,
@@ -4200,8 +4200,8 @@ body.dark .pd-card {
 }
 
 .pd-med-icon.active {
-  background: rgba(99, 102, 241, 0.12);
-  color: #6366f1;
+  background: rgba(124, 77, 255, 0.12);
+  color: #7c4dff;
 }
 
 .pd-med-icon.ended {
@@ -4284,7 +4284,7 @@ body.dark .pd-card {
 
 .pd-card-footer a:hover,
 .pd-card-footer button:hover {
-  color: #6366f1;
+  color: #7c4dff;
 }
 
 /* Appointment */
@@ -4409,7 +4409,7 @@ body.dark .pd-card {
 }
 
 .pd-health-bars span.is-active {
-  background: linear-gradient(135deg, #4f46e5, #2563eb);
+  background: linear-gradient(135deg, #7c4dff, #6735f2);
 }
 
 .pd-quick-actions {

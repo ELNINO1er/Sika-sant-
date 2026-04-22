@@ -50,6 +50,7 @@
       bindPatientActionButtons,
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
+    import { getAppointments } from '../services/patient-api.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Rendez-vous',
@@ -65,13 +66,32 @@
       ]
     });
 
-    renderAppointmentBlocks(document.getElementById('upcomingAppointments'), state.appointments.upcoming, {
+    // Try loading real appointments from API, fallback to derived state
+    let upcoming = state.appointments.upcoming;
+    let past = state.appointments.past;
+    try {
+      const res = await getAppointments();
+      if (res.data) {
+        upcoming = (res.data.upcoming || []).map(a => ({
+          id: a.id, title: a.title, professional: a.professionalName || 'Professionnel',
+          date: a.date, place: a.location, status: a.status === 'PLANIFIE' ? 'A planifier' : a.status,
+          summary: a.notes || ''
+        }));
+        past = (res.data.past || []).map(a => ({
+          id: a.id, title: a.title, professional: a.professionalName || 'Professionnel',
+          date: a.date, place: a.location, status: 'Realise',
+          summary: a.notes || ''
+        }));
+      }
+    } catch { /* fallback to derived */ }
+
+    renderAppointmentBlocks(document.getElementById('upcomingAppointments'), upcoming, {
       emptyTitle: 'Aucun rendez-vous a venir',
       emptyDescription: 'Vous pouvez demander un rendez-vous ou une teleconsultation.',
       allowManage: true
     });
 
-    renderAppointmentBlocks(document.getElementById('pastAppointments'), state.appointments.past, {
+    renderAppointmentBlocks(document.getElementById('pastAppointments'), past, {
       emptyTitle: 'Aucun rendez-vous passe',
       emptyDescription: 'Les rendez-vous deja effectues apparaitront ici.'
     });

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carnet de vaccination | Sika-Sant&eacute;</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="patient-dashboard-page">
+  <div class="layout-shell">
+    <div id="appSidebar"></div>
+
+    <main class="main-content patient-main-shell">
+      <div id="toastContainer" class="toast-container"></div>
+      <div id="appNavbar"></div>
+      <div id="patientPageHero"></div>
+
+      <section class="patient-page-grid patient-page-grid-2">
+        <div class="patient-page-column">
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Carnet vaccinal</span>
+                <h3 class="patient-module-title">Vaccinations enregistr&eacute;es</h3>
+              </div>
+            </div>
+            <div id="vaccinationList" class="patient-stacked-list"></div>
+          </article>
+        </div>
+
+        <div class="patient-page-column">
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Prochaines doses</span>
+                <h3 class="patient-module-title">Rappels &agrave; venir</h3>
+              </div>
+            </div>
+            <div id="upcomingVaccinations" class="patient-stacked-list"></div>
+          </article>
+
+          <article class="card-surface section-card patient-module">
+            <div class="section-header">
+              <div>
+                <span class="small-label">Ajouter</span>
+                <h3 class="patient-module-title">D&eacute;clarer une vaccination</h3>
+              </div>
+            </div>
+            <form id="vaccinationForm" class="patient-form">
+              <div>
+                <label class="form-label">Nom du vaccin *</label>
+                <input type="text" class="form-control" id="vaccineName" placeholder="Ex: COVID-19 Pfizer" required>
+              </div>
+              <div>
+                <label class="form-label">Dose</label>
+                <input type="text" class="form-control" id="vaccineDose" placeholder="Ex: 1re dose, Rappel">
+              </div>
+              <div>
+                <label class="form-label">Date d'administration *</label>
+                <input type="date" class="form-control" id="vaccineDate" required>
+              </div>
+              <div>
+                <label class="form-label">Prochaine dose</label>
+                <input type="date" class="form-control" id="vaccineNextDate">
+              </div>
+              <div>
+                <label class="form-label">Lieu</label>
+                <input type="text" class="form-control" id="vaccineLocation" placeholder="Centre de sant&eacute;">
+              </div>
+              <div>
+                <label class="form-label">Professionnel</label>
+                <input type="text" class="form-control" id="vaccineProfessional" placeholder="Dr...">
+              </div>
+              <div>
+                <label class="form-label">Num&eacute;ro de lot</label>
+                <input type="text" class="form-control" id="vaccineLot" placeholder="Lot">
+              </div>
+              <div>
+                <label class="form-label">Notes</label>
+                <textarea class="form-control" id="vaccineNotes" rows="2" placeholder="Observations..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Enregistrer la vaccination</button>
+            </form>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import {
+      initializePatientPage,
+      escapeHtml,
+      completePatientPageLoading
+    } from '../assets/js/patient-portal.js';
+    import { formatDate, showToast } from '../utils/helpers.js';
+    import { getVaccinations, createVaccination } from '../services/patient-api.js';
+
+    const state = await initializePatientPage({
+      pageTitle: 'Carnet de vaccination',
+      showNavbar: false,
+      heroBadge: 'Vaccinations',
+      heroTitle: 'Carnet de vaccination',
+      heroDescription: 'Consultez votre historique vaccinal, les rappels \u00e0 venir et d\u00e9clarez de nouvelles vaccinations.',
+      heroStats: [
+        { label: 'Vaccinations', value: '0', description: 'Doses enregistr\u00e9es' },
+        { label: 'Rappels', value: '0', description: 'Prochaines doses' }
+      ]
+    });
+
+    const listContainer = document.getElementById('vaccinationList');
+    const upcomingContainer = document.getElementById('upcomingVaccinations');
+    const form = document.getElementById('vaccinationForm');
+
+    async function loadAndRender() {
+      try {
+        const res = await getVaccinations();
+        const data = res.data || { vaccinations: [], upcoming: [] };
+        renderList(data.vaccinations);
+        renderUpcoming(data.upcoming);
+      } catch {
+        renderList([]);
+        renderUpcoming([]);
+      }
+    }
+
+    function renderList(items) {
+      if (!items.length) {
+        listContainer.innerHTML = `
+          <div class="patient-empty-card">
+            <strong>Aucune vaccination enregistr\u00e9e</strong>
+            <p>D\u00e9clarez vos vaccinations via le formulaire ci-contre.</p>
+          </div>`;
+        return;
+      }
+
+      listContainer.innerHTML = items.map(v => `
+        <div class="patient-list-item">
+          <div class="patient-list-item-head">
+            <div>
+              <strong>${escapeHtml(v.vaccine_name)}</strong>
+              ${v.dose ? `<span class="status-badge success">${escapeHtml(v.dose)}</span>` : ''}
+            </div>
+            <span class="text-muted" style="font-size:0.82rem;">${escapeHtml(formatDate(v.administered_at))}</span>
+          </div>
+          <div class="patient-meta-row">
+            ${v.location ? `<span><i class="bi bi-geo-alt"></i> ${escapeHtml(v.location)}</span>` : ''}
+            ${v.professional_name ? `<span><i class="bi bi-person"></i> ${escapeHtml(v.professional_name)}</span>` : ''}
+            ${v.lot_number ? `<span><i class="bi bi-upc"></i> Lot ${escapeHtml(v.lot_number)}</span>` : ''}
+          </div>
+          ${v.notes ? `<p class="text-muted" style="font-size:0.85rem; margin:0.3rem 0 0;">${escapeHtml(v.notes)}</p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderUpcoming(items) {
+      if (!items.length) {
+        upcomingContainer.innerHTML = `
+          <div class="patient-empty-card">
+            <strong>Aucun rappel pr\u00e9vu</strong>
+            <p>Les rappels de vaccination appara\u00eetront ici.</p>
+          </div>`;
+        return;
+      }
+
+      upcomingContainer.innerHTML = items.map(v => `
+        <div class="patient-list-item">
+          <div class="patient-list-item-head">
+            <div>
+              <strong>${escapeHtml(v.vaccine_name)}</strong>
+              <div class="text-muted">${v.dose ? escapeHtml(v.dose) : 'Rappel'}</div>
+            </div>
+            <span class="status-badge warning">${escapeHtml(formatDate(v.next_dose_at))}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Enregistrement...';
+
+      try {
+        await createVaccination({
+          vaccineName: document.getElementById('vaccineName').value.trim(),
+          dose: document.getElementById('vaccineDose').value.trim(),
+          administeredAt: document.getElementById('vaccineDate').value,
+          nextDoseAt: document.getElementById('vaccineNextDate').value || null,
+          location: document.getElementById('vaccineLocation').value.trim(),
+          professionalName: document.getElementById('vaccineProfessional').value.trim(),
+          lotNumber: document.getElementById('vaccineLot').value.trim(),
+          notes: document.getElementById('vaccineNotes').value.trim()
+        });
+        showToast('Vaccination enregistr\u00e9e avec succ\u00e8s.', 'success');
+        form.reset();
+        await loadAndRender();
+      } catch (error) {
+        showToast(error.message || 'Impossible d\'enregistrer la vaccination.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enregistrer la vaccination';
+      }
+    });
+
+    await loadAndRender();
+    completePatientPageLoading();
+  </script>
+</body>
+</html>

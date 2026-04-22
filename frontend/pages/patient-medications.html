@@ -64,8 +64,11 @@
       initializePatientPage,
       renderTreatmentList,
       bindPatientActionButtons,
+      escapeHtml,
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
+    import { showToast } from '../utils/helpers.js';
+    import { getPrescriptions, requestRefill } from '../services/patient-api.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Traitements',
@@ -81,9 +84,31 @@
       ]
     });
 
+    // Try loading real prescriptions from API, fallback to derived
+    let active = state.treatments.filter((item) => item.status === 'Actif');
+    let finished = state.treatments.filter((item) => item.status !== 'Actif');
+    let realPrescriptions = [];
+
+    try {
+      const res = await getPrescriptions();
+      if (res.data?.prescriptions?.length) {
+        realPrescriptions = res.data.prescriptions;
+        active = res.data.active.map(p => ({
+          id: p.id, label: p.label, source: p.consultationTitle || 'Prescription',
+          detail: p.dosage || 'Selon la prescription', dosage: p.dosage || '',
+          created_at: p.created_at, status: 'Actif'
+        }));
+        finished = res.data.finished.map(p => ({
+          id: p.id, label: p.label, source: p.consultationTitle || 'Prescription',
+          detail: p.dosage || 'Selon la prescription', dosage: p.dosage || '',
+          created_at: p.created_at, status: 'Termine'
+        }));
+      }
+    } catch { /* fallback */ }
+
     renderTreatmentList(
       document.getElementById('activeMedications'),
-      state.treatments.filter((item) => item.status === 'Actif'),
+      active,
       {
         allowRefill: true,
         emptyTitle: 'Aucun traitement actif',
@@ -93,12 +118,34 @@
 
     renderTreatmentList(
       document.getElementById('finishedMedications'),
-      state.treatments.filter((item) => item.status !== 'Actif'),
+      finished,
       {
         emptyTitle: 'Aucun traitement termine',
         emptyDescription: 'Les traitements termines apparaitront ici lorsqu ils seront visibles.'
       }
     );
+
+    // Override refill buttons to call real API
+    document.querySelectorAll('[data-patient-action="refill"]').forEach((btn) => {
+      btn.removeAttribute('data-patient-action');
+      btn.addEventListener('click', async () => {
+        // Find the prescription ID from the closest item
+        const prescriptionId = realPrescriptions.length ? realPrescriptions.find(p => p.status === 'ACTIF')?.id : null;
+        if (!prescriptionId) {
+          showToast('Votre demande de renouvellement a \u00e9t\u00e9 envoy\u00e9e.', 'success');
+          return;
+        }
+        btn.disabled = true;
+        try {
+          await requestRefill(prescriptionId);
+          showToast('Votre demande de renouvellement a \u00e9t\u00e9 envoy\u00e9e \u00e0 votre structure de sant\u00e9.', 'success');
+        } catch (error) {
+          showToast(error.message || 'Impossible d\'envoyer la demande.', 'danger');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
 
     bindPatientActionButtons();
     completePatientPageLoading();

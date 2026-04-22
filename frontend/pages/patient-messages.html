@@ -37,6 +37,15 @@
               </div>
             </div>
             <div id="messageDetail" class="patient-stacked-list"></div>
+
+            <div id="replySection" class="patient-reply-section" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+              <strong style="font-size:0.9rem;">R&eacute;pondre</strong>
+              <form id="replyForm" style="display:grid; gap:0.6rem; margin-top:0.5rem;">
+                <input type="text" class="form-control" id="replySubject" placeholder="Objet de la r&eacute;ponse" required>
+                <textarea class="form-control" id="replyBody" rows="3" placeholder="Votre message..." minlength="5" required></textarea>
+                <button type="submit" class="btn btn-primary btn-sm">Envoyer</button>
+              </form>
+            </div>
           </article>
 
           <article class="card-surface section-card patient-module">
@@ -59,7 +68,8 @@
       escapeHtml,
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
-    import { formatDateTime } from '../utils/helpers.js';
+    import { formatDateTime, showToast } from '../utils/helpers.js';
+    import { getMessages, markMessageRead, sendMessage } from '../services/patient-api.js';
 
     const state = await initializePatientPage({
       pageTitle: 'Messagerie',
@@ -78,7 +88,23 @@
     const inbox = document.getElementById('messagesInbox');
     const detail = document.getElementById('messageDetail');
     const notifications = document.getElementById('messageNotifications');
-    const rows = state.messages.length ? state.messages : [];
+
+    // Try loading real messages from API, fallback to derived
+    let rows = state.messages.length ? state.messages : [];
+    try {
+      const res = await getMessages();
+      if (res.data?.messages?.length) {
+        rows = res.data.messages.map(m => ({
+          id: m.id,
+          sender: m.senderName || 'Centre de sante',
+          subject: m.subject,
+          preview: m.body,
+          date: m.created_at,
+          attachment: m.attachment_document_id ? 'Document joint' : '',
+          isRead: !!m.is_read
+        }));
+      }
+    } catch { /* fallback to derived */ }
     let selected = rows[0] || null;
 
     function renderSelected() {
@@ -146,8 +172,14 @@
       `).join('');
 
       inbox.querySelectorAll('[data-message-index]').forEach((button) => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
           selected = rows[Number(button.dataset.messageIndex)];
+          if (selected?.id && !selected.isRead) {
+            try {
+              await markMessageRead(selected.id);
+              selected.isRead = true;
+            } catch { /* ignore */ }
+          }
           renderInbox();
           renderSelected();
         });
@@ -170,6 +202,68 @@
 
     renderInbox();
     renderSelected();
+
+    // Reply section visibility
+    const replySection = document.getElementById('replySection');
+    const replyForm = document.getElementById('replyForm');
+
+    function updateReplyVisibility() {
+      if (selected?.senderUserId || selected?.id) {
+        replySection.style.display = 'block';
+        document.getElementById('replySubject').value = `Re: ${selected.subject || ''}`;
+      } else {
+        replySection.style.display = 'none';
+      }
+    }
+    updateReplyVisibility();
+
+    // Override renderSelected to also show reply
+    const origRenderSelected = renderSelected;
+    function renderSelectedWithReply() {
+      origRenderSelected();
+      updateReplyVisibility();
+    }
+
+    // Re-bind inbox clicks to use updated render
+    inbox.querySelectorAll('[data-message-index]').forEach((button) => {
+      const clone = button.cloneNode(true);
+      button.replaceWith(clone);
+      clone.addEventListener('click', async () => {
+        selected = rows[Number(clone.dataset.messageIndex)];
+        if (selected?.id && !selected.isRead) {
+          try { await markMessageRead(selected.id); selected.isRead = true; } catch {}
+        }
+        renderInbox();
+        origRenderSelected();
+        updateReplyVisibility();
+      });
+    });
+
+    replyForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const subject = document.getElementById('replySubject').value.trim();
+      const body = document.getElementById('replyBody').value.trim();
+      if (!subject || body.length < 5) {
+        showToast('Veuillez saisir un objet et un message (5 caract\u00e8res minimum).', 'warning');
+        return;
+      }
+      // Use the sender of the selected message as recipient, or fallback to professional user 2
+      const recipientId = selected?.senderUserId || 2;
+      const btn = replyForm.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Envoi...';
+      try {
+        await sendMessage(recipientId, subject, body);
+        showToast('Votre message a \u00e9t\u00e9 envoy\u00e9 avec succ\u00e8s.', 'success');
+        document.getElementById('replyBody').value = '';
+      } catch (error) {
+        showToast(error.message || 'Impossible d\'envoyer le message.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Envoyer';
+      }
+    });
+
     completePatientPageLoading();
   </script>
 </body>

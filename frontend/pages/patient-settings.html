@@ -118,6 +118,7 @@
   <script type="module">
     import { initializePatientPage, completePatientPageLoading } from '../assets/js/patient-portal.js';
     import { showToast } from '../utils/helpers.js';
+    import { updateSettings, changePassword, getSettings } from '../services/patient-api.js';
 
     await initializePatientPage({
       pageTitle: 'Parametres',
@@ -133,14 +134,68 @@
       ]
     });
 
-    document.getElementById('settingsForm').addEventListener('submit', (event) => {
+    // Load current settings
+    try {
+      const res = await getSettings();
+      if (res.data) {
+        const s = res.data;
+        const cb = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+        cb('notifyAppointments', s.notify_appointments ?? s.notifyAppointments);
+        cb('notifyTreatments', s.notify_treatments ?? s.notifyTreatments);
+        cb('notifyDocuments', s.notify_documents ?? s.notifyDocuments);
+      }
+    } catch { /* use defaults */ }
+
+    document.getElementById('settingsForm').addEventListener('submit', async (event) => {
       event.preventDefault();
-      showToast('Les preferences seront enregistrees via /api/v1/patient/settings.', 'success');
+      const btn = event.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      try {
+        await updateSettings({
+          notifyAppointments: document.getElementById('notifyAppointments')?.checked ?? true,
+          notifyTreatments: document.getElementById('notifyTreatments')?.checked ?? true,
+          notifyDocuments: document.getElementById('notifyDocuments')?.checked ?? true,
+          language: document.getElementById('settingsLanguage')?.value || 'fr',
+          theme: document.getElementById('settingsTheme')?.value || 'light'
+        });
+        showToast('Vos pr\u00e9f\u00e9rences ont \u00e9t\u00e9 enregistr\u00e9es avec succ\u00e8s.', 'success');
+      } catch (error) {
+        showToast(error.message || 'Impossible de sauvegarder les pr\u00e9f\u00e9rences.', 'danger');
+      } finally {
+        btn.disabled = false;
+      }
     });
 
-    document.getElementById('passwordForm').addEventListener('submit', (event) => {
+    document.getElementById('passwordForm').addEventListener('submit', async (event) => {
       event.preventDefault();
-      showToast('La mise a jour du mot de passe passera par /api/v1/patient/password.', 'success');
+      const currentPwd = document.getElementById('currentPassword')?.value;
+      const newPwd = document.getElementById('newPassword')?.value;
+      const confirmPwd = document.getElementById('confirmPassword')?.value;
+
+      if (!currentPwd || !newPwd) {
+        showToast('Veuillez remplir tous les champs.', 'warning');
+        return;
+      }
+      if (newPwd.length < 12) {
+        showToast('Le nouveau mot de passe doit contenir au moins 12 caract\u00e8res.', 'warning');
+        return;
+      }
+      if (newPwd !== confirmPwd) {
+        showToast('Les mots de passe ne correspondent pas.', 'warning');
+        return;
+      }
+
+      const btn = event.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      try {
+        await changePassword(currentPwd, newPwd);
+        showToast('Votre mot de passe a \u00e9t\u00e9 mis \u00e0 jour avec succ\u00e8s.', 'success');
+        event.target.reset();
+      } catch (error) {
+        showToast(error.message || 'Impossible de changer le mot de passe.', 'danger');
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     completePatientPageLoading();
