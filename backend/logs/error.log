@@ -1105,3 +1105,879 @@
 2026-04-23T11:10:08.947Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
     at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
     at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:42:01.661Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:42:01.663Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:42:01.664Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:42:01.665Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:42:06.805Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:42:06.806Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:42:06.807Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:42:06.808Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:43:06.828Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:43:06.829Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:43:06.833Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:43:06.834Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:44:06.822Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:44:06.822Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:44:06.824Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:44:06.824Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:45:06.821Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:45:06.822Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:45:06.824Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:45:06.825Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:46:06.823Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT COUNT(*) AS total FROM messages WHERE recipient_user_id = 1 AND is_read = 0',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:46:06.824Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:46:06.826Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:46:06.826Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:47:06.817Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:47:06.817Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:47:06.818Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:47:06.819Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:48:06.932Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:48:06.933Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:48:06.935Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:48:06.935Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:49:11.946Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT COUNT(*) AS total FROM messages WHERE recipient_user_id = 1 AND is_read = 0',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:49:11.947Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:49:11.948Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND (a.date < NOW() OR a.status = 'REALISE')\n" +
+    '     ORDER BY a.date DESC\n' +
+    '     LIMIT 20',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:49:11.948Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:50:11.944Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:50:11.945Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:50:11.947Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:50:11.948Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:51:06.822Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:51:06.823Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:51:06.825Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND (a.date < NOW() OR a.status = 'REALISE')\n" +
+    '     ORDER BY a.date DESC\n' +
+    '     LIMIT 20',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:51:06.826Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:52:06.818Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:52:06.819Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:52:06.822Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND (a.date < NOW() OR a.status = 'REALISE')\n" +
+    '     ORDER BY a.date DESC\n' +
+    '     LIMIT 20',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:52:06.823Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:53:06.833Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:53:06.834Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:53:06.835Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:53:06.835Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:54:06.843Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT m.*, u.name AS senderName\n' +
+    '     FROM messages m\n' +
+    '     JOIN users u ON u.id = m.sender_user_id\n' +
+    '     WHERE m.recipient_user_id = 1\n' +
+    '     ORDER BY m.created_at DESC\n' +
+    '     LIMIT 30',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:54:06.844Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:54:06.846Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:54:06.847Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:55:06.946Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT COUNT(*) AS total FROM messages WHERE recipient_user_id = 1 AND is_read = 0',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:55:06.947Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:55:06.948Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:55:06.949Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:56:11.933Z [error] : getMessages error: Error: La table 'sika_sante.messages' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.messages' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT COUNT(*) AS total FROM messages WHERE recipient_user_id = 1 AND is_read = 0',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.messages' n'existe pas"
+} 
+2026-04-23T11:56:11.934Z [error] : ErrorHandler: Error: Impossible de charger les messages
+    at getMessages (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:247:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:56:11.936Z [error] : getAppointments error: Error: La table 'sika_sante.appointments' n'existe pas
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\promise\make_done_cb.js:6:24
+    at cmdQuery.onResult (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\pool.js:237:13)
+    at Query.execute (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\commands\command.js:36:14)
+    at PoolConnection.handlePacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\wamp64\www\Sika-sant-\backend\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3) {
+  [stack]: [Getter/Setter],
+  message: "La table 'sika_sante.appointments' n'existe pas",
+  code: 'ER_NO_SUCH_TABLE',
+  errno: 1146,
+  sql: 'SELECT a.*, u.name AS professionalName\n' +
+    '     FROM appointments a\n' +
+    '     LEFT JOIN users u ON u.id = a.professional_user_id\n' +
+    "     WHERE a.patient_user_id = 1 AND a.date >= NOW() AND a.status != 'ANNULE'\n" +
+    '     ORDER BY a.date ASC\n' +
+    '     LIMIT 10',
+  sqlState: '42S02',
+  sqlMessage: "La table 'sika_sante.appointments' n'existe pas"
+} 
+2026-04-23T11:56:11.937Z [error] : ErrorHandler: Error: Impossible de charger les rendez-vous
+    at getAppointments (C:\wamp64\www\Sika-sant-\backend\controllers\patientController.js:151:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) 
+2026-04-23T11:57:11.954Z [error] : JWT error: TokenExpiredError: jwt expired
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\wamp64\www\Sika-sant-\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\wamp64\www\Sika-sant-\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at verifyAccessToken (C:\wamp64\www\Sika-sant-\backend\config\jwt.js:13:14)
+    at verifyToken (C:\wamp64\www\Sika-sant-\backend\middlewares\authMiddleware.js:22:21)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:284:15 {
+  [stack]: [Getter/Setter],
+  name: 'TokenExpiredError',
+  message: 'jwt expired',
+  expiredAt: 2026-04-23T11:57:00.000Z
+} 
+2026-04-23T11:57:11.965Z [error] : JWT error: TokenExpiredError: jwt expired
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\wamp64\www\Sika-sant-\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\wamp64\www\Sika-sant-\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at verifyAccessToken (C:\wamp64\www\Sika-sant-\backend\config\jwt.js:13:14)
+    at verifyToken (C:\wamp64\www\Sika-sant-\backend\middlewares\authMiddleware.js:22:21)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\wamp64\www\Sika-sant-\backend\node_modules\express\lib\router\index.js:284:15 {
+  [stack]: [Getter/Setter],
+  name: 'TokenExpiredError',
+  message: 'jwt expired',
+  expiredAt: 2026-04-23T11:57:00.000Z
+} 
