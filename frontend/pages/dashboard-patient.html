@@ -125,12 +125,24 @@
                   <i class="bi bi-search"></i>
                   <input type="text" placeholder="Rechercher..." id="pdHistorySearch">
                 </div>
-                <select class="pd-filter-select" id="pdHistoryFilter">
-                  <option value="">Tout type</option>
-                  <option value="consultation">Consultation</option>
-                  <option value="controle">Contr&ocirc;le</option>
-                  <option value="suivi">Suivi</option>
-                </select>
+                <div class="pd-dropdown" id="pdHistoryFilterDropdown">
+                  <div class="pd-dropdown-trigger" tabindex="0">
+                    <span>Tout type</span>
+                    <span class="pd-dropdown-arrow"><i class="bi bi-chevron-down"></i></span>
+                  </div>
+                  <div class="pd-dropdown-menu">
+                    <div class="pd-dropdown-item selected" data-value="">Tout type</div>
+                    <div class="pd-dropdown-item" data-value="consultation"><i class="bi bi-clipboard2-pulse"></i> Consultation</div>
+                    <div class="pd-dropdown-item" data-value="controle"><i class="bi bi-heart-pulse"></i> Contr&ocirc;le</div>
+                    <div class="pd-dropdown-item" data-value="suivi"><i class="bi bi-graph-up"></i> Suivi</div>
+                  </div>
+                  <select class="pd-filter-select" id="pdHistoryFilter" aria-hidden="true">
+                    <option value="">Tout type</option>
+                    <option value="consultation">Consultation</option>
+                    <option value="controle">Contr&ocirc;le</option>
+                    <option value="suivi">Suivi</option>
+                  </select>
+                </div>
               </div>
               <div class="pd-table-wrap" id="pdHistoryTable">
                 <div class="pd-table-skeleton">
@@ -196,7 +208,7 @@
       escapeHtml,
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
-    import { formatDate, formatDateTime, showToast, toggleDarkMode } from '../utils/helpers.js';
+    import { formatDate, formatDateTime, showToast, toggleDarkMode, initCustomDropdowns } from '../utils/helpers.js';
     import { getDarkMode, setDarkMode } from '../utils/storage.js';
     import { logout } from '../services/auth.js';
     import { apiGet } from '../services/api.js';
@@ -559,6 +571,10 @@
     });
 
     document.getElementById('pdLogout').addEventListener('click', logout);
+
+    // ── Custom dropdowns ──
+    initCustomDropdowns();
+
     bindPatientActionButtons();
 
     // ── Notification dot ──

@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/dashboard-patient.css">
 </head>
 <body class="patient-dashboard-page">
   <div class="layout-shell">
@@ -26,10 +27,19 @@
           </div>
 
           <div class="patient-record-filter">
-            <label for="recordTypeFilter" class="small-label">Type</label>
-            <select id="recordTypeFilter" class="form-select">
-              <option value="">Tous les types</option>
-            </select>
+            <label class="small-label">Type</label>
+            <div class="pd-dropdown" id="recordTypeFilterDropdown">
+              <div class="pd-dropdown-trigger" tabindex="0">
+                <span>Tous les types</span>
+                <span class="pd-dropdown-arrow"><i class="bi bi-chevron-down"></i></span>
+              </div>
+              <div class="pd-dropdown-menu">
+                <div class="pd-dropdown-item selected" data-value="">Tous les types</div>
+              </div>
+              <select id="recordTypeFilter" class="form-select" aria-hidden="true" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;">
+                <option value="">Tous les types</option>
+              </select>
+            </div>
           </div>
 
           <div class="patient-record-filter">
@@ -127,7 +137,7 @@
       escapeHtml,
       completePatientPageLoading
     } from '../assets/js/patient-portal.js';
-    import { formatDate, formatDateTime, showToast } from '../utils/helpers.js';
+    import { formatDate, formatDateTime, showToast, initCustomDropdowns } from '../utils/helpers.js';
     import { apiGet } from '../services/api.js';
 
     const state = await initializePatientPage({
@@ -508,6 +518,7 @@
     });
 
     await renderRecord(currentRecord);
+    initCustomDropdowns();
     completePatientPageLoading();
   </script>
 </body>

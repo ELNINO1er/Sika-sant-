@@ -100,3 +100,61 @@ export function createEmptyStateMarkup(title, description) {
     </div>
   `;
 }
+
+/**
+ * Initialise tous les custom dropdowns (.pd-dropdown) de la page.
+ * Synchronise le <select> caché pour compatibilité avec le JS existant.
+ */
+export function initCustomDropdowns() {
+  document.querySelectorAll('.pd-dropdown').forEach(dd => {
+    const trigger = dd.querySelector('.pd-dropdown-trigger');
+    const menu = dd.querySelector('.pd-dropdown-menu');
+    const hiddenSelect = dd.querySelector('select');
+    const label = trigger.querySelector('span:first-child');
+    const items = menu.querySelectorAll('.pd-dropdown-item');
+
+    // Toggle
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Close other dropdowns
+      document.querySelectorAll('.pd-dropdown.open').forEach(other => {
+        if (other !== dd) other.classList.remove('open');
+      });
+      dd.classList.toggle('open');
+    });
+
+    // Keyboard
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        trigger.click();
+      }
+      if (e.key === 'Escape') dd.classList.remove('open');
+    });
+
+    // Select item
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        const value = item.dataset.value;
+        // Update visual
+        items.forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        label.textContent = item.textContent.trim();
+        dd.classList.remove('open');
+
+        // Sync hidden select and fire change event
+        if (hiddenSelect) {
+          hiddenSelect.value = value;
+          hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    });
+  });
+
+  // Close all on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.pd-dropdown')) {
+      document.querySelectorAll('.pd-dropdown.open').forEach(dd => dd.classList.remove('open'));
+    }
+  });
+}

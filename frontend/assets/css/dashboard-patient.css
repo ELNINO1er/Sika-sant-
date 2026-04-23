@@ -385,19 +385,169 @@
   border-bottom: 1px solid var(--border);
 }
 
-.pd-filter-select {
-  padding: 0.45rem 0.75rem;
-  border-radius: 0.65rem;
-  border: 1px solid var(--border);
-  background: var(--surface-muted);
-  color: var(--text);
-  font-size: 0.85rem;
-  outline: none;
-  cursor: pointer;
+/* ── Custom Dropdown ── */
+
+.pd-dropdown {
+  position: relative;
+  display: inline-block;
+  min-width: 150px;
 }
 
-.pd-filter-select:focus {
+.pd-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.pd-dropdown-trigger:hover {
+  border-color: rgba(124, 77, 255, 0.35);
+}
+
+.pd-dropdown.open .pd-dropdown-trigger {
   border-color: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.1);
+}
+
+.pd-dropdown-arrow {
+  display: flex;
+  align-items: center;
+  transition: transform 0.25s ease;
+  color: #7c4dff;
+  font-size: 0.75rem;
+}
+
+.pd-dropdown.open .pd-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.pd-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  padding: 0.35rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(124, 77, 255, 0.06);
+  z-index: 60;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.pd-dropdown.open .pd-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.pd-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pd-dropdown-item:hover {
+  background: rgba(124, 77, 255, 0.06);
+  color: var(--text);
+}
+
+.pd-dropdown-item.selected {
+  background: rgba(124, 77, 255, 0.1);
+  color: #7c4dff;
+  font-weight: 600;
+}
+
+.pd-dropdown-item.selected::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7c4dff;
+  flex-shrink: 0;
+}
+
+.pd-dropdown-item i {
+  font-size: 0.9rem;
+  color: inherit;
+  width: 1rem;
+  text-align: center;
+}
+
+.pd-dropdown-divider {
+  height: 1px;
+  margin: 0.25rem 0.5rem;
+  background: var(--border);
+}
+
+/* Dark mode dropdown */
+body.dark .pd-dropdown-trigger {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(124, 77, 255, 0.15);
+}
+
+body.dark .pd-dropdown-trigger:hover {
+  border-color: rgba(124, 77, 255, 0.3);
+}
+
+body.dark .pd-dropdown.open .pd-dropdown-trigger {
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.12);
+}
+
+body.dark .pd-dropdown-arrow {
+  color: #b39dff;
+}
+
+body.dark .pd-dropdown-menu {
+  background: #1e293b;
+  border-color: rgba(124, 77, 255, 0.15);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(124, 77, 255, 0.08);
+}
+
+body.dark .pd-dropdown-item:hover {
+  background: rgba(124, 77, 255, 0.1);
+  color: var(--text);
+}
+
+body.dark .pd-dropdown-item.selected {
+  background: rgba(124, 77, 255, 0.16);
+  color: #b39dff;
+}
+
+body.dark .pd-dropdown-item.selected::before {
+  background: #b39dff;
+}
+
+/* Hidden native select (for form compatibility) */
+.pd-dropdown select.pd-filter-select {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .pd-table-wrap {
@@ -785,4 +935,451 @@
   .pd-search-box {
     display: none;
   }
+}
+
+/* ═══════════════════════════════════════════
+   Dark mode — violet polish
+   ═══════════════════════════════════════════ */
+
+/* Cards & surfaces */
+body.dark .pd-appointment-card {
+  background: rgba(124, 77, 255, 0.06);
+  border-color: rgba(124, 77, 255, 0.15);
+}
+
+body.dark .pd-appointment-card.active {
+  background: rgba(124, 77, 255, 0.12);
+  border-color: rgba(124, 77, 255, 0.3);
+}
+
+body.dark .pd-kpi-card {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(124, 77, 255, 0.1);
+}
+
+body.dark .pd-panel-card {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(124, 77, 255, 0.1);
+}
+
+body.dark .pd-med-row {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(124, 77, 255, 0.08);
+}
+
+body.dark .pd-msg-row {
+  background: rgba(30, 41, 59, 0.4);
+  border-color: rgba(124, 77, 255, 0.08);
+}
+
+body.dark .pd-stat-item {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+/* Table dark */
+body.dark .pd-table-card {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(124, 77, 255, 0.1);
+}
+
+body.dark .pd-table-toolbar {
+  border-color: rgba(124, 77, 255, 0.08);
+}
+
+/* Native select hidden — custom .pd-dropdown used instead */
+
+body.dark .pd-table thead th {
+  border-color: rgba(124, 77, 255, 0.08);
+  color: var(--text-muted);
+}
+
+body.dark .pd-table tbody td {
+  border-color: rgba(124, 77, 255, 0.06);
+}
+
+body.dark .pd-table tbody tr:hover {
+  background: rgba(124, 77, 255, 0.06);
+}
+
+body.dark .pd-table-status {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+/* Pills in dark */
+body.dark .pd-pill-badge.actif {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+
+body.dark .pd-appointment-badge {
+  background: rgba(124, 77, 255, 0.2);
+  color: #b39dff;
+}
+
+body.dark .pd-appointment-badge.realise {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+
+/* Topbar icons dark */
+body.dark .pd-topbar-icon {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(124, 77, 255, 0.12);
+}
+
+body.dark .pd-topbar-icon:hover {
+  background: rgba(124, 77, 255, 0.12);
+  border-color: rgba(124, 77, 255, 0.25);
+  color: #b39dff;
+}
+
+/* Search box dark */
+body.dark .pd-search-box {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(124, 77, 255, 0.12);
+}
+
+body.dark .pd-search-box:focus-within {
+  border-color: rgba(124, 77, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.08);
+}
+
+/* Profile pill dark */
+body.dark .pd-profile-pill {
+  background: rgba(30, 41, 59, 0.4);
+}
+
+body.dark .pd-profile-dropdown {
+  background: #1e293b;
+  border-color: rgba(124, 77, 255, 0.12);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+body.dark .pd-profile-dropdown a:hover,
+body.dark .pd-profile-dropdown button:hover {
+  background: rgba(124, 77, 255, 0.1);
+}
+
+/* Avatar dark */
+body.dark .pd-avatar {
+  background: linear-gradient(135deg, #7c4dff 0%, #6735f2 50%, #9d7aff 100%);
+}
+
+/* KPI mini chart glow */
+body.dark .pd-kpi-chart {
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════
+   Global select/dropdown override for patient pages
+   ═══════════════════════════════════════════ */
+
+.patient-dashboard-page .form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237c4dff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 14px;
+  border-radius: 0.75rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.patient-dashboard-page .form-select:hover {
+  border-color: rgba(124, 77, 255, 0.35);
+}
+
+.patient-dashboard-page .form-select:focus {
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.12);
+}
+
+.patient-dashboard-page .form-select option {
+  padding: 0.5rem;
+}
+
+body.dark .patient-dashboard-page .form-select {
+  background-color: rgba(30, 41, 59, 0.7);
+  border-color: rgba(124, 77, 255, 0.15);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239d7aff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 14px;
+}
+
+body.dark .patient-dashboard-page .form-select option {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+/* ═══════════════════════════════════════════
+   Sub-page shared styles (consistent with dashboard)
+   ═══════════════════════════════════════════ */
+
+/* Page header used in sub-pages */
+.pd-subpage-header {
+  margin-bottom: 1.5rem;
+}
+
+.pd-subpage-header h1 {
+  margin: 0;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pd-subpage-header p {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Card component for sub-pages */
+.pd-card {
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+body.dark .pd-card {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(124, 77, 255, 0.1);
+}
+
+.pd-card:hover {
+  border-color: rgba(124, 77, 255, 0.2);
+}
+
+/* Action buttons consistent with dashboard */
+.pd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pd-btn-primary {
+  background: linear-gradient(135deg, #7c4dff 0%, #6735f2 100%);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(124, 77, 255, 0.2);
+}
+
+.pd-btn-primary:hover {
+  background: linear-gradient(135deg, #6735f2 0%, #5a2de0 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(124, 77, 255, 0.3);
+}
+
+.pd-btn-outline {
+  background: transparent;
+  color: #7c4dff;
+  border: 1px solid rgba(124, 77, 255, 0.3);
+}
+
+.pd-btn-outline:hover {
+  background: rgba(124, 77, 255, 0.08);
+  border-color: rgba(124, 77, 255, 0.5);
+}
+
+body.dark .pd-btn-outline {
+  border-color: rgba(124, 77, 255, 0.25);
+  color: #b39dff;
+}
+
+body.dark .pd-btn-outline:hover {
+  background: rgba(124, 77, 255, 0.12);
+}
+
+/* Toast / notification violet style */
+.pd-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 0.85rem 1.2rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, #7c4dff, #6735f2);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 12px 36px rgba(124, 77, 255, 0.3);
+  z-index: 9999;
+  animation: pdToastIn 0.3s ease;
+}
+
+@keyframes pdToastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Input group search in sub-pages */
+.pd-search-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pd-search-input:focus-within {
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.1);
+}
+
+.pd-search-input input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--text);
+  font-size: 0.88rem;
+  flex: 1;
+}
+
+body.dark .pd-search-input {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(124, 77, 255, 0.12);
+}
+
+/* Tabs for sub-pages */
+.pd-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border-radius: 0.85rem;
+  background: var(--surface-muted);
+  margin-bottom: 1.2rem;
+  width: fit-content;
+}
+
+.pd-tab {
+  padding: 0.5rem 1rem;
+  border-radius: 0.65rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pd-tab:hover {
+  color: var(--text);
+}
+
+.pd-tab.active {
+  background: #7c4dff;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(124, 77, 255, 0.25);
+}
+
+body.dark .pd-tabs {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+body.dark .pd-tab.active {
+  background: #7c4dff;
+  color: #fff;
+}
+
+/* Status badges unified */
+.pd-status {
+  display: inline-flex;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pd-status.success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.pd-status.warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.pd-status.danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+.pd-status.info {
+  background: rgba(124, 77, 255, 0.12);
+  color: #7c4dff;
+}
+
+body.dark .pd-status.success {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+
+body.dark .pd-status.warning {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+
+body.dark .pd-status.danger {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+}
+
+body.dark .pd-status.info {
+  background: rgba(124, 77, 255, 0.18);
+  color: #b39dff;
+}
+
+/* Section divider */
+.pd-section-title {
+  margin: 0 0 1rem;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pd-section-title i {
+  color: #7c4dff;
+  font-size: 1rem;
+}
+
+/* Link violet */
+.pd-link {
+  color: #7c4dff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.pd-link:hover {
+  color: #6735f2;
+}
+
+body.dark .pd-link {
+  color: #b39dff;
+}
+
+body.dark .pd-link:hover {
+  color: #d4c4ff;
 }

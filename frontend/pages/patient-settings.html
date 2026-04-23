@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/dashboard-patient.css">
 </head>
 <body class="patient-dashboard-page">
   <div class="layout-shell">
@@ -40,18 +41,39 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label">Langue</label>
-                  <select class="form-select">
-                    <option selected>Francais</option>
-                    <option>English</option>
-                  </select>
+                  <div class="pd-dropdown" id="settingsLangDropdown">
+                    <div class="pd-dropdown-trigger" tabindex="0">
+                      <span>Fran&ccedil;ais</span>
+                      <span class="pd-dropdown-arrow"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                    <div class="pd-dropdown-menu">
+                      <div class="pd-dropdown-item selected" data-value="fr"><i class="bi bi-translate"></i> Fran&ccedil;ais</div>
+                      <div class="pd-dropdown-item" data-value="en"><i class="bi bi-translate"></i> English</div>
+                    </div>
+                    <select class="form-select" aria-hidden="true" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;">
+                      <option value="fr" selected>Fran&ccedil;ais</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Theme</label>
-                  <select class="form-select">
-                    <option selected>Clair</option>
-                    <option>Sombre</option>
-                    <option>Systeme</option>
-                  </select>
+                  <label class="form-label">Th&egrave;me</label>
+                  <div class="pd-dropdown" id="settingsThemeDropdown">
+                    <div class="pd-dropdown-trigger" tabindex="0">
+                      <span>Clair</span>
+                      <span class="pd-dropdown-arrow"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                    <div class="pd-dropdown-menu">
+                      <div class="pd-dropdown-item selected" data-value="light"><i class="bi bi-sun"></i> Clair</div>
+                      <div class="pd-dropdown-item" data-value="dark"><i class="bi bi-moon-stars"></i> Sombre</div>
+                      <div class="pd-dropdown-item" data-value="system"><i class="bi bi-laptop"></i> Syst&egrave;me</div>
+                    </div>
+                    <select class="form-select" aria-hidden="true" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;">
+                      <option value="light" selected>Clair</option>
+                      <option value="dark">Sombre</option>
+                      <option value="system">Syst&egrave;me</option>
+                    </select>
+                  </div>
                 </div>
               </div>
               <div class="patient-inline-actions">
@@ -117,7 +139,7 @@
 
   <script type="module">
     import { initializePatientPage, completePatientPageLoading } from '../assets/js/patient-portal.js';
-    import { showToast } from '../utils/helpers.js';
+    import { showToast, initCustomDropdowns } from '../utils/helpers.js';
     import { updateSettings, changePassword, getSettings } from '../services/patient-api.js';
 
     await initializePatientPage({
@@ -198,6 +220,7 @@
       }
     });
 
+    initCustomDropdowns();
     completePatientPageLoading();
   </script>
 </body>
